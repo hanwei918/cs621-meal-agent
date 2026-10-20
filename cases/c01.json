@@ -1,0 +1,11 @@
+{
+  "case_id": "c01",
+  "synthetic": true,
+  "profile": {"diet": [], "allergies": ["peanut"], "budget_sgd": 40, "days": 3, "meals_per_day": 2,
+              "servings": 1, "max_cook_minutes": 30, "pantry": {}},
+  "events": [],
+  "gold": {"feasible": true},
+  "tags": ["allergy"],
+  "boundary": false,
+  "derivation": "r01 x3 + r07 x3 (no peanut, <=30 min): rice 1 pack 2.80, egg 750 g = 2 packs 6.40, spring onion 120 g = 2 packs 1.80, soy 1 pack 2.50, tomato 1 pack 2.60 = S$16.10 <= 40 -> feasible"
+}

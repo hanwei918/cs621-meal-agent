@@ -1,0 +1,11 @@
+{
+  "case_id": "c03",
+  "synthetic": true,
+  "profile": {"diet": [], "allergies": [], "budget_sgd": 5, "days": 3, "meals_per_day": 2,
+              "servings": 1, "max_cook_minutes": 30, "pantry": {}},
+  "events": [],
+  "gold": {"feasible": false, "binding": "budget"},
+  "tags": ["infeasible", "budget"],
+  "boundary": true,
+  "derivation": "six meals for S$5: the cheapest single recipe, r01 x6, already needs rice 2.80 + eggs 3.20 = 6.00 before spring onion and soy -> no plan fits; binding = budget"
+}
