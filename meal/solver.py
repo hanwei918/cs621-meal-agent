@@ -37,12 +37,17 @@ def solve(w: World) -> tuple[Plan, dict[str, int]] | None:
     return best
 
 
+BINDING_RULE = ("apply the constraints in this order: diet and allergies, then cooking time, then stock, then "
+                "budget; the binding constraint is the first one after which no valid plan is left")
+
+
 def diagnose(w: World) -> str:
-    """Which constraint binds when solve() finds nothing: diet/time (no allowed recipe), stock, or budget."""
+    """Which constraint binds when solve() finds nothing, by BINDING_RULE."""
     ok = allowed_recipes(w)
     if not ok:
-        kinds = {v[0] for r in w.recipes.values() for v in recipe_violations(r, w)}
-        return "time" if kinds == {"time"} else "diet"
+        by_diet = [r for r in w.recipes.values()
+                   if not [v for v in recipe_violations(r, w) if v[0] in ("diet", "allergy")]]
+        return "diet" if not by_diet else "time"
     any_stocked = any(cheapest_cart(needs(_plan(ids, w), w), w) is not None
                       for k in (1, 2, 3) for ids in combinations(ok, k))
     return "budget" if any_stocked else "stock"

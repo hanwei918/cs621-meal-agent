@@ -62,3 +62,11 @@ def test_notice_on_a_list_returning_tool_is_not_lost():
     env.call("get_profile")
     r = env.call("search_recipes", max_minutes=30)
     assert any("rice_1kg is now out of stock" in n for n in r["notices"]) and len(r["results"]) > 0
+
+
+def test_approval_refused_when_the_reported_total_is_wrong():
+    """Debug run 20261022T083102Z, c02: the single call asked for approval with a stale total
+    (S$12.80 vs S$18.60). The user must never approve a price that is not the real one."""
+    env = StoreEnv(C["c01"]); ready(env)
+    r = env.call("request_approval", reported_total_sgd=12.80)
+    assert r["approved"] is False and any(v.startswith("total") for v in r["violations"])

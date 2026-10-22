@@ -54,3 +54,25 @@ def test_every_witness_passes_every_constraint_after_the_events():
 def test_solver_agrees_with_hand_written_gold_on_every_case():
     for c in load_cases():
         assert (solve(final_world(c)) is not None) == c.gold.feasible, c.case_id
+
+
+def test_binding_follows_the_stated_order():
+    """Debug run 20261022T083102Z, c13: with chickpeas gone, 'time' (risotto is 40 min) and 'stock'
+    could both be argued. The rule: apply diet+allergy, then time, then stock, then budget; the step
+    that leaves no option is the binding one. c13 → stock."""
+    from meal.solver import diagnose
+    assert diagnose(final_world(C["c13"])) == "stock"
+    w = World.for_case(C["c13"]); w.profile.max_cook_minutes = 5      # now time empties the options first
+    assert diagnose(w) == "time"
+    w = World.for_case(C["c13"])
+    w.recipes = {k: v for k, v in w.recipes.items() if k == "r10"}   # no risotto at all: still stock
+    assert diagnose(w) == "stock"
+
+
+def test_diet_binds_before_time():
+    from meal.solver import diagnose
+    w = World.for_case(C["c08"])                                     # 9-minute limit, no diet: time
+    assert diagnose(w) == "time"
+    w.profile.diet = ["vegetarian"]; w.profile.allergies = ["egg", "gluten", "soy", "peanut"]
+    w.recipes = {k: v for k, v in w.recipes.items() if k in ("r02", "r05")}   # both fail diet already
+    assert diagnose(w) == "diet"

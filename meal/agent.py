@@ -29,7 +29,8 @@ When they do, re-check the plan and the cart against the new situation and fix t
 - request_approval with the exact cart total you computed. If it is refused, read the violations, fix them, ask again.
 - After approval, call place_order with the token, then stop.
 - If no plan can satisfy every constraint, call report_infeasible with the binding constraint \
-(budget, diet, time or stock) and stop. Never relax a constraint and never order without approval.
+(budget, diet, time or stock) and stop. To name it, apply the constraints in this order: diet and allergies, \
+then cooking time, then stock, then budget; the binding one is the first after which no valid plan is left. Never relax a constraint and never order without approval.
 - This is not nutrition or medical advice; follow only the user's stated constraints."""
 
 _S, _I = {"type": "string"}, {"type": "integer"}

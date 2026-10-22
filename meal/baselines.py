@@ -16,7 +16,9 @@ You get the whole situation in one message and have no tools. Hard constraints y
 (vegetarian excludes chicken, pork, beef, fish, shellfish; no_pork; no_beef), allergies (check every ingredient's \
 allergens), maximum cooking minutes per meal, exactly one recipe per day × meal slot, enough whole packs of \
 in-stock items to cover recipe grams × servings minus the pantry, and the cart total within budget. \
-If no plan can satisfy every constraint, set feasible=false and name the binding constraint. \
+If no plan can satisfy every constraint, set feasible=false and name the binding constraint: apply the \
+constraints in this order (diet and allergies, then cooking time, then stock, then budget); the binding one is \
+the first after which no valid plan is left. \
 Return JSON only, matching the schema; total_sgd must be the exact sum of price × packs."""
 
 SINGLE_SCHEMA = {
