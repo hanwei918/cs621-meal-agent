@@ -58,3 +58,10 @@ def test_stray_icloud_copies_are_not_cases(tmp_path, monkeypatch):
     shutil.copy(tmp_path / "c01.json", tmp_path / "c01 2.json")
     monkeypatch.setattr(harness, "CASES", tmp_path)
     assert [c.case_id for c in harness.load_cases()] == [f"c{i:02d}" for i in range(1, 31)]
+
+
+def test_parallel_run_matches_sequential():
+    a = run_eval(lambda c: OracleAgent(), CS, n_runs=1, write=False, workers=1)
+    b = run_eval(lambda c: OracleAgent(), CS, n_runs=1, write=False, workers=6)
+    assert [r.case.case_id for r in a.rows] == [r.case.case_id for r in b.rows]
+    assert [r.result.score.passed for r in a.rows] == [r.result.score.passed for r in b.rows]

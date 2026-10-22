@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")/.."
 .venv/bin/python run.py --system fixed --runs 3
 for model in "${@:-claude-haiku-5-5}"; do
-  .venv/bin/python run.py --system single_call --model "$model" --runs 3 --yes
-  .venv/bin/python run.py --system agent       --model "$model" --runs 3 --yes
+  .venv/bin/python run.py --system single_call --model "$model" --runs 3 --workers 4 --yes
+  .venv/bin/python run.py --system agent       --model "$model" --runs 3 --workers 4 --yes
 done
 echo; tail -n 6 runs/ledger.csv

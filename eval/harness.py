@@ -96,17 +96,23 @@ class Report:
 
 
 def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str = "agent",
-             model: str = "-", write: bool = True, meta: dict | None = None) -> Report:
+             model: str = "-", write: bool = True, meta: dict | None = None, workers: int = 1) -> Report:
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(c: Case) -> CaseResult:              # each case gets its own agent and its own StoreEnv
+        try:
+            r = run_case(make_agent(c), c)
+        except Exception as e:  # noqa: BLE001 — an error is a failed case, not a crash
+            r = CaseResult(c.case_id, Outcome(), Score(c.case_id, False, ["error"]), error=f"{type(e).__name__}: {e}")
+        u = r.usage
+        r.cost_usd = cost_usd(model, u.input_tokens, u.output_tokens, u.cache_write_tokens, u.cache_read_tokens)
+        return r
+
     rows = []
     for k in range(n_runs):
-        for c in cases:
-            try:
-                r = run_case(make_agent(c), c)
-            except Exception as e:  # noqa: BLE001 — an error is a failed case, not a crash
-                r = CaseResult(c.case_id, Outcome(), Score(c.case_id, False, ["error"]), error=f"{type(e).__name__}: {e}")
-            u = r.usage
-            r.cost_usd = cost_usd(model, u.input_tokens, u.output_tokens, u.cache_write_tokens, u.cache_read_tokens)
-            rows.append(Row(c, k, r))
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            for c, r in zip(cases, ex.map(one, cases)):           # map keeps case order
+                rows.append(Row(c, k, r))
     rep = Report(name, model, n_runs, rows)
     if write:
         rep.run_dir = _write(rep, meta or {})
