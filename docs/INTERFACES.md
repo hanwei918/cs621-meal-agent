@@ -16,7 +16,7 @@ Status 2026-10-21 — ✅ done · ⬜ TODO (owner). Change a contract only with 
 | ② | `violations(plan, cart, world)` — the one definition of the hard constraints | ✅ |
 | ② | `score(case, outcome, world) -> Score(passed, failed=[checks])` | ✅ |
 | ② | `run_eval(make_agent, cases, n_runs=3) -> Report`; `runs/` + `ledger.csv` | ✅ |
-| ③ | Agent: `run(env) -> AgentUsage`, acting only via `env.call(tool, **args)`; tools in `env.TOOL_SPECS` | ⬜ `MealAgent` |
+| ③ | Agent: `run(env) -> AgentUsage`, acting only via `env.call(tool, **args)`; tools in `env.TOOL_SPECS` | ✅ `MealAgent` (fake-client tested; no live run yet) |
 | ④ | `StoreEnv`: tools, G1 constraint check before approval, G2 approval revoked by any change or event, G3 order only with the current token | ✅ |
 | ⑤ | Same Agent interface: `SingleCallBaseline`, `FixedPlanner` | ⬜ |
 
