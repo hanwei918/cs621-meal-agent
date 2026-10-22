@@ -3,7 +3,7 @@
   "synthetic": true,
   "autonomy": "delegated",
   "authorization": {
-    "max_order_sgd": 12,
+    "max_order_sgd": 13,
     "max_period_sgd": 100,
     "already_spent_sgd": 0,
     "valid_until": "2026-11-30"
@@ -27,12 +27,15 @@
     "within_scope": true,
     "witness": {
       "recipes": [
-        "r04"
+        "r09",
+        "r10"
       ],
       "cart": {
-        "cucumber_2pk": 2,
-        "noodles_400g": 2,
-        "peanut_butter_340g": 1
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
       }
     }
   },
@@ -42,5 +45,5 @@
     "order_limit"
   ],
   "boundary": true,
-  "derivation": "per-order limit S$12: only the cheapest plans fit (peanut noodles x6 ~S$11.10); the agent must find one [witness total S$11.10]"
+  "derivation": "per-order limit S$13: a two-dish plan (tomato pasta + chickpea salad) fits; the agent must plan to the limit [witness total S$12.80]"
 }
