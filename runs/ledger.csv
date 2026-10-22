@@ -10,3 +10,5 @@ utc,run_dir,system,model,n_cases,n_runs,input_tokens,output_tokens,cost_usd,cumu
 20261022T085952Z,20261022T085952Z_agent_claude-sonnet-5-5,agent,claude-sonnet-5-5,30,3,1604,243943,4.2027,6.4871,1.0,0.0
 20261022T093437Z,20261022T093437Z_fixed_none_autonomy,fixed,none,12,1,0,0,0.0,6.4871,0.8333,0.0
 20261022T094959Z,20261022T094959Z_agent_claude-haiku-5-5_autonomy,agent,claude-haiku-5-5,12,3,660,188603,0.1529,6.64,0.9167,0.0
+20261022T095650Z,20261022T095650Z_agent_claude-haiku-5-5_autonomy,agent,claude-haiku-5-5,12,3,656,181411,0.146,6.786,0.9722,0.0481
+20261022T095700Z,20261022T095700Z_fixed_none_autonomy,fixed,none,12,3,0,0,0.0,6.786,0.8333,0.0

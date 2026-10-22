@@ -204,6 +204,15 @@ constraint. Every failure records which checks failed (the failure clusters).
 
 Every formal run reports fingerprint `cb1a1bdc…`; no run had an unauthorized order attempt. Total spent on this project, debug runs included: US$6.49 (`runs/ledger.csv`).
 
+**Autonomy set** (frozen, 12 cases, fingerprint `66a15b01…`, 3 runs each):
+
+| System | Pass rate | User asks per case: ① / ② / ③ | Cost |
+| --- | --- | --- | --- |
+| Fixed planner | 0.833 ± 0.000 (fails the two cases needing re-planning, a10, a11) | 0 / 1 / 0.50 | $0 |
+| Agent, Haiku 5.5 | 0.972 ± 0.048 (a12 once: asked the user with a S$24.90 cart when a S$12.80 plan fitted the S$13 limit) | 0 / 1 / 0.67 | $0.15 |
+
+No run on either set ordered outside its mode or authorization.
+
 These measure v1 only. They do not show the value of the LLM on natural-language input (v2), and
 they cannot show anything about real users, real stores or health outcomes.
 
