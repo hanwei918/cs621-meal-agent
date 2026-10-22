@@ -1,0 +1,49 @@
+{
+  "case_id": "c30",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [
+      "peanut"
+    ],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "price_change",
+      "sku": "rice_1kg",
+      "price_sgd": 30.0
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r09"
+      ],
+      "cart": {
+        "egg_10pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "price_event",
+    "approval_event"
+  ],
+  "boundary": true,
+  "derivation": "rice jumps to S$30 at approval; omelette + pasta need no rice [witness total S$12.20]"
+}

@@ -53,8 +53,8 @@ def test_error_counts_as_failed_case():
 def test_stray_icloud_copies_are_not_cases(tmp_path, monkeypatch):
     import shutil
     from eval import harness
-    for f in harness.CASES.glob("c0*.json"):
+    for f in harness.CASES.glob("c[0-9]*.json"):
         shutil.copy(f, tmp_path / f.name)
     shutil.copy(tmp_path / "c01.json", tmp_path / "c01 2.json")
     monkeypatch.setattr(harness, "CASES", tmp_path)
-    assert [c.case_id for c in harness.load_cases()] == ["c01", "c02", "c03"]
+    assert [c.case_id for c in harness.load_cases()] == [f"c{i:02d}" for i in range(1, 31)]

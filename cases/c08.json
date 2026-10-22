@@ -1,0 +1,26 @@
+{
+  "case_id": "c08",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 9,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": false,
+    "binding": "time"
+  },
+  "tags": [
+    "infeasible",
+    "time"
+  ],
+  "boundary": true,
+  "derivation": "fastest recipes take 10 minutes; a 9-minute limit leaves nothing"
+}

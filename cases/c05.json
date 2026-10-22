@@ -1,0 +1,45 @@
+{
+  "case_id": "c05",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "no_pork",
+      "no_beef"
+    ],
+    "allergies": [
+      "shellfish"
+    ],
+    "budget_sgd": 45,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r02",
+        "r06"
+      ],
+      "cart": {
+        "broccoli_300g": 1,
+        "chicken_breast_500g": 1,
+        "cucumber_2pk": 1,
+        "rice_1kg": 1,
+        "salmon_300g": 2,
+        "soy_sauce_300ml": 1
+      }
+    }
+  },
+  "tags": [
+    "diet",
+    "allergy"
+  ],
+  "boundary": false,
+  "derivation": "no pork/beef, no shellfish: chicken stir-fry + salmon bowl, about S$40 <= S$45 [witness total S$35.10]"
+}

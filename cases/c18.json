@@ -1,0 +1,49 @@
+{
+  "case_id": "c18",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [],
+    "budget_sgd": 20,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "price_change",
+      "sku": "egg_10pk",
+      "price_sgd": 9.0
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r09",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "price_event",
+    "approval_event"
+  ],
+  "boundary": false,
+  "derivation": "eggs jump to S$9.00 at approval; pasta + chickpea salad avoid eggs and stay under S$20 [witness total S$12.80]"
+}

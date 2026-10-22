@@ -1,0 +1,45 @@
+{
+  "case_id": "c22",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "step",
+      "after_step": 2,
+      "kind": "out_of_stock",
+      "sku": "rice_1kg"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "stock_event"
+  ],
+  "boundary": false,
+  "derivation": "rice disappears early; no rice dishes, omelette + salad [witness total S$14.00]"
+}

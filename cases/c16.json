@@ -1,0 +1,27 @@
+{
+  "case_id": "c16",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 15,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 2,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": false,
+    "binding": "budget"
+  },
+  "tags": [
+    "infeasible",
+    "budget",
+    "servings"
+  ],
+  "boundary": true,
+  "derivation": "two servings: the cheapest option (fried rice x6) is about S$17.20 > S$15"
+}

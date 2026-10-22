@@ -1,0 +1,38 @@
+{
+  "case_id": "c14",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 8,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {
+      "rice": 1000
+    }
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r01"
+      ],
+      "cart": {
+        "egg_10pk": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2
+      }
+    }
+  },
+  "tags": [
+    "pantry",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "rice already at home: egg fried rice x6 needs eggs 3.20 + spring onion 1.80 + soy 2.50 = S$7.50 <= S$8 [witness total S$7.50]"
+}

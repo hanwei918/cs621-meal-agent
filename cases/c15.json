@@ -1,0 +1,38 @@
+{
+  "case_id": "c15",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 45,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 2,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r01",
+        "r07"
+      ],
+      "cart": {
+        "egg_10pk": 3,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 3,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "servings"
+  ],
+  "boundary": false,
+  "derivation": "two servings per meal doubles the grams; fried rice + omelette still about S$23 [witness total S$22.80]"
+}

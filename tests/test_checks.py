@@ -40,10 +40,15 @@ def test_each_constraint_is_caught():
 
 
 def final_world(case):
-    env = StoreEnv(case)
-    while env.pending:
-        env.call("view_cart")
-    return env.w
+    return StoreEnv(case).fire_all()
+
+
+def test_every_witness_passes_every_constraint_after_the_events():
+    from meal.solver import _plan
+    for c in load_cases():
+        if c.gold.feasible:
+            w = final_world(c)
+            assert violations(_plan(tuple(c.gold.witness.recipes), w), c.gold.witness.cart, w) == [], c.case_id
 
 
 def test_solver_agrees_with_hand_written_gold_on_every_case():

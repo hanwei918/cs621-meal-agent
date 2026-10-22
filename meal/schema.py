@@ -53,7 +53,9 @@ class Profile(_M):
 
 
 class Event(_M):
-    after_step: int                        # fires once the agent has made this many tool calls
+    on: Literal["step", "approval"] = "step"   # step: after the agent's Nth tool call;
+                                               # approval: the moment the user first approves a cart
+    after_step: int = 0
     kind: Literal["out_of_stock", "price_change", "preference"]
     sku: Optional[str] = None
     price_sgd: Optional[float] = None
@@ -61,9 +63,17 @@ class Event(_M):
     add_allergy: Optional[str] = None
 
 
+class Witness(_M):
+    """A plan the case author chose by hand that proves feasibility; its cart is the cheapest cover
+    of that plan's needs. Tests check it passes every hard constraint in the post-event world."""
+    recipes: list[str]                     # cycled over the day × meal slots in order
+    cart: dict[str, int]
+
+
 class Gold(_M):
     feasible: bool                         # after all events
     binding: Optional[Literal["budget", "diet", "time", "stock"]] = None   # for infeasible cases
+    witness: Optional[Witness] = None      # for feasible cases
 
 
 class Case(_M):

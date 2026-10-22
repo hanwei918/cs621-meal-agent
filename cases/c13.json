@@ -1,0 +1,37 @@
+{
+  "case_id": "c13",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "soy",
+      "peanut"
+    ],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "chickpeas_400g": {
+      "stock": 0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": false,
+    "binding": "stock"
+  },
+  "tags": [
+    "infeasible",
+    "stock"
+  ],
+  "boundary": true,
+  "derivation": "chickpea salad is the only allowed recipe and chickpeas are out of stock"
+}

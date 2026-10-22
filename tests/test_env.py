@@ -54,3 +54,11 @@ def test_valid_flow_orders_exactly_the_approved_cart():
     tok = env.call("request_approval", reported_total_sgd=16.10)["token"]
     assert env.call("place_order", token=tok)["ordered"] is True
     assert env.out.order == C01_CART and env.out.order_total_sgd == 16.10
+
+
+def test_notice_on_a_list_returning_tool_is_not_lost():
+    """Regression (c22): an event firing on search_recipes / find_items must not crash, and must reach the agent."""
+    env = StoreEnv(C["c22"])                                   # rice_1kg out of stock after step 2
+    env.call("get_profile")
+    r = env.call("search_recipes", max_minutes=30)
+    assert any("rice_1kg is now out of stock" in n for n in r["notices"]) and len(r["results"]) > 0

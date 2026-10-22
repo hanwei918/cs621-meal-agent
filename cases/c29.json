@@ -1,0 +1,48 @@
+{
+  "case_id": "c29",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "no_pork"
+    ],
+    "allergies": [],
+    "budget_sgd": 25,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "out_of_stock",
+      "sku": "egg_10pk"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r09",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "stock_event",
+    "approval_event"
+  ],
+  "boundary": false,
+  "derivation": "eggs sell out at approval; pasta + salad need no egg [witness total S$12.80]"
+}

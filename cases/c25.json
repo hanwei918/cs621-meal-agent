@@ -1,0 +1,38 @@
+{
+  "case_id": "c25",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 20,
+    "days": 2,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "shape"
+  ],
+  "boundary": false,
+  "derivation": "2 days x 3 meals is still six slots; omelette + salad about S$14 [witness total S$14.00]"
+}

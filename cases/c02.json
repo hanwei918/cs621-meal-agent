@@ -1,14 +1,62 @@
 {
   "case_id": "c02",
   "synthetic": true,
-  "profile": {"diet": ["vegetarian"], "allergies": ["egg"], "budget_sgd": 25, "days": 3, "meals_per_day": 2,
-              "servings": 1, "max_cook_minutes": 30, "pantry": {}},
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg"
+    ],
+    "budget_sgd": 25,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
   "events": [
-    {"after_step": 3, "kind": "out_of_stock", "sku": "tofu_300g"},
-    {"after_step": 5, "kind": "price_change", "sku": "chickpeas_400g", "price_sgd": 4.50}
+    {
+      "on": "step",
+      "after_step": 3,
+      "kind": "out_of_stock",
+      "sku": "tofu_300g"
+    },
+    {
+      "on": "step",
+      "after_step": 5,
+      "kind": "price_change",
+      "sku": "chickpeas_400g",
+      "price_sgd": 4.5
+    }
   ],
-  "gold": {"feasible": true},
-  "tags": ["diet", "allergy", "stock_event", "price_event"],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r04",
+        "r09",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 1,
+        "cucumber_2pk": 2,
+        "garlic_100g": 1,
+        "noodles_400g": 1,
+        "pasta_500g": 1,
+        "peanut_butter_340g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "diet",
+    "allergy",
+    "stock_event",
+    "price_event"
+  ],
   "boundary": true,
-  "derivation": "vegetarian, no egg, <=30 min, tofu gone: r04 x2 + r09 x2 + r10 x2 = noodles 1.80 + peanut butter 4.50 + cucumber 2 packs 3.00 + pasta 1.90 + tomato 2 packs 5.20 + garlic 1.00 + chickpeas 4.50 = S$21.90 <= 25 -> feasible (tight)"
+  "derivation": "vegetarian, no egg, tofu gone, chickpeas S$4.50: peanut noodles + tomato pasta + chickpea salad still fit S$25 [witness total S$21.90]"
 }

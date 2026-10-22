@@ -1,0 +1,47 @@
+{
+  "case_id": "c28",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "salmon_300g": {
+      "stock": 0
+    },
+    "prawns_300g": {
+      "stock": 0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r01",
+        "r09"
+      ],
+      "cart": {
+        "egg_10pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "stock"
+  ],
+  "boundary": false,
+  "derivation": "seafood out of stock; fried rice + pasta [witness total S$17.50]"
+}

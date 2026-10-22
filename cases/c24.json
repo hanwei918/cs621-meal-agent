@@ -1,0 +1,41 @@
+{
+  "case_id": "c24",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 25,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "chicken_breast_500g": {
+      "stock": 1
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r02"
+      ],
+      "cart": {
+        "broccoli_300g": 2,
+        "chicken_breast_1kg": 1,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1
+      }
+    }
+  },
+  "tags": [
+    "stock",
+    "multi_sku"
+  ],
+  "boundary": false,
+  "derivation": "chicken stir-fry x6 needs 900 g chicken: the 1 kg pack covers it; about S$21.60 [witness total S$21.60]"
+}

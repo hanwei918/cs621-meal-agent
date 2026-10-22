@@ -1,0 +1,42 @@
+{
+  "case_id": "c27",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [],
+    "budget_sgd": 25,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 45,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r12",
+        "r10"
+      ],
+      "cart": {
+        "butter_250g": 1,
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "mushrooms_250g": 2,
+        "rice_1kg": 1,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "time"
+  ],
+  "boundary": false,
+  "derivation": "45-minute limit admits mushroom risotto; risotto + salad [witness total S$20.90]"
+}

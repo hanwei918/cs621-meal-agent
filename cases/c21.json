@@ -1,0 +1,53 @@
+{
+  "case_id": "c21",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 12,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_diet": "vegetarian"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "egg"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "gluten"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "soy"
+    }
+  ],
+  "gold": {
+    "feasible": false,
+    "binding": "budget"
+  },
+  "tags": [
+    "preference_event",
+    "approval_event",
+    "infeasible",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "feasible before approval (fried rice ~S$10.30), but after the update only chickpea salad remains at S$13.00 > S$12"
+}

@@ -1,0 +1,43 @@
+{
+  "case_id": "c10",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "soy",
+      "peanut"
+    ],
+    "budget_sgd": 20,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "diet",
+    "allergy"
+  ],
+  "boundary": true,
+  "derivation": "only chickpea salad survives; x6 = chickpeas 3 + cucumber 2 + tomato 2 packs = S$13.00 <= S$20 [witness total S$13.00]"
+}

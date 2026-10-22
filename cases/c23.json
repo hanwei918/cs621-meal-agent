@@ -1,0 +1,50 @@
+{
+  "case_id": "c23",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten"
+    ],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "tomato_500g": {
+      "stock": 1
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r03",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "coconut_milk_400ml": 1,
+        "cucumber_2pk": 1,
+        "curry_paste_100g": 2,
+        "rice_1kg": 1,
+        "tofu_300g": 2,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "stock",
+    "allergy"
+  ],
+  "boundary": false,
+  "derivation": "one pack of tomatoes: curry x3 + salad x3 needs 300 g <= 500 g [witness total S$21.50]"
+}

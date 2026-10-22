@@ -10,15 +10,15 @@ Status 2026-10-21 — ✅ done · ⬜ TODO (owner). Change a contract only with 
 
 | | Contract | Status |
 |---|---|---|
-| ① | `Case` (schema.py): profile, store_overrides, events, `gold.feasible` (+ `binding` if not), tags, `derivation` | ✅ schema, 3 examples · ⬜ 27 more cases (≥ 1/3 boundary) |
+| ① | `Case` (schema.py): profile, store_overrides, events, `gold.feasible` (+ `binding` if not), tags, `derivation` | ✅ 30 cases, 14 boundary, built by `scripts/build_cases.py` with a checked witness per feasible case |
 | ① | Catalogs `data/ingredients.json`, `recipes.json`, `store.json` | ✅ first version (extend as cases need) |
 | ① | `solve(world) -> (plan, cart) or None`, `diagnose(world)`; must agree with every hand-written gold | ✅ |
 | ② | `violations(plan, cart, world)` — the one definition of the hard constraints | ✅ |
 | ② | `score(case, outcome, world) -> Score(passed, failed=[checks])` | ✅ |
 | ② | `run_eval(make_agent, cases, n_runs=3) -> Report`; `runs/` + `ledger.csv` | ✅ |
 | ③ | Agent: `run(env) -> AgentUsage`, acting only via `env.call(tool, **args)`; tools in `env.TOOL_SPECS` | ✅ `MealAgent` (fake-client tested; no live run yet) |
-| ④ | `StoreEnv`: tools, G1 constraint check before approval, G2 approval revoked by any change or event, G3 order only with the current token | ✅ |
-| ⑤ | Same Agent interface: `SingleCallBaseline`, `FixedPlanner` | ⬜ |
+| ④ | `StoreEnv`: tools, G1 constraint check before approval, G2 approval revoked by any change or event, G3 order only with the current token; events `on: step` or `on: approval`; list results gain `{results, notices}` when an event fires | ✅ |
+| ⑤ | Same Agent interface: `FixedPlanner` | ✅ (21/30, no re-planning) · ⬜ `SingleCallBaseline` |
 
 Pass rule — feasible case: an order exists, the ordered plan + cart violate nothing in the
 post-event world, the reported total is exact, no refused order attempts. Infeasible case: no order,

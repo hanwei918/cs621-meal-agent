@@ -38,7 +38,8 @@ class StoreEnv:
         self.case = case
         self.w = World.for_case(case)
         self.out = Outcome()
-        self.pending = sorted(case.events, key=lambda e: e.after_step)
+        self.pending = sorted((e for e in case.events if e.on == "step"), key=lambda e: e.after_step)
+        self.on_approval = [e for e in case.events if e.on == "approval"]
         self._token: str | None = None
 
     # ------------------------------------------------------------- plumbing
@@ -52,26 +53,37 @@ class StoreEnv:
             self.out.approved_hash, self._token = None, None
             notes.append(f"Approval revoked: {why}. Request approval again.")
 
+    def _fire(self, e, notes: list[str]):
+        if e.kind == "out_of_stock":
+            self.w.store[e.sku] = self.w.store[e.sku].model_copy(update={"stock": 0})
+            notes.append(f"Store update: {e.sku} is now out of stock.")
+        elif e.kind == "price_change":
+            self.w.store[e.sku] = self.w.store[e.sku].model_copy(update={"price_sgd": e.price_sgd})
+            notes.append(f"Store update: {e.sku} now costs S${e.price_sgd:.2f}.")
+        else:
+            if e.add_diet and e.add_diet not in self.w.profile.diet:
+                self.w.profile.diet.append(e.add_diet)
+            if e.add_allergy and e.add_allergy not in self.w.profile.allergies:
+                self.w.profile.allergies.append(e.add_allergy)
+            parts = ([e.add_diet] if e.add_diet else []) + ([f"no {e.add_allergy}"] if e.add_allergy else [])
+            notes.append(f"User update: from now on {' and '.join(parts)}.")
+        self.w.log.append(notes[-1])
+        self._revoke("the situation changed", notes)
+
     def _tick(self) -> list[str]:
         self.out.steps += 1
-        notes = []
+        notes: list[str] = []
         while self.pending and self.pending[0].after_step <= self.out.steps:
-            e = self.pending.pop(0)
-            if e.kind == "out_of_stock":
-                self.w.store[e.sku] = self.w.store[e.sku].model_copy(update={"stock": 0})
-                notes.append(f"Store update: {e.sku} is now out of stock.")
-            elif e.kind == "price_change":
-                self.w.store[e.sku] = self.w.store[e.sku].model_copy(update={"price_sgd": e.price_sgd})
-                notes.append(f"Store update: {e.sku} now costs S${e.price_sgd:.2f}.")
-            else:
-                if e.add_diet and e.add_diet not in self.w.profile.diet:
-                    self.w.profile.diet.append(e.add_diet)
-                if e.add_allergy and e.add_allergy not in self.w.profile.allergies:
-                    self.w.profile.allergies.append(e.add_allergy)
-                notes.append(f"User update: from now on {e.add_diet or 'no ' + str(e.add_allergy)}.")
-            self.w.log.append(notes[-1])
-            self._revoke("the situation changed", notes)
+            self._fire(self.pending.pop(0), notes)
         return notes
+
+    def fire_all(self):
+        """Apply every remaining event now — for building the post-event world in tests/solver checks."""
+        notes: list[str] = []
+        for e in self.pending + self.on_approval:
+            self._fire(e, notes)
+        self.pending, self.on_approval = [], []
+        return self.w
 
     def call(self, name: str, **args) -> dict:
         """Single entry point for every tool; adds event notices to the result."""
@@ -84,6 +96,8 @@ class StoreEnv:
             res = {"error": f"{type(e).__name__}: {e}"}
         notes = self._tick()
         if notes:
+            if not isinstance(res, dict):                   # list results: keep them, add the notices beside
+                res = {"results": res}
             res = dict(res, notices=list(res.get("notices", [])) + notes)
         return res
 
@@ -140,6 +154,12 @@ class StoreEnv:
             return {"approved": False, "refused_by": "constraint check", "violations": [f"{c}: {d}" for c, d in v]}
         self.out.approved_hash = self._hash()                                      # G2 (scripted user approves)
         self._token = self.out.approved_hash
+        if self.on_approval:                    # events that strike right after the first approval
+            notes: list[str] = []
+            for e in self.on_approval:
+                self._fire(e, notes)
+            self.on_approval = []
+            return {"approved": True, "token": self._token, "notices": notes}
         return {"approved": True, "token": self._token}
 
     def t_place_order(self, token: str):

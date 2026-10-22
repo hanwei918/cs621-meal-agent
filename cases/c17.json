@@ -1,0 +1,52 @@
+{
+  "case_id": "c17",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "no_beef"
+    ],
+    "allergies": [],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "chicken_breast_1kg": {
+      "stock": 0
+    }
+  },
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "out_of_stock",
+      "sku": "chicken_breast_500g"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r01",
+        "r07"
+      ],
+      "cart": {
+        "egg_10pk": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "stock_event",
+    "approval_event"
+  ],
+  "boundary": false,
+  "derivation": "if the first cart uses chicken, both chicken SKUs are gone at approval; egg dishes still fit [witness total S$16.10]"
+}

@@ -1,0 +1,27 @@
+{
+  "case_id": "c26",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 6,
+    "days": 3,
+    "meals_per_day": 1,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": false,
+    "binding": "budget"
+  },
+  "tags": [
+    "infeasible",
+    "budget",
+    "shape"
+  ],
+  "boundary": true,
+  "derivation": "three meals for S$6: the cheapest (omelette x3) is S$6.70"
+}

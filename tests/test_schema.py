@@ -12,8 +12,11 @@ def raw(cid):
     return json.loads((CASES / f"{cid}.json").read_text(encoding="utf-8"))
 
 
-def test_cases_load():
-    assert [c.case_id for c in load_cases()] == ["c01", "c02", "c03"]
+def test_cases_load_with_enough_boundary_cases():
+    cs = load_cases()
+    assert [c.case_id for c in cs] == [f"c{i:02d}" for i in range(1, 31)]
+    assert sum(c.boundary for c in cs) * 3 >= len(cs)
+    assert all(c.gold.witness for c in cs if c.gold.feasible)
 
 
 @pytest.mark.parametrize("mutate", [

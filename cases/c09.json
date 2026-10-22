@@ -1,0 +1,47 @@
+{
+  "case_id": "c09",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "peanut"
+    ],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r03",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "coconut_milk_400ml": 1,
+        "cucumber_2pk": 1,
+        "curry_paste_100g": 2,
+        "rice_1kg": 1,
+        "tofu_300g": 2,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "diet",
+    "allergy"
+  ],
+  "boundary": false,
+  "derivation": "tofu curry (soy is fine) + chickpea salad [witness total S$21.50]"
+}

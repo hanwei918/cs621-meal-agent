@@ -1,0 +1,43 @@
+{
+  "case_id": "c12",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "soy",
+      "peanut"
+    ],
+    "budget_sgd": 13,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "budget",
+    "diet"
+  ],
+  "boundary": true,
+  "derivation": "same as c11 with budget S$13.00: the S$13.00 plan is exactly within budget [witness total S$13.00]"
+}

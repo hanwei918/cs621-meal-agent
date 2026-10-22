@@ -1,0 +1,34 @@
+{
+  "case_id": "c11",
+  "synthetic": true,
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "soy",
+      "peanut"
+    ],
+    "budget_sgd": 12,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": false,
+    "binding": "budget"
+  },
+  "tags": [
+    "infeasible",
+    "budget",
+    "diet"
+  ],
+  "boundary": true,
+  "derivation": "only chickpea salad survives and x6 costs S$13.00 > S$12"
+}

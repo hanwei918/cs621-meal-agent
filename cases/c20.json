@@ -1,0 +1,62 @@
+{
+  "case_id": "c20",
+  "synthetic": true,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 14,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_diet": "vegetarian"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "egg"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "gluten"
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "preference",
+      "add_allergy": "soy"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "witness": {
+      "recipes": [
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "preference_event",
+    "approval_event",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "after the update only chickpea salad remains: S$13.00 <= S$14 [witness total S$13.00]"
+}

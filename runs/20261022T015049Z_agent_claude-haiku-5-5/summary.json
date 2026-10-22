@@ -1,0 +1,25 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 3,
+  "n_runs": 1,
+  "pass_mean": 1.0,
+  "pass_sd": 0.0,
+  "per_run": [
+    1.0
+  ],
+  "failed_checks": {},
+  "failures_by_tag": {},
+  "flaky": [],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "errors": 0,
+  "steps_per_case": 34,
+  "input_tokens": 48,
+  "output_tokens": 11905,
+  "cost_usd": 0.0097,
+  "meta": {
+    "eval_sha256": "470e2d80fce98d9aadc876f6d81153ac74dfb2443135930033e1b720d4d6b89b"
+  },
+  "utc": "20261022T015049Z"
+}
