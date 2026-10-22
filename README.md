@@ -14,13 +14,13 @@ meal/scoring.py     ② pass/fail per case + which checks failed
 eval/harness.py     ② run_eval: 3 runs, mean ± sd, failures by check and tag, cost ledger
 meal/env.py         ④ simulated store + tools; approval and order gates; event injection
 meal/agent.py       ③ the agent: Claude tool loop (fake-client tested; no live run yet)
-meal/baselines.py   ⑤ fixed planner (done) · single call (TODO)
+meal/baselines.py   ⑤ fixed planner · single call (one structured call, applied through the same tools)
 meal/fakes.py       Oracle / Reckless fake agents — check the grader, never reported
 ```
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                 # 29 tests, each seen failing first
+.venv/bin/python -m pytest -q                 # 31 tests, each seen failing first
 .venv/bin/python run.py --system oracle       # must be 1.000
 .venv/bin/python run.py --system reckless     # must be 0.000
 ```

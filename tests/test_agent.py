@@ -84,3 +84,27 @@ def test_step_cap_stops_a_looping_agent():
     fc = FakeClient([lambda m: resp([use("view_cart", {}, 1)])] * 5)
     run_case(MealAgent("claude-haiku-5-5", client=fc, max_steps=5), C["c01"])
     assert len(fc.sent) == 5
+
+
+def test_single_call_baseline_applies_its_answer_through_the_tools():
+    from meal.baselines import SingleCallBaseline
+    ans = {"feasible": True, "binding": "none", "meals": [m.model_dump() for m in plan("r01", "r07").meals],
+           "cart": [{"sku": s, "packs": n} for s, n in C01_CART.items()], "total_sgd": 16.10}
+    fc = FakeClient([lambda m: resp([NS(type="text", text=json.dumps(ans))], "end_turn")])
+    r = run_case(SingleCallBaseline("claude-haiku-5-5", client=fc), C["c01"])
+    assert r.score.passed and len(fc.sent) == 1 and "tools" not in fc.sent[0]
+
+
+def test_single_call_cannot_react_to_an_approval_event():
+    """c29: eggs sell out at approval. A plan with eggs gets approved, revoked, and the baseline stops."""
+    from meal.baselines import SingleCallBaseline
+    from meal.checks import World, cheapest_cart, needs
+    w = World.for_case(C["c29"])
+    p = plan("r01", "r07")
+    ans = {"feasible": True, "binding": "none", "meals": [m.model_dump() for m in p.meals],
+           "cart": [{"sku": s, "packs": n} for s, n in cheapest_cart(needs(p, w), w).items()], "total_sgd": 0}
+    from meal.checks import cart_total
+    ans["total_sgd"] = cart_total({x["sku"]: x["packs"] for x in ans["cart"]}, w)
+    fc = FakeClient([lambda m: resp([NS(type="text", text=json.dumps(ans))], "end_turn")])
+    r = run_case(SingleCallBaseline("claude-haiku-5-5", client=fc), C["c29"])
+    assert not r.score.passed and r.score.failed == ["no_order"]
