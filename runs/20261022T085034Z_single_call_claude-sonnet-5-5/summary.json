@@ -1,0 +1,55 @@
+{
+  "system": "single_call",
+  "model": "claude-sonnet-5-5",
+  "n_cases": 30,
+  "n_runs": 3,
+  "pass_mean": 0.7111,
+  "pass_sd": 0.0385,
+  "per_run": [
+    0.7333333333333333,
+    0.7333333333333333,
+    0.6666666666666666
+  ],
+  "failed_checks": {
+    "no_order": 23,
+    "not_declared": 3
+  },
+  "failures_by_tag": {
+    "approval_event:no_order": 18,
+    "stock_event:no_order": 9,
+    "price_event:no_order": 9,
+    "preference_event:no_order": 6,
+    "diet:no_order": 4,
+    "allergy:no_order": 4,
+    "budget:no_order": 3,
+    "preference_event:not_declared": 3,
+    "approval_event:not_declared": 3,
+    "infeasible:not_declared": 3,
+    "budget:not_declared": 3,
+    "shape:no_order": 1
+  },
+  "flaky": [
+    "c05",
+    "c25"
+  ],
+  "always_fail": [
+    "c02",
+    "c17",
+    "c18",
+    "c19",
+    "c20",
+    "c21",
+    "c29",
+    "c30"
+  ],
+  "unauthorized_attempts": 0,
+  "errors": 0,
+  "steps_per_case": 6.62,
+  "input_tokens": 303615,
+  "output_tokens": 104114,
+  "cost_usd": 1.6713,
+  "meta": {
+    "eval_sha256": "cb1a1bdc0034f63f6a8264dfb406e18bab346f0a4596737543f254c98c75ffd9"
+  },
+  "utc": "20261022T085034Z"
+}
