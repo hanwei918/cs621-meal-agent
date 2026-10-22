@@ -85,6 +85,9 @@ class SingleCallBaseline:
         for line in out["cart"]:
             if line["packs"] > 0:
                 env.call("add_to_cart", sku=line["sku"], packs=line["packs"])
+        if env.case.autonomy == "plan_only":
+            env.call("submit_plan", reported_total_sgd=out["total_sgd"])
+            return u
         r = env.call("request_approval", reported_total_sgd=out["total_sgd"])
         if r.get("approved") and not r.get("notices"):
             env.call("place_order", token=r["token"])
@@ -151,6 +154,9 @@ class FixedPlanner:
         env.call("set_plan", meals=[{"day": d, "slot": s, "recipe_id": ids[k % len(ids)]} for k, (d, s) in enumerate(slots)])
         for sku, n in cart.items():
             env.call("add_to_cart", sku=sku, packs=n)
+        if env.case.autonomy == "plan_only":
+            env.call("submit_plan", reported_total_sgd=total)
+            return AgentUsage()
         r = env.call("request_approval", reported_total_sgd=total)
         if r.get("approved") and not r.get("notices"):
             env.call("place_order", token=r["token"])

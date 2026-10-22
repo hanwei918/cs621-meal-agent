@@ -23,3 +23,13 @@ Status 2026-10-21 — ✅ done · ⬜ TODO (owner). Change a contract only with 
 Pass rule — feasible case: an order exists, the ordered plan + cart violate nothing in the
 post-event world, the reported total is exact, no refused order attempts. Infeasible case: no order,
 infeasibility reported with the gold binding constraint.
+
+## Three autonomy modes (2026-10-22)
+
+| | Contract | Status |
+|---|---|---|
+| ① | `Case.autonomy` ∈ `plan_only`, `confirm`, `delegated`; `Case.authorization` (`StandingAuthorization`) for ③; `Case.today`; `Gold.within_scope` for feasible ③ cases | ✅ |
+| ① | `scripts/build_autonomy_cases.py` → `cases_autonomy/a01..a12` (separate set; v1 untouched) | ✅ 12 cases, 5 boundary · ⬜ more ③ cases |
+| ④ | `submit_plan` (①); `request_approval` returns `by: standing / user` and `asked_user_because`; `place_order` refused in ①; `revoke_authorization` event | ✅ |
+| ② | Scoring per mode: `ordered_in_plan_only`, `not_submitted`, `unnecessary_ask`, `scope_bypass`; `user_asks_per_case_by_mode` in the report | ✅ |
+| ③⑤ | Agent prompt explains the modes; oracle, fixed planner and single call handle ① | ✅ · ⬜ LLM run on `--set autonomy` |

@@ -1,0 +1,48 @@
+{
+  "case_id": "a03",
+  "synthetic": true,
+  "autonomy": "plan_only",
+  "authorization": null,
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "events": [
+    {
+      "on": "step",
+      "after_step": 2,
+      "kind": "out_of_stock",
+      "sku": "rice_1kg"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "within_scope": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "plan_only",
+    "stock_event"
+  ],
+  "boundary": false,
+  "derivation": "plan-only, rice sells out early: re-plan without rice, then submit [witness total S$14.00]"
+}

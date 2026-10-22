@@ -22,7 +22,8 @@ from meal.schema import Case, Outcome
 from meal.scoring import Score
 
 ROOT = Path(__file__).resolve().parent.parent
-CASES = ROOT / "cases"
+CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
+CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json")}
 RUNS = ROOT / "runs"
 
 
@@ -30,14 +31,17 @@ def _canonical(folder: Path, pattern: str):
     return [f for f in sorted(folder.glob(pattern)) if f.stem.isalnum()]   # skips "c01 2.json"
 
 
-def load_cases(ids: list[str] | None = None) -> list[Case]:
-    cs = [Case.model_validate_json(f.read_text(encoding="utf-8")) for f in _canonical(CASES, "c[0-9]*.json")]
+def load_cases(ids: list[str] | None = None, case_set: str = "v1") -> list[Case]:
+    folder, pattern = (CASES, "c[0-9]*.json") if case_set == "v1" else (ROOT / CASE_SETS[case_set][0], CASE_SETS[case_set][1])
+    cs = [Case.model_validate_json(f.read_text(encoding="utf-8")) for f in _canonical(folder, pattern)]
     return [c for c in cs if ids is None or c.case_id in ids]
 
 
-def eval_fingerprint() -> str:
+def eval_fingerprint(case_set: str = "v1") -> str:
+    """v1 keeps its original definition (cases/ + data/), so the frozen v1 fingerprint is unchanged."""
     h = hashlib.sha256()
-    for folder, pat in ((CASES, "c[0-9]*.json"), (ROOT / "data", "*.json")):
+    first = (CASES, "c[0-9]*.json") if case_set == "v1" else (ROOT / CASE_SETS[case_set][0], CASE_SETS[case_set][1])
+    for folder, pat in (first, (ROOT / "data", "*.json")):
         for f in _canonical(folder, pat):
             h.update(f.name.encode()); h.update(f.read_bytes())
     return h.hexdigest()
@@ -64,6 +68,9 @@ class Report:
             rs = [r for r in self.rows if r.run == k]
             per_run.append(sum(r.result.score.passed for r in rs) / max(1, len(rs)))
         checks, by_tag, by_case = Counter(), Counter(), defaultdict(list)
+        asks_by_mode = defaultdict(list)
+        for r in self.rows:
+            asks_by_mode[r.case.autonomy].append(r.result.outcome.user_asks)
         for r in self.rows:
             by_case[r.case.case_id].append(r.result.score.passed)
             for c in r.result.score.failed:
@@ -79,6 +86,7 @@ class Report:
             "flaky": sorted(c for c, v in by_case.items() if 0 < sum(v) < len(v)),
             "always_fail": sorted(c for c, v in by_case.items() if not any(v)),
             "unauthorized_attempts": sum(x.outcome.unauthorized_attempts for x in res),
+            "user_asks_per_case_by_mode": {m: round(statistics.mean(v), 2) for m, v in sorted(asks_by_mode.items())},
             "errors": sum(1 for x in res if x.error),
             "steps_per_case": round(statistics.mean(x.outcome.steps for x in res), 2) if res else 0,
             "input_tokens": sum(x.usage.input_tokens for x in res), "output_tokens": sum(x.usage.output_tokens for x in res),
@@ -96,7 +104,8 @@ class Report:
 
 
 def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str = "agent",
-             model: str = "-", write: bool = True, meta: dict | None = None, workers: int = 1) -> Report:
+             model: str = "-", write: bool = True, meta: dict | None = None, workers: int = 1,
+             case_set: str = "v1") -> Report:
     from concurrent.futures import ThreadPoolExecutor
 
     def one(c: Case) -> CaseResult:              # each case gets its own agent and its own StoreEnv
@@ -115,13 +124,14 @@ def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str
                 rows.append(Row(c, k, r))
     rep = Report(name, model, n_runs, rows)
     if write:
-        rep.run_dir = _write(rep, meta or {})
+        rep.run_dir = _write(rep, (meta or {}) | {"case_set": case_set})
     return rep
 
 
 def _write(rep: Report, meta: dict) -> Path:
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    d = RUNS / f"{ts}_{rep.name}_{rep.model}"
+    tag = "" if meta.get("case_set", "v1") == "v1" else f"_{meta['case_set']}"
+    d = RUNS / f"{ts}_{rep.name}_{rep.model}{tag}"
     d.mkdir(parents=True, exist_ok=True)
     with (d / "results.jsonl").open("w", encoding="utf-8") as f:
         for r in rep.rows:
@@ -129,7 +139,7 @@ def _write(rep: Report, meta: dict) -> Path:
             f.write(json.dumps({"case": r.case.case_id, "run": r.run, "score": x.score.as_dict(),
                                 "outcome": x.outcome.model_dump(), "events": x.log, "usage": asdict(x.usage),
                                 "cost_usd": x.cost_usd, "error": x.error}, ensure_ascii=False) + "\n")
-    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint()}, "utc": ts}
+    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint(meta.get("case_set", "v1"))}, "utc": ts}
     (d / "summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False), encoding="utf-8")
     ledger, prev = RUNS / "ledger.csv", 0.0
     if ledger.exists():

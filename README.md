@@ -18,9 +18,12 @@ meal/baselines.py   ⑤ fixed planner · single call (one structured call, appli
 meal/fakes.py       Oracle / Reckless fake agents — check the grader, never reported
 ```
 
+Autonomy modes (case set `autonomy`, `cases_autonomy/`): ① plan only · ② confirm each order ·
+③ pre-authorized within limits — see `docs/MEAL_PLANNING_POLICY.md` §7.1.
+
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                 # 31 tests, each seen failing first
+.venv/bin/python -m pytest -q                 # 47 tests, each seen failing first
 .venv/bin/python run.py --system oracle       # must be 1.000
 .venv/bin/python run.py --system reckless     # must be 0.000
 ```

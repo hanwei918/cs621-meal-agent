@@ -51,3 +51,18 @@ def diagnose(w: World) -> str:
     any_stocked = any(cheapest_cart(needs(_plan(ids, w), w), w) is not None
                       for k in (1, 2, 3) for ids in combinations(ok, k))
     return "budget" if any_stocked else "stock"
+
+
+def scope_cap(case, w: World) -> float | None:
+    """Mode ③: the most one order may cost without asking the user, or None if the authorization cannot
+    be used at all (revoked, expired, declared allergy — policy O-03)."""
+    a = case.authorization
+    if a is None or a.revoked or case.today > a.valid_until or w.profile.allergies:
+        return None
+    return min(a.max_order_sgd, a.max_period_sgd - a.already_spent_sgd)
+
+
+def solve_within(w: World, cap: float):
+    """solve() with the budget tightened to the authorization cap."""
+    tight = World(w.ingredients, w.recipes, w.store, w.profile.model_copy(update={"budget_sgd": min(w.profile.budget_sgd, cap)}))
+    return solve(tight)

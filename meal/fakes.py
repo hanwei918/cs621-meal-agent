@@ -10,7 +10,7 @@ from __future__ import annotations
 from .checks import cart_total
 from .env import StoreEnv
 from .runner import AgentUsage
-from .solver import diagnose, solve
+from .solver import diagnose, scope_cap, solve, solve_within
 
 
 class OracleAgent:
@@ -20,7 +20,8 @@ class OracleAgent:
                 break
             env.call("view_cart")
         for _ in range(4):                                 # approval may trigger events: re-solve
-            found = solve(env.w)
+            cap = scope_cap(env.case, env.w) if env.case.autonomy == "delegated" else None
+            found = (cap is not None and solve_within(env.w, cap)) or solve(env.w)
             if found is None:
                 env.call("report_infeasible", binding=diagnose(env.w), explanation="no feasible plan")
                 return AgentUsage()
@@ -30,6 +31,9 @@ class OracleAgent:
                 env.call("remove_from_cart", sku=sku, packs=env.out.cart[sku])
             for sku, n in cart.items():
                 env.call("add_to_cart", sku=sku, packs=n)
+            if env.case.autonomy == "plan_only":
+                env.call("submit_plan", reported_total_sgd=cart_total(cart, env.w))
+                return AgentUsage()
             r = env.call("request_approval", reported_total_sgd=cart_total(cart, env.w))
             if r.get("approved") and env.out.approved_hash:
                 env.call("place_order", token=r["token"])

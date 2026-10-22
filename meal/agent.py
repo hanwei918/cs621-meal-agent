@@ -31,6 +31,14 @@ When they do, re-check the plan and the cart against the new situation and fix t
 - If no plan can satisfy every constraint, call report_infeasible with the binding constraint \
 (budget, diet, time or stock) and stop. To name it, apply the constraints in this order: diet and allergies, \
 then cooking time, then stock, then budget; the binding one is the first after which no valid plan is left. Never relax a constraint and never order without approval.
+- get_profile also tells you the autonomy mode:
+  * plan_only (①): build the plan and the shopping cart, then call submit_plan with the exact total. Never request \
+approval and never order.
+  * confirm (②): request_approval (the user is asked), then place_order with the token.
+  * delegated (③): the user has a standing authorization (per-order limit, period limit including what was already \
+spent, expiry date, and it may be revoked). Code decides whether a cart is inside it; a declared allergy always \
+needs the user. Prefer a valid plan whose total fits inside the authorization so the user need not be asked; if no \
+valid plan fits, request approval anyway and the user will be asked.
 - This is not nutrition or medical advice; follow only the user's stated constraints."""
 
 _S, _I = {"type": "string"}, {"type": "integer"}
@@ -50,6 +58,7 @@ SCHEMAS = {
     "add_to_cart": _obj({"sku": _S, "packs": _I}, ["sku", "packs"]),
     "remove_from_cart": _obj({"sku": _S, "packs": _I}, ["sku", "packs"]),
     "view_cart": _obj({}, []),
+    "submit_plan": _obj({"reported_total_sgd": {"type": "number"}}, ["reported_total_sgd"]),
     "request_approval": _obj({"reported_total_sgd": {"type": "number"}}, ["reported_total_sgd"]),
     "place_order": _obj({"token": _S}, ["token"]),
     "report_infeasible": _obj({"binding": {"type": "string", "enum": ["budget", "diet", "time", "stock"]},

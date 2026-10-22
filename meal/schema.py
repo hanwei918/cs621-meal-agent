@@ -7,6 +7,7 @@ reference solver, never taken from an agent run.
 """
 from __future__ import annotations
 
+from datetime import date
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -52,11 +53,23 @@ class Profile(_M):
     pantry: dict[str, int] = {}            # ingredient id → grams already at home
 
 
+AUTONOMY = ("plan_only", "confirm", "delegated")
+
+
+class StandingAuthorization(_M):
+    """Mode ③: what the user lets the agent buy without asking (policy O-02). Enforced in code."""
+    max_order_sgd: float                   # one order may not exceed this
+    max_period_sgd: float                  # all orders in the current period together
+    already_spent_sgd: float = 0.0         # spent earlier in this period
+    valid_until: date                      # compared with Case.today
+    revoked: bool = False
+
+
 class Event(_M):
     on: Literal["step", "approval"] = "step"   # step: after the agent's Nth tool call;
                                                # approval: the moment the user first approves a cart
     after_step: int = 0
-    kind: Literal["out_of_stock", "price_change", "preference"]
+    kind: Literal["out_of_stock", "price_change", "preference", "revoke_authorization"]
     sku: Optional[str] = None
     price_sgd: Optional[float] = None
     add_diet: Optional[Literal["vegetarian", "no_pork", "no_beef"]] = None
@@ -74,12 +87,16 @@ class Gold(_M):
     feasible: bool                         # after all events
     binding: Optional[Literal["budget", "diet", "time", "stock"]] = None   # for infeasible cases
     witness: Optional[Witness] = None      # for feasible cases
+    within_scope: Optional[bool] = None    # mode ③ only: can a valid plan be ordered WITHOUT asking the user?
 
 
 class Case(_M):
     case_id: str
     synthetic: Literal[True] = True
     profile: Profile
+    autonomy: Literal["plan_only", "confirm", "delegated"] = "confirm"   # ① ② ③; case set v1 is all ②
+    authorization: Optional[StandingAuthorization] = None                # required for ③
+    today: date = date(2026, 10, 25)       # the simulated date, for authorization expiry
     store_overrides: dict[str, dict] = {}  # sku → {"stock": n} and/or {"price_sgd": x}
     events: list[Event] = []
     gold: Gold
@@ -91,6 +108,12 @@ class Case(_M):
     def _ok(self):
         if not self.gold.feasible and self.gold.binding is None:
             raise ValueError("an infeasible case must name the binding constraint")
+        if self.autonomy == "plan_only" and any(e.on == "approval" for e in self.events):
+            raise ValueError("plan-only (①) cases never reach approval, so cannot have approval events")
+        if self.autonomy == "delegated" and self.authorization is None:
+            raise ValueError("a delegated (③) case needs a standing authorization")
+        if self.autonomy == "delegated" and self.gold.feasible and self.gold.within_scope is None:
+            raise ValueError("a feasible delegated case must say whether it fits the authorization")
         return self
 
 
@@ -116,5 +139,8 @@ class Outcome(_M):
     reported_total_sgd: Optional[float] = None
     declared_infeasible: bool = False
     declared_binding: Optional[str] = None
-    unauthorized_attempts: int = 0         # place_order calls the gate refused
+    unauthorized_attempts: int = 0         # order/approval calls the gate refused (incl. outside the mode)
     steps: int = 0
+    submitted: bool = False                # mode ①: a plan + list was submitted and passed the checks
+    approved_by: Optional[Literal["user", "standing"]] = None   # who approved the cart that was ordered
+    user_asks: int = 0                     # times the user had to be asked — the burden metric
