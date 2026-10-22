@@ -1,0 +1,57 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 30,
+  "n_runs": 1,
+  "pass_mean": 0.6667,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.6666666666666666
+  ],
+  "failed_checks": {
+    "no_order": 7,
+    "reported_total": 1,
+    "binding": 1,
+    "not_declared": 1
+  },
+  "failures_by_tag": {
+    "approval_event:no_order": 6,
+    "stock_event:no_order": 3,
+    "price_event:no_order": 2,
+    "preference_event:no_order": 2,
+    "diet:reported_total": 1,
+    "allergy:reported_total": 1,
+    "stock_event:reported_total": 1,
+    "price_event:reported_total": 1,
+    "infeasible:binding": 1,
+    "stock:binding": 1,
+    "budget:no_order": 1,
+    "preference_event:not_declared": 1,
+    "approval_event:not_declared": 1,
+    "infeasible:not_declared": 1,
+    "budget:not_declared": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "c02",
+    "c13",
+    "c17",
+    "c18",
+    "c19",
+    "c20",
+    "c21",
+    "c22",
+    "c29",
+    "c30"
+  ],
+  "unauthorized_attempts": 0,
+  "errors": 0,
+  "steps_per_case": 8.73,
+  "input_tokens": 101205,
+  "output_tokens": 76984,
+  "cost_usd": 0.0489,
+  "meta": {
+    "eval_sha256": "cb1a1bdc0034f63f6a8264dfb406e18bab346f0a4596737543f254c98c75ffd9"
+  },
+  "utc": "20261022T083102Z"
+}
