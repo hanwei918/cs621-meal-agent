@@ -26,6 +26,7 @@ class World:
     store: dict[str, StoreItem]
     profile: Profile
     log: list[str] = field(default_factory=list)
+    note: object = None                    # NoteConstraints in force (declared by the agent, or gold when grading)
 
     @classmethod
     def for_case(cls, case: Case) -> "World":
@@ -49,6 +50,12 @@ def recipe_violations(r: Recipe, w: World) -> list[tuple[str, str]]:
             out.append(("allergy", f"{r.id} contains {i} ({', '.join(sorted(hit))})"))
     if r.minutes > w.profile.max_cook_minutes:
         out.append(("time", f"{r.id} takes {r.minutes} min > {w.profile.max_cook_minutes}"))
+    if w.note is not None:
+        if r.id in w.note.exclude_recipes:
+            out.append(("note", f"{r.id} excluded by the user's note"))
+        for i in r.grams:
+            if i in w.note.exclude_ingredients:
+                out.append(("note", f"{r.id} contains {i}, excluded by the user's note"))
     return out
 
 
@@ -58,7 +65,11 @@ def needs(plan: Plan, w: World) -> dict[str, int]:
     for m in plan.meals:
         for i, g in w.recipes[m.recipe_id].grams.items():
             total[i] = total.get(i, 0) + g * w.profile.servings
-    return {i: g - w.profile.pantry.get(i, 0) for i, g in total.items() if g > w.profile.pantry.get(i, 0)}
+    pantry = dict(w.profile.pantry)
+    if w.note is not None:
+        for i, g in w.note.pantry_add.items():
+            pantry[i] = pantry.get(i, 0) + g
+    return {i: g - pantry.get(i, 0) for i, g in total.items() if g > pantry.get(i, 0)}
 
 
 def cart_total(cart: dict[str, int], w: World) -> float:
@@ -77,6 +88,10 @@ def violations(plan: Plan, cart: dict[str, int], w: World) -> list[tuple[str, st
             out.append(("meals", f"unknown recipe {m.recipe_id}"))
             continue
         out += recipe_violations(w.recipes[m.recipe_id], w)
+        if w.note is not None:
+            for lim in w.note.slot_max_minutes:
+                if (lim.day, lim.slot) == (m.day, m.slot) and w.recipes[m.recipe_id].minutes > lim.minutes:
+                    out.append(("note", f"day {m.day} meal {m.slot}: {m.recipe_id} takes {w.recipes[m.recipe_id].minutes} min > {lim.minutes}"))
     known_plan = Plan(meals=[m for m in plan.meals if m.recipe_id in w.recipes])
     for i, g in needs(known_plan, w).items():
         have = sum(w.store[s].pack_g * n for s, n in cart.items() if s in w.store and w.store[s].ingredient == i)

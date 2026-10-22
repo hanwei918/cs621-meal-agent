@@ -1,0 +1,55 @@
+{
+  "case_id": "n03",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "My flatmate has a bad peanut allergy and we share the kitchen, so nothing with peanuts please."
+  },
+  "store_overrides": {
+    "peanut_butter_340g": {
+      "price_sgd": 2.0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "peanut_butter"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r01",
+        "r07"
+      ],
+      "meals": null,
+      "cart": {
+        "egg_10pk": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "exclude_ingredient"
+  ],
+  "boundary": false,
+  "derivation": "peanut butter is the only peanut ingredient (peanut noodles); fried rice + omelette. The profile itself has no allergy: the flatmate's is a kitchen rule, so ordering stays mode ② as usual. Peanut butter on promo makes peanut noodles the cheapest plan ignoring the note [witness total S$16.10]"
+}

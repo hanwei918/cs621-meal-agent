@@ -23,7 +23,8 @@ from meal.scoring import Score
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
-CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json")}
+CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json"),
+             "nl": ("cases_nl", "n[0-9]*.json")}
 RUNS = ROOT / "runs"
 
 
@@ -139,7 +140,15 @@ def _write(rep: Report, meta: dict) -> Path:
             f.write(json.dumps({"case": r.case.case_id, "run": r.run, "score": x.score.as_dict(),
                                 "outcome": x.outcome.model_dump(), "events": x.log, "usage": asdict(x.usage),
                                 "cost_usd": x.cost_usd, "error": x.error}, ensure_ascii=False) + "\n")
-    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint(meta.get("case_set", "v1"))}, "utc": ts}
+    import subprocess
+    try:
+        rev = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+        dirty = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--", "meal", "eval", "run.py"],
+                               capture_output=True, text=True).stdout.strip()
+        rev += "-dirty" if dirty else ""
+    except OSError:
+        rev = "unknown"
+    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint(meta.get("case_set", "v1")), "code": rev}, "utc": ts}
     (d / "summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False), encoding="utf-8")
     ledger, prev = RUNS / "ledger.csv", 0.0
     if ledger.exists():

@@ -19,7 +19,15 @@ def allowed_recipes(w: World) -> list[str]:
 
 def _plan(ids: tuple[str, ...], w: World) -> Plan:
     slots = [(d, s) for d in range(1, w.profile.days + 1) for s in range(1, w.profile.meals_per_day + 1)]
-    return Plan(meals=[Meal(day=d, slot=s, recipe_id=ids[k % len(ids)]) for k, (d, s) in enumerate(slots)])
+    limits = {(l.day, l.slot): l.minutes for l in w.note.slot_max_minutes} if w.note is not None else {}
+    meals = []
+    for k, (d, s) in enumerate(slots):
+        rid = ids[k % len(ids)]
+        if (d, s) in limits and w.recipes[rid].minutes > limits[(d, s)]:
+            fast = [i for i in ids if w.recipes[i].minutes <= limits[(d, s)]]
+            rid = fast[0] if fast else rid             # none fast enough: the plan fails its check
+        meals.append(Meal(day=d, slot=s, recipe_id=rid))
+    return Plan(meals=meals)
 
 
 def solve(w: World) -> tuple[Plan, dict[str, int]] | None:
@@ -46,7 +54,7 @@ def diagnose(w: World) -> str:
     ok = allowed_recipes(w)
     if not ok:
         by_diet = [r for r in w.recipes.values()
-                   if not [v for v in recipe_violations(r, w) if v[0] in ("diet", "allergy")]]
+                   if not [v for v in recipe_violations(r, w) if v[0] in ("diet", "allergy", "note")]]
         return "diet" if not by_diet else "time"
     any_stocked = any(cheapest_cart(needs(_plan(ids, w), w), w) is not None
                       for k in (1, 2, 3) for ids in combinations(ok, k))
@@ -64,5 +72,6 @@ def scope_cap(case, w: World) -> float | None:
 
 def solve_within(w: World, cap: float):
     """solve() with the budget tightened to the authorization cap."""
-    tight = World(w.ingredients, w.recipes, w.store, w.profile.model_copy(update={"budget_sgd": min(w.profile.budget_sgd, cap)}))
+    tight = World(w.ingredients, w.recipes, w.store,
+                  w.profile.model_copy(update={"budget_sgd": min(w.profile.budget_sgd, cap)}), note=w.note)
     return solve(tight)

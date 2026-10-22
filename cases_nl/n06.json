@@ -1,0 +1,49 @@
+{
+  "case_id": "n06",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 5,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "I still have a 1 kg bag of rice and a dozen eggs at home."
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {
+        "rice": 1000,
+        "egg": 720
+      }
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r01"
+      ],
+      "meals": null,
+      "cart": {
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "pantry",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "a dozen eggs ~720 g (10-pack = 600 g); egg fried rice x6 needs rice 900 + egg 600, both covered; spring onion 2 packs + soy 1 = S$4.30 <= S$5. Without the pantry note nothing fits S$5 (as v1 c03) [witness total S$4.30]"
+}

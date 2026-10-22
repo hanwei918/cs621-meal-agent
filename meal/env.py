@@ -33,6 +33,11 @@ TOOL_SPECS = {
                          "In pre-authorized mode (③) a cart inside the user's standing authorization is approved without "
                          "asking the user; otherwise the user is asked."),
     "place_order": "Place the order with the approval token. Refused unless the current plan + cart are the approved ones.",
+    "declare_constraints": ("Record what the user's note means, as constraints the code will then enforce: ingredient "
+                            "ids and recipe ids to exclude, per-meal time limits {day, slot, minutes}, and food already "
+                            "at home {ingredient: grams}. Call again to replace. Declare only what the note says."),
+    "decline_request": ("Decline a request this service does not handle (weight loss, calorie or macro targets, a medical "
+                        "or clinician-managed diet, pregnancy, eating-disorder context). No plan and no order follow."),
     "report_infeasible": ("Stop without ordering: name the binding constraint (budget, diet, time or stock) and explain. "
                           "To name it, apply the constraints in this order: diet and allergies, then cooking time, then "
                           "stock, then budget; the binding one is the first after which no valid plan is left."),
@@ -115,7 +120,8 @@ class StoreEnv:
     # ------------------------------------------------------------- read tools (L5)
     def t_get_profile(self):
         a = self.case.authorization
-        return dict(self.w.profile.model_dump(), autonomy=self.case.autonomy, today=str(self.case.today),
+        return dict(self.w.profile.model_dump(exclude_none=True),
+                    autonomy=self.case.autonomy, today=str(self.case.today),
                     authorization=a.model_dump(mode="json") if a else None)
 
     def scope_reasons(self, total: float) -> list[str]:
@@ -147,7 +153,7 @@ class StoreEnv:
                                  "animal": self.w.ingredients[i].animal} for i, g in r.grams.items()]}
 
     def t_find_items(self, ingredient: str):
-        return [s.model_dump() for s in self.w.store.values() if s.ingredient == ingredient]
+        return [s.model_dump(exclude_none=True) for s in self.w.store.values() if s.ingredient == ingredient]
 
     def t_view_cart(self):
         return {"cart": dict(self.out.cart), "total_sgd": cart_total(self.out.cart, self.w)}
@@ -230,6 +236,24 @@ class StoreEnv:
         self.out.approved_by = self._by
         self.out.order_total_sgd = cart_total(self.out.order, self.w)
         return {"ordered": True, "total_sgd": self.out.order_total_sgd}
+
+    def t_declare_constraints(self, exclude_ingredients=(), exclude_recipes=(), slot_max_minutes=(), pantry_add=None):
+        from .schema import NoteConstraints
+        nc = NoteConstraints(exclude_ingredients=list(exclude_ingredients), exclude_recipes=list(exclude_recipes),
+                             slot_max_minutes=list(slot_max_minutes), pantry_add=dict(pantry_add or {}))
+        unknown = ([i for i in nc.exclude_ingredients + list(nc.pantry_add) if i not in self.w.ingredients]
+                   + [r for r in nc.exclude_recipes if r not in self.w.recipes])
+        if unknown:
+            raise ValueError(f"unknown ids: {unknown}")
+        self.w.note = nc
+        self.out.declared = nc.model_dump()
+        notes: list[str] = []
+        self._revoke("the constraints changed", notes)
+        return {"declared": self.out.declared, **({"notices": notes} if notes else {})}
+
+    def t_decline_request(self, reason: str):
+        self.out.declined, self.out.decline_reason = True, reason
+        return {"declined": True}
 
     def t_report_infeasible(self, binding: str, explanation: str = ""):
         self.out.declared_infeasible, self.out.declared_binding = True, binding

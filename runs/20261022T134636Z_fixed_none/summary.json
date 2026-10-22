@@ -1,0 +1,57 @@
+{
+  "system": "fixed",
+  "model": "none",
+  "n_cases": 30,
+  "n_runs": 1,
+  "pass_mean": 0.7,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.7
+  ],
+  "failed_checks": {
+    "no_order": 6,
+    "binding": 2,
+    "not_declared": 1
+  },
+  "failures_by_tag": {
+    "approval_event:no_order": 6,
+    "infeasible:binding": 2,
+    "stock_event:no_order": 2,
+    "price_event:no_order": 2,
+    "preference_event:no_order": 2,
+    "time:binding": 1,
+    "stock:binding": 1,
+    "budget:no_order": 1,
+    "preference_event:not_declared": 1,
+    "approval_event:not_declared": 1,
+    "infeasible:not_declared": 1,
+    "budget:not_declared": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "c08",
+    "c13",
+    "c17",
+    "c18",
+    "c19",
+    "c20",
+    "c21",
+    "c29",
+    "c30"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.8
+  },
+  "errors": 0,
+  "steps_per_case": 30.87,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0,
+  "meta": {
+    "case_set": "v1",
+    "eval_sha256": "cb1a1bdc0034f63f6a8264dfb406e18bab346f0a4596737543f254c98c75ffd9",
+    "code": "fea8b04-dirty"
+  },
+  "utc": "20261022T134636Z"
+}

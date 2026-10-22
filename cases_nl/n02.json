@@ -1,0 +1,55 @@
+{
+  "case_id": "n02",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "Cucumber makes me feel sick. Leave it out of everything."
+  },
+  "store_overrides": {
+    "peanut_butter_340g": {
+      "price_sgd": 2.0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "cucumber"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r09"
+      ],
+      "meals": null,
+      "cart": {
+        "egg_10pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "exclude_ingredient"
+  ],
+  "boundary": false,
+  "derivation": "no cucumber rules out peanut noodles, salmon bowl and chickpea salad; omelette + tomato pasta. Peanut butter on promo makes peanut noodles the cheapest plan ignoring the note [witness total S$12.20]"
+}

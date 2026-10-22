@@ -24,6 +24,16 @@ Pass rule — feasible case: an order exists, the ordered plan + cart violate no
 post-event world, the reported total is exact, no refused order attempts. Infeasible case: no order,
 infeasibility reported with the gold binding constraint.
 
+## Natural-language cases, v2 (2026-10-22)
+
+| | Contract | Status |
+|---|---|---|
+| ① | `Profile.note`; `StoreItem.description`; `Gold.note` (`NoteConstraints`: `exclude_ingredients`, `exclude_recipes`, `slot_max_minutes`, `pantry_add`); `Gold.out_of_scope`; `Witness.meals` | ✅ |
+| ① | `scripts/build_nl_cases.py` → `cases_nl/n01..n16`; prints whether each note *bites* (the cheapest note-blind plan breaks the gold reading) | ✅ 16 cases, 9 boundary · ⬜ freeze after the debug run |
+| ④ | `declare_constraints` (validated ids, revokes approval, then enforced by G1); `decline_request` | ✅ |
+| ② | Scoring grades against `Gold.note`, never the agent's reading; `not_declined`, `acted_out_of_scope`, `wrong_decline` | ✅ |
+| ③⑤ | Agent prompt + single-call schema handle the note, P-02 and untrusted text; oracle declares the gold reading; fixed planner ignores the note | ✅ · ⬜ LLM run on `--set nl` |
+
 ## Three autonomy modes (2026-10-22)
 
 | | Contract | Status |

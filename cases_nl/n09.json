@@ -1,0 +1,62 @@
+{
+  "case_id": "n09",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "egg",
+      "gluten",
+      "peanut"
+    ],
+    "budget_sgd": 20,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "Cannot take spicy one lah, anything got chilli also don't want."
+  },
+  "store_overrides": {
+    "chickpeas_400g": {
+      "price_sgd": 3.5
+    },
+    "curry_paste_100g": {
+      "price_sgd": 0.9
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "curry_paste"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "singlish",
+    "exclude_ingredient"
+  ],
+  "boundary": true,
+  "derivation": "Singlish 'no spicy': curry paste out, so tofu curry goes; only chickpea salad is left: x6 = chickpeas 3 x S$3.50 + cucumber 2 + tomato 2 = S$18.70 <= S$20. With curry paste cut to S$0.90 the cheapest plan ignoring the note is tofu curry [witness total S$18.70]"
+}

@@ -1,0 +1,68 @@
+{
+  "case_id": "n07",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "I don't eat meat, but fish and seafood are fine."
+  },
+  "store_overrides": {
+    "egg_10pk": {
+      "stock": 0
+    },
+    "chickpeas_400g": {
+      "stock": 0
+    },
+    "peanut_butter_340g": {
+      "stock": 0
+    },
+    "pasta_500g": {
+      "stock": 0
+    },
+    "tofu_300g": {
+      "stock": 0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "chicken_breast",
+        "pork_mince",
+        "beef_slices"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r06"
+      ],
+      "meals": null,
+      "cart": {
+        "cucumber_2pk": 2,
+        "rice_1kg": 1,
+        "salmon_300g": 3,
+        "soy_sauce_300ml": 1
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "exclude_ingredient",
+    "stock"
+  ],
+  "boundary": true,
+  "derivation": "eggs, chickpeas, peanut butter, pasta and tofu are out of stock; without meat only the salmon bowl is left: x6 = salmon 3 packs + rice + cucumber 2 + soy = S$37.70 <= S$40 [witness total S$37.70]"
+}

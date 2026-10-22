@@ -1,0 +1,51 @@
+{
+  "case_id": "n01",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "I've gone off eggs completely, please don't give me anything with egg in it."
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "egg"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r09",
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "exclude_ingredient"
+  ],
+  "boundary": false,
+  "derivation": "no egg rules out fried rice, omelette and prawn fried rice; tomato pasta + chickpea salad [witness total S$12.80]"
+}

@@ -1,0 +1,44 @@
+{
+  "case_id": "n08",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "Anything works, I'm not fussy at all."
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": null,
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "control"
+  ],
+  "boundary": false,
+  "derivation": "the note adds no constraint; the agent should not invent one [witness total S$14.00]"
+}

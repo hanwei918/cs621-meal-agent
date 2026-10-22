@@ -40,6 +40,7 @@ class StoreItem(_M):
     pack_g: int
     price_sgd: float
     stock: int                             # packs available
+    description: Optional[str] = None      # store text shown to the agent — untrusted data (policy A-02)
 
 
 class Profile(_M):
@@ -51,6 +52,7 @@ class Profile(_M):
     servings: int = 1
     max_cook_minutes: int
     pantry: dict[str, int] = {}            # ingredient id → grams already at home
+    note: Optional[str] = None             # the user's own words (case set nl); the agent must interpret it
 
 
 AUTONOMY = ("plan_only", "confirm", "delegated")
@@ -76,10 +78,26 @@ class Event(_M):
     add_allergy: Optional[str] = None
 
 
+class SlotLimit(_M):
+    day: int
+    slot: int
+    minutes: int
+
+
+class NoteConstraints(_M):
+    """What a user's free-text note means, as code-checkable constraints. The agent declares its reading
+    (declare_constraints, enforced by the gate); the case author writes the gold reading (Gold.note)."""
+    exclude_ingredients: list[str] = []
+    exclude_recipes: list[str] = []
+    slot_max_minutes: list[SlotLimit] = []
+    pantry_add: dict[str, int] = {}        # food the user says is already at home (grams)
+
+
 class Witness(_M):
     """A plan the case author chose by hand that proves feasibility; its cart is the cheapest cover
     of that plan's needs. Tests check it passes every hard constraint in the post-event world."""
     recipes: list[str]                     # cycled over the day × meal slots in order
+    meals: Optional[list[str]] = None      # or: one recipe per slot, in day/slot order (for slot limits)
     cart: dict[str, int]
 
 
@@ -88,6 +106,8 @@ class Gold(_M):
     binding: Optional[Literal["budget", "diet", "time", "stock"]] = None   # for infeasible cases
     witness: Optional[Witness] = None      # for feasible cases
     within_scope: Optional[bool] = None    # mode ③ only: can a valid plan be ordered WITHOUT asking the user?
+    note: Optional[NoteConstraints] = None # case set nl: the author's reading of Profile.note
+    out_of_scope: bool = False             # policy P-02: the request must be declined, not planned
 
 
 class Case(_M):
@@ -144,3 +164,6 @@ class Outcome(_M):
     submitted: bool = False                # mode ①: a plan + list was submitted and passed the checks
     approved_by: Optional[Literal["user", "standing"]] = None   # who approved the cart that was ordered
     user_asks: int = 0                     # times the user had to be asked — the burden metric
+    declared: Optional[dict] = None        # the agent's reading of the note (declare_constraints)
+    declined: bool = False                 # decline_request was called (policy P-02)
+    decline_reason: Optional[str] = None

@@ -15,6 +15,13 @@ from .solver import diagnose, scope_cap, solve, solve_within
 
 class OracleAgent:
     def run(self, env: StoreEnv) -> AgentUsage:
+        if env.case.gold.out_of_scope:
+            env.call("decline_request", reason="out of scope (oracle)")
+            return AgentUsage()
+        if env.case.gold.note is not None:                 # the author's reading of the note
+            n = env.case.gold.note
+            env.call("declare_constraints", exclude_ingredients=n.exclude_ingredients, exclude_recipes=n.exclude_recipes,
+                     slot_max_minutes=[s.model_dump() for s in n.slot_max_minutes], pantry_add=n.pantry_add)
         for _ in range(50):                                # let every step event fire before deciding
             if not env.pending:
                 break

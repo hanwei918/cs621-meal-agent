@@ -1,0 +1,73 @@
+{
+  "case_id": "n10",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 14,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 40,
+    "pantry": {},
+    "note": "My lunch break is short, so lunches need to take 15 minutes or less. Dinners can take up to 40."
+  },
+  "store_overrides": {
+    "noodles_400g": {
+      "stock": 0
+    },
+    "egg_10pk": {
+      "price_sgd": 9.0
+    }
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [],
+      "exclude_recipes": [],
+      "slot_max_minutes": [
+        {
+          "day": 1,
+          "slot": 1,
+          "minutes": 15
+        },
+        {
+          "day": 2,
+          "slot": 1,
+          "minutes": 15
+        },
+        {
+          "day": 3,
+          "slot": 1,
+          "minutes": 15
+        }
+      ],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r10",
+        "r09"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "note",
+    "slot_limit",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "lunches (slot 1) <= 15 min: chickpea salad at lunch, tomato pasta (20 min) at dinner = S$12.80 <= S$14. Noodles gone and eggs at S$9 make pasta x6 (S$12.60) the cheapest plan ignoring the note, with 20-minute lunches [witness total S$12.80]"
+}
