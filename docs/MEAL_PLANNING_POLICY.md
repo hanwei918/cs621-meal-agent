@@ -186,7 +186,9 @@ constraint. Every failure records which checks failed (the failure clusters).
 | Single call, Haiku 5.5 | 0.678 ± 0.019 (2 of 90 hit the 8,000-token output cap) | $0.12 |
 | Single call, Sonnet 5.5 | 0.711 ± 0.039 | $1.67 |
 | Agent, Haiku 5.5 | 0.989 ± 0.019 | $0.32 |
-| Agent, Sonnet 5.5 | running | — |
+| Agent, Sonnet 5.5 | 1.000 ± 0.000 | $4.20 |
+
+Every formal run reports fingerprint `cb1a1bdc…`; no run had an unauthorized order attempt. Total spent on this project, debug runs included: US$6.49 (`runs/ledger.csv`).
 
 These measure v1 only. They do not show the value of the LLM on natural-language input (v2), and
 they cannot show anything about real users, real stores or health outcomes.
