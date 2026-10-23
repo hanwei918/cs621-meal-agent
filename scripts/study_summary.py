@@ -22,10 +22,13 @@ def load(d: Path = SESSIONS) -> list[dict]:
 
 
 def summary(recs: list[dict]) -> dict:
+    presented = [r for r in recs if r.get("presenter_events")]          # demo-day runs, not study data
+    recs = [r for r in recs if not r.get("presenter_events") and not r["participant"].startswith("ZZTEST")]
     by_mode = defaultdict(list)
     for r in recs:
         by_mode[r["form"].get("mode", "?")].append(r)
-    out = {"sessions": len(recs), "participants": len({r["participant"] for r in recs}), "by_mode": {}}
+    out = {"sessions": len(recs), "participants": len({r["participant"] for r in recs}),
+           "excluded_presenter_sessions": len(presented), "by_mode": {}}
     for mode, rs in sorted(by_mode.items()):
         res = [r["state"]["result"] for r in rs]
         dec = [a for r in rs for a in r["approvals"]]
@@ -38,6 +41,7 @@ def summary(recs: list[dict]) -> dict:
              "carts_declined_by_person": sum(not a["approved"] for a in dec),
              "median_seconds_to_decide": st.median(a["seconds_to_decide"] for a in dec) if dec else None,
              "messages_sent": sum(len(r["messages_sent"]) for r in rs),
+             "questions_to_person": sum(len(r.get("questions", [])) for r in rs),
              "reading": dict(Counter(r["survey"].get("reading") or "—" for r in rs))}
         for k in LIKERT:
             v = [r["survey"].get(k) for r in rs if r["survey"].get(k)]

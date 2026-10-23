@@ -102,11 +102,22 @@ def build_case(form: dict) -> Case:
         auth = {"max_order_sgd": float(a.get("max_order_sgd", 30)), "max_period_sgd": float(a.get("max_period_sgd", 80)),
                 "already_spent_sgd": float(a.get("already_spent_sgd", 0)), "valid_until": a.get("valid_until", "2026-12-31")}
     p = form["profile"]
-    profile = {"diet": p.get("diet", []), "allergies": p.get("allergies", []), "budget_sgd": float(p["budget_sgd"]),
+    withheld = {}                                    # P-01: a blank field is missing; the agent must ask the person
+    blank = lambda v: v is None or v == ""
+    if blank(p.get("budget_sgd")):
+        withheld["budget_sgd"] = None
+    if blank(p.get("max_cook_minutes")):
+        withheld["max_cook_minutes"] = None
+    if p.get("allergies_unknown"):
+        withheld["allergies"] = None
+    profile = {"diet": p.get("diet", []), "allergies": [] if "allergies" in withheld else p.get("allergies", []),
+               "budget_sgd": 0.0 if "budget_sgd" in withheld else float(p["budget_sgd"]),
                "days": int(p.get("days", 3)), "meals_per_day": int(p.get("meals_per_day", 2)),
-               "servings": int(p.get("servings", 1)), "max_cook_minutes": int(p["max_cook_minutes"]),
+               "servings": int(p.get("servings", 1)),
+               "max_cook_minutes": 0 if "max_cook_minutes" in withheld else int(p["max_cook_minutes"]),
                "pantry": {}, "note": (form.get("note") or "").strip()[:600] or None}
     return Case.model_validate({"case_id": "live", "profile": profile, "autonomy": mode, "authorization": auth,
+                                "withheld": withheld,
                                 "today": str(date(2026, 10, 25)), "gold": {"feasible": True}, "tags": ["live"],
                                 "derivation": "live demo session: there is no gold, a person judges the result"})
 
@@ -123,9 +134,14 @@ class Session:
         self.pending_approval: dict | None = None
         self.approvals: list[dict] = []          # every ask: shown_at, seconds_to_decide, approved, comment
         self.messages_sent: list[dict] = []
+        self.pending_question: dict | None = None
+        self.questions: list[dict] = []          # every request_input that reached the person (E-04)
+        self.presenter_events: list[dict] = []   # injected by a presenter: such sessions are not study data
+        self._got_input = threading.Event()
+        self._input: dict = {}
         self._answer = threading.Event()
         self._reply: tuple[bool, str] = (False, "")
-        self.env = StoreEnv(self.case, approver=self._approve)
+        self.env = StoreEnv(self.case, approver=self._approve, answerer=self._ask)
         self._wrap_env()
         self.agent, self.model = self._make_agent(form.get("system", "agent"), form.get("model", "claude-haiku-5-5"))
         self.saved_to: str | None = None
@@ -165,6 +181,48 @@ class Session:
         self.pending_approval, self.status = None, "running"
         return ok, comment
 
+    def _ask(self, fields: list, question: str) -> dict:
+        self._got_input.clear()
+        self.pending_question = {"fields": list(fields), "question": question, "shown_at": time.time()}
+        self.status = "awaiting_input"
+        self._got_input.wait(APPROVAL_TIMEOUT_S)
+        answers = dict(self._input)
+        self.questions.append({"fields": list(fields), "question": question, "answers": answers,
+                               "seconds_to_answer": round(time.time() - self.pending_question["shown_at"], 1)})
+        self.pending_question, self.status = None, "running"
+        return answers
+
+    def give_input(self, answers: dict):
+        if self.pending_question is not None:
+            self._input = {k: v for k, v in answers.items() if k in self.pending_question["fields"]}
+            self._got_input.set()
+
+    def inject(self, what: str) -> str:
+        """Presenter controls. Each picks a target from the CURRENT cart so the change matters."""
+        w, cart = self.env.w, self.env.out.cart
+        biggest = max(cart, key=lambda s: cart[s] * w.store[s].price_sgd, default=None)
+        if what == "sell_out":
+            if biggest is None:
+                return "the cart is empty: nothing to sell out yet"
+            self.env.inject("out_of_stock", sku=biggest)
+            msg = f"{w.ingredients[w.store[biggest].ingredient].name} ({biggest}) sells out"
+        elif what == "price_up":
+            if biggest is None:
+                return "the cart is empty: nothing to reprice yet"
+            new = round(w.store[biggest].price_sgd * 1.5, 2)
+            self.env.inject("price_change", sku=biggest, price_sgd=new)
+            msg = f"{biggest} now costs S${new:.2f}"
+        elif what == "plan_only":
+            self.env.inject("set_mode", mode="plan_only")
+            msg = "the user switches to plan only"
+        elif what == "timeout":
+            self.env.inject("order_timeout", outcome="not_placed")
+            msg = "the next order will time out (not created)"
+        else:
+            return "unknown control"
+        self.presenter_events.append({"t": round(time.time() - self.started, 1), "what": what, "detail": msg})
+        return msg
+
     def answer(self, ok: bool, comment: str):
         if self.pending_approval is not None:
             self._reply = (ok, comment)
@@ -188,7 +246,7 @@ class Session:
 
     @property
     def live(self) -> bool:
-        return self.status in ("running", "awaiting_approval")
+        return self.status in ("running", "awaiting_approval", "awaiting_input")
 
     # ------------------------------------------------------------ what the page shows
     def agent_text(self) -> list[str]:
@@ -231,6 +289,11 @@ class Session:
                        "user_asks": o.user_asks, "unauthorized_attempts": o.unauthorized_attempts,
                        "stopped_for_cost": getattr(self.agent, "stopped_for_cost", False),
                        "violations_against_profile_and_declared": [f"{k}: {d}" for k, d in checks]},
+            "pending_question": None if self.pending_question is None else {
+                k: self.pending_question[k] for k in ("fields", "question")},
+            "presenter_events": self.presenter_events,
+            "burden": {"confirmations": o.user_asks, "questions": o.clarifications, "fields_asked": o.clarified_fields,
+                       "avoidable_fields": o.avoidable_fields},
             "agent_text": self.agent_text(), "cost_usd": self.cost(), "saved_to": self.saved_to,
         }
 
@@ -240,7 +303,8 @@ class Session:
         pid = "".join(c for c in str(self.form.get("participant", "P00")) if c.isalnum())[:8] or "P00"
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         rec = {"participant": pid, "utc": ts, "form": self.form, "state": self.state(), "approvals": self.approvals,
-               "messages_sent": self.messages_sent, "survey": survey, "code": _code_rev()}
+               "messages_sent": self.messages_sent, "questions": self.questions,
+               "presenter_events": self.presenter_events, "survey": survey, "code": _code_rev()}
         self.saved_to = STORE.save(f"{pid}_{self.case.autonomy}_{ts}_{self.sid[:4]}", rec)
         return self.saved_to
 
@@ -345,6 +409,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"error": "no such session"}, 409)
             if self.path == "/api/approve":
                 s.answer(bool(b.get("approve")), str(b.get("comment", ""))[:500])
+            elif self.path == "/api/answer":
+                s.give_input(b.get("answers") or {})
+            elif self.path == "/api/inject":
+                if not s.live:
+                    return self._json({"error": "the run has finished"}, 409)
+                return self._json({"ok": True, "detail": s.inject(str(b.get("what", "")))})
             elif self.path == "/api/message":
                 text = str(b.get("text", "")).strip()[:500]
                 if text and s.live:

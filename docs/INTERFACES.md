@@ -34,6 +34,13 @@ infeasibility reported with the gold binding constraint.
 | ② | Scoring grades against `Gold.note`, never the agent's reading; `not_declined`, `acted_out_of_scope`, `wrong_decline` | ✅ |
 | ③⑤ | Agent prompt + single-call schema handle the note, P-02 and untrusted text; oracle declares the gold reading; fixed planner ignores the note | ✅ · ⬜ LLM run on `--set nl` |
 
+## Demo completeness (2026-10-24)
+
+| | Contract | Status |
+|---|---|---|
+| ④ | `StoreEnv(..., answerer=None)`: in the demo `request_input` reaches the person; answers are validated (`_valid_answer`), an invalid one keeps the field missing. `env.inject(kind, **kw)` fires an event on the next call or arms an order timeout | ✅ |
+| — | Demo: blank budget / time or "Not sure yet" allergies → withheld; question sheet; `?presenter=1` controls (sell out, price up, plan only, timeout); presenter sessions excluded from the study summary | ✅ |
+
 ## Operational rules from the group proposal (2026-10-24)
 
 | | Contract | Status |

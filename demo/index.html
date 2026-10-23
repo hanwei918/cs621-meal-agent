@@ -46,7 +46,7 @@ button { font: inherit; color: inherit; }
 .status { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; padding: 5px 12px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); white-space: nowrap; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
 .status.running .dot { background: var(--blue-ink); animation: pulse 1.2s infinite; }
-.status.awaiting_approval .dot { background: var(--amber); animation: pulse 1s infinite; }
+.status.awaiting_approval .dot, .status.awaiting_input .dot { background: var(--amber); animation: pulse 1s infinite; }
 .status.done .dot { background: var(--green); }
 .status.error .dot { background: var(--tomato); }
 @keyframes pulse { 50% { opacity: .3; } }
@@ -166,6 +166,16 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .sheet .mini b { display: block; font-size: 11px; color: var(--muted); font-weight: 600; }
 .sheet .actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 14px; }
 
+/* question sheet + presenter */
+.qfield { margin-top: 14px; }
+.presenter { border: 1.5px dashed var(--amber); }
+.presenter .eyebrow { color: var(--amber); }
+.pbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pbtns button { border: 1.5px solid var(--line); background: var(--bg); border-radius: 10px; padding: 9px 8px; cursor: pointer; font-size: 13.5px; text-align: left; }
+.pbtns button:hover { border-color: var(--amber); }
+.plog { margin-top: 8px; font-size: 12.5px; color: var(--amber); }
+.toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 14px; z-index: 20; }
+
 /* survey */
 .likert { margin: 14px 0; }
 .likert .q { font-size: 14.5px; margin-bottom: 7px; }
@@ -229,8 +239,8 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
       </div>
 
       <div class="field grid2">
-        <div><label class="lbl" for="budget">Budget for 3 days (S$)</label><input id="budget" type="number" value="30" min="1"></div>
-        <div><label class="lbl" for="minutes">Max cooking time per meal (min)</label><input id="minutes" type="number" value="30" min="5" step="5"></div>
+        <div><label class="lbl" for="budget">Budget for 3 days (S$)</label><input id="budget" type="number" value="30" min="1" placeholder="blank: it will ask you"></div>
+        <div><label class="lbl" for="minutes">Max cooking time per meal (min)</label><input id="minutes" type="number" value="30" min="5" step="5" placeholder="blank: it will ask you"></div>
       </div>
 
       <div class="field">
@@ -250,6 +260,7 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
           <button type="button" class="tog allergy" data-v="peanut" aria-pressed="false">Peanut</button>
           <button type="button" class="tog allergy" data-v="shellfish" aria-pressed="false">Shellfish</button>
           <button type="button" class="tog allergy" data-v="dairy" aria-pressed="false">Dairy</button>
+          <button type="button" class="tog" id="allergyUnknown" aria-pressed="false">🤷 Not sure yet: ask me</button>
         </div>
       </div>
 
@@ -325,6 +336,16 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
       </div>
 
       <div>
+        <div class="card presenter hidden" id="presenterCard">
+          <p class="eyebrow">Presenter controls</p>
+          <div class="pbtns">
+            <button data-w="sell_out">🚫 Sell out an item in the cart</button>
+            <button data-w="price_up">📈 Raise the biggest price 50%</button>
+            <button data-w="plan_only">📝 Switch to plan only</button>
+            <button data-w="timeout">⏳ Next order times out</button>
+          </div>
+          <div class="plog" id="plog"></div>
+        </div>
         <div class="card hidden" id="msgCard">
           <p class="eyebrow">Tell it something while it works</p>
           <div class="msgrow"><input id="msg" type="text" placeholder="e.g. Actually, no eggs either."><button class="btn primary" id="send">Send</button></div>
@@ -359,6 +380,14 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
     <button class="btn ghost" id="declineBtn">Decline</button>
     <button class="btn primary" id="approveBtn">Approve S$<span id="approveAmt"></span></button>
   </div>
+</div>
+
+<div class="sheet hidden" id="qsheet" role="dialog" aria-modal="true" aria-labelledby="qTitle">
+  <div class="grab"></div>
+  <h2 id="qTitle">It needs to know</h2>
+  <p class="empty" id="qText" style="margin:6px 0 0"></p>
+  <div id="qFields"></div>
+  <div class="field"><button class="btn primary big" id="qSend">Answer</button></div>
 </div>
 
 <script>
@@ -397,6 +426,8 @@ function toggles(id, single) {
 }
 const picked = id => [...$(id).querySelectorAll('.tog[aria-pressed="true"]')].map(b => b.dataset.v);
 ["diet", "allergies"].forEach(id => toggles(id, false));
+const PRESENTER = new URLSearchParams(location.search).has("presenter");
+const num = id => $(id).value === "" ? null : +$(id).value;
 ["reading", "prefMode"].forEach(id => toggles(id, true));
 const mode = () => document.querySelector("input[name=mode]:checked").value;
 document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => show("authBox", mode() === "delegated"));
@@ -413,20 +444,23 @@ function stage(n) { [1, 2, 3, 4].forEach(i => $("s" + i).classList.toggle("on", 
 $("start").onclick = async () => {
   const [system, model] = $("system").value.split("|");
   form = {participant: $("participant").value, mode: mode(), system, model, note: $("note").value,
-    profile: {budget_sgd: +$("budget").value, max_cook_minutes: +$("minutes").value, servings: +$("servings").value,
-              days: 3, meals_per_day: 2, diet: picked("diet"), allergies: picked("allergies")},
+    profile: {budget_sgd: num("budget"), max_cook_minutes: num("minutes"), servings: +$("servings").value || 1,
+              days: 3, meals_per_day: 2, diet: picked("diet"), allergies: picked("allergies").filter(Boolean),
+              allergies_unknown: $("allergyUnknown").getAttribute("aria-pressed") === "true"},
     authorization: {max_order_sgd: +$("maxOrder").value, max_period_sgd: +$("maxPeriod").value,
                     already_spent_sgd: +$("spent").value, valid_until: $("until").value}};
   if (!Object.keys(cat.recipes).length && !(await loadCatalog())) { alert("That passcode doesn't work."); return; }
   const r = await post("/api/start", form);
   if (r.error) { alert(r.error); return; }
-  sid = r.sid; survey = {};
+  sid = r.sid; survey = {}; $("plog").innerHTML = ""; show("presenterCard", PRESENTER);
   document.querySelectorAll('.scale button, #reading .tog, #prefMode .tog').forEach(b => b.setAttribute("aria-pressed", "false"));
   ["missed", "wouldDelegate", "minutesNow", "msg"].forEach(id => $(id).value = "");
   $("sent").innerHTML = ""; $("feed").innerHTML = "";
   show("setupView", false); show("liveView", true); show("resultCard", false); show("surveyCard", false); show("thanksCard", false);
-  $("summary").innerHTML = [MODE[form.mode], money(form.profile.budget_sgd), `≤ ${form.profile.max_cook_minutes} min`,
-    ...form.profile.diet, ...form.profile.allergies.map(a => "no " + a)].map((t, i) => `<span class="pill ${i ? "" : "k"}">${esc(t)}</span>`).join("")
+  const pf = form.profile;
+  $("summary").innerHTML = [MODE[form.mode], pf.budget_sgd == null ? "budget: it will ask" : money(pf.budget_sgd),
+    pf.max_cook_minutes == null ? "time: it will ask" : `≤ ${pf.max_cook_minutes} min`,
+    ...pf.diet, ...(pf.allergies_unknown ? ["allergies: it will ask"] : pf.allergies.map(a => "no " + a))].map((t, i) => `<span class="pill ${i ? "" : "k"}">${esc(t)}</span>`).join("")
     + `<button class="linkbtn" id="edit">Change setup</button>`;
   $("edit").onclick = backToSetup;
   window.scrollTo({top: 0, behavior: "smooth"});
@@ -434,6 +468,40 @@ $("start").onclick = async () => {
 };
 function backToSetup() { clearInterval(timer); sid = null; show("liveView", false); show("setupView", true); hideSheet(); stage(1); setStatus("idle"); }
 $("again").onclick = backToSetup;
+
+document.querySelectorAll("#presenterCard button").forEach(b => b.onclick = async () => {
+  const r = await post("/api/inject", {sid, what: b.dataset.w});
+  const msg = r.detail || r.error || "?";
+  $("plog").insertAdjacentHTML("afterbegin", `<div>▸ ${esc(msg)}</div>`);
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200); poll();
+});
+const FIELD_UI = {
+  budget_sgd: () => `<div class="qfield"><label class="lbl" for="q_budget_sgd">Budget for 3 days (S$)</label><input id="q_budget_sgd" type="number" min="1"></div>`,
+  max_cook_minutes: () => `<div class="qfield"><label class="lbl" for="q_max_cook_minutes">Max cooking time per meal (min)</label><input id="q_max_cook_minutes" type="number" min="5" step="5"></div>`,
+  servings: () => `<div class="qfield"><label class="lbl" for="q_servings">Servings per meal</label><input id="q_servings" type="number" min="1" max="4"></div>`,
+  allergies: () => `<div class="qfield"><span class="lbl">Allergies (pick none if you have none)</span><div class="chips" id="q_allergies">${
+    ["egg", "gluten", "soy", "peanut", "shellfish", "dairy"].map(a => `<button type="button" class="tog allergy" data-v="${a}" aria-pressed="false">${a}</button>`).join("")}</div></div>`,
+  diet: () => `<div class="qfield"><span class="lbl">I don't eat</span><div class="chips" id="q_diet">${
+    [["vegetarian", "meat or fish"], ["no_pork", "pork"], ["no_beef", "beef"]].map(([v, l]) => `<button type="button" class="tog" data-v="${v}" aria-pressed="false">${l}</button>`).join("")}</div></div>`,
+};
+let qOpen = false;
+function openQuestion(q) {
+  $("qText").textContent = q.question || "";
+  $("qFields").innerHTML = q.fields.map(f => (FIELD_UI[f] || (() => ""))()).join("");
+  ["q_allergies", "q_diet"].forEach(id => $(id) && toggles(id, false));
+  show("qsheet", true); show("scrim", true); qOpen = true;
+}
+$("qSend").onclick = async () => {
+  const a = {};
+  if ($("q_budget_sgd")) a.budget_sgd = num("q_budget_sgd");
+  if ($("q_max_cook_minutes")) a.max_cook_minutes = num("q_max_cook_minutes");
+  if ($("q_servings")) a.servings = num("q_servings");
+  if ($("q_allergies")) a.allergies = picked("q_allergies");
+  if ($("q_diet")) a.diet = picked("q_diet");
+  show("qsheet", false); show("scrim", false); qOpen = false;
+  await post("/api/answer", {sid, answers: a}); poll();
+};
 
 $("approveBtn").onclick = () => { hideSheet(); post("/api/approve", {sid, approve: true}).then(poll); };
 $("declineBtn").onclick = () => { hideSheet(); post("/api/approve", {sid, approve: false, comment: $("declineComment").value}).then(() => { $("declineComment").value = ""; poll(); }); };
@@ -477,7 +545,7 @@ function cartHTML(lines, total) {
 }
 const ICON = {get_profile: "👤", search_recipes: "📖", get_recipe: "📖", find_items: "🛒", set_plan: "🗓️", add_to_cart: "➕",
   remove_from_cart: "➖", view_cart: "🧾", declare_constraints: "✍️", decline_request: "🙅", report_infeasible: "⚠️",
-  submit_plan: "📝", request_approval: "✋", place_order: "✅"};
+  submit_plan: "📝", request_approval: "✋", place_order: "✅", request_input: "❓", get_order_status: "🔎"};
 function evText(s) {
   const a = s.args || {}, r = s.result || {};
   const T = {
@@ -489,16 +557,21 @@ function evText(s) {
     submit_plan: () => r.submitted ? "Submitted the plan" : "Plan stopped by the checks",
     request_approval: () => r.approved ? (r.by === "standing" ? "Approved within your limits" : "You approved") :
       r.refused_by === "user" ? "You declined" + (r.comment ? ": " + r.comment : "") : "Stopped by the checks — fixing",
-    place_order: () => r.ordered ? "Order placed · " + money(r.total_sgd) : "Order refused (no valid approval)",
+    place_order: () => r.ordered === "unknown" ? "The store didn't confirm the order" : r.ordered === true
+      ? (r.note ? "Same order confirmed, no duplicate" : "Order placed · " + money(r.total_sgd)) : "Order refused: " + (r.error || ""),
+    request_input: () => "Asked you: " + (a.question || (a.fields || []).join(", ")) + (r.unanswered ? " (no valid answer)" : ""),
+    get_order_status: () => "Checked the order: " + (r.status === "placed" ? "placed · " + money(r.total_sgd) : "not created"),
   };
   const bad = r.error || (r.violations && !r.approved && !r.submitted) || r.refused_by;
   const notes = [...(r.violations && !r.approved ? [r.violations.join("; ")] : []), ...(r.error ? [r.error] : []), ...(r.notices || [])];
-  return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${ICON[s.tool] || "•"}</span><span class="x">${esc((T[s.tool] || (() => s.tool))())}
+  const icon = s.tool === "place_order" && r.ordered !== true ? "⏳" : (ICON[s.tool] || "•");
+  return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${icon}</span><span class="x">${esc((T[s.tool] || (() => s.tool))())}
     ${notes.map(n => `<span class="note">${esc(n)}</span>`).join("")}</span><span class="t">${Math.round(s.t)}s</span></div>`;
 }
 function setStatus(st) {
   $("status").className = "status " + st;
-  $("statusText").textContent = {idle: "ready", running: "working", awaiting_approval: "needs you", done: "done", error: "error"}[st] || st;
+  $("statusText").textContent = {idle: "ready", running: "working", awaiting_approval: "needs you", awaiting_input: "needs you",
+    done: "done", error: "error"}[st] || st;
 }
 function hideSheet() { show("sheet", false); show("scrim", false); }
 
@@ -507,15 +580,17 @@ async function poll() {
   const s = await get("/api/state?sid=" + encodeURIComponent(sid));
   if (s.status === "idle") return;
   setStatus(s.status);
-  const live = s.status === "running" || s.status === "awaiting_approval";
-  stage(s.status === "awaiting_approval" || !live ? 3 : 2);
+  const live = ["running", "awaiting_approval", "awaiting_input"].includes(s.status);
+  stage(s.status.startsWith("awaiting") || !live ? 3 : 2);
+  if (s.pending_question && !qOpen) openQuestion(s.pending_question);
+  else if (!s.pending_question && qOpen) { show("qsheet", false); show("scrim", false); qOpen = false; }
   $("understood").innerHTML = understood(s.declared, live);
   $("plan").innerHTML = planHTML(s.plan);
   $("cart").innerHTML = cartHTML(s.cart, s.cart.length ? s.total_sgd : null);
   const feed = $("feed"), atEnd = feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 10;
   feed.innerHTML = s.steps.map(evText).join("") || `<span class="empty">Starting…</span>`;
   if (atEnd) feed.scrollTop = feed.scrollHeight;
-  show("thinking", s.status === "running"); show("msgCard", live);
+  show("thinking", s.status === "running"); show("msgCard", live); show("presenterCard", PRESENTER && live);
 
   const pa = s.pending_approval;
   if (pa && $("sheet").classList.contains("hidden")) {
@@ -526,7 +601,7 @@ async function poll() {
     const why = s.mode === "delegated" && pa.asked_because?.length ? "It's asking because " + pa.asked_because.join("; ") : "";
     $("why").textContent = why; show("why", !!why);
     show("sheet", true); show("scrim", true);
-  } else if (!pa) hideSheet();
+  } else if (!pa && !qOpen) hideSheet();
 
   if (!live) {
     clearInterval(timer);
@@ -538,7 +613,9 @@ async function poll() {
     else if (r.infeasible) { icon = "🤔"; title = "No plan fits everything"; sub = `The ${r.binding} limit can't be met. Try a little more budget or time.`; ok = false; }
     else if (r.stopped_for_cost) { icon = "⏸️"; title = "Stopped at its spending limit"; ok = false; }
     else { icon = "⏹️"; title = "Stopped without an order"; ok = false; }
-    sub += ` · asked you ${r.user_asks}× · ${Math.round(s.elapsed_s)} s`;
+    const b = s.burden || {};
+    sub += ` · ${r.user_asks} approval${r.user_asks === 1 ? "" : "s"}` + (b.questions ? ` · ${b.questions} question${b.questions === 1 ? "" : "s"}` : "")
+         + ` · ${Math.round(s.elapsed_s)} s`;
     const v = r.violations_against_profile_and_declared || [];
     const said = s.agent_text.length ? `<div class="say">${esc(s.agent_text[s.agent_text.length - 1])}</div>` : "";
     $("resultCard").innerHTML = `<div class="result ${ok ? "" : "bad"}"><span class="big">${icon}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div></div>

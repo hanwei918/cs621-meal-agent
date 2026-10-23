@@ -52,12 +52,33 @@ TOOL_SPECS = {
 }
 
 
+def _valid_answer(field: str, v):
+    """A person's answer to request_input, or ValueError: no guessing on their behalf either."""
+    if field == "budget_sgd":
+        v = float(v)
+        if not 0 < v < 10_000:
+            raise ValueError
+    elif field in ("max_cook_minutes", "servings"):
+        v = int(v)
+        if not 0 < v < 1_000:
+            raise ValueError
+    elif field in ("allergies", "diet"):
+        if not isinstance(v, list) or not all(isinstance(x, str) for x in v):
+            raise ValueError
+        if field == "diet" and set(v) - {"vegetarian", "no_pork", "no_beef"}:
+            raise ValueError
+    return v
+
+
 class StoreEnv:
-    def __init__(self, case: Case, approver=None):
+    def __init__(self, case: Case, approver=None, answerer=None):
         """approver: None in evaluation (the scripted user approves every cart that passes G1). In the demo, a
-        callable(request: dict) -> (approved: bool, comment: str) that waits for a real person."""
+        callable(request: dict) -> (approved: bool, comment: str) that waits for a real person.
+        answerer: None in evaluation (the scripted user gives the true profile value). In the demo, a
+        callable(fields: list, question: str) -> dict that waits for a real person; answers are validated."""
         self.case = case
         self.approver = approver
+        self.answerer = answerer
         self.w = World.for_case(case)
         self.out = Outcome()
         self.pending = sorted((e for e in case.events if e.on == "step"), key=lambda e: e.after_step)
@@ -109,6 +130,14 @@ class StoreEnv:
             notes.append(f"User update: from now on {' and '.join(parts)}.")
         self.w.log.append(notes[-1])
         self._revoke("the situation changed", notes)
+
+    def inject(self, kind: str, **kw):
+        """Demo presenter: fire an event on the agent's next tool call, or make the next order time out."""
+        if kind == "order_timeout":
+            self._timeout_pending = kw.get("outcome", "not_placed")
+            return
+        from .schema import Event
+        self.pending.insert(0, Event(kind=kind, after_step=0, **kw))
 
     def say(self, text: str):
         """Demo: a real user's message, delivered on the agent's next tool call like a step event."""
@@ -309,20 +338,28 @@ class StoreEnv:
         return {"intent_id": intent_id, "status": "placed", "total_sgd": rec["total_sgd"], "cart": rec["cart"]}
 
     def t_request_input(self, fields: list, question: str = ""):
+        bad = [f for f in fields if f not in WITHHOLDABLE]
+        if bad:
+            raise ValueError(f"unknown profile field {bad[0]!r}; ask about one of {list(WITHHOLDABLE)}")
         self.out.clarifications += 1
-        answers = {}
+        self.out.clarified_fields += len(fields)
+        self.out.avoidable_fields += sum(f not in self.withheld for f in fields)    # E-04: already known and valid
+        ask = [f for f in fields if f in self.withheld]
+        given = self.answerer(ask, question) if (self.answerer and ask) else {}
+        answers, unanswered = {}, []
         for f in fields:
-            if f not in WITHHOLDABLE:
-                raise ValueError(f"unknown profile field {f!r}; ask about one of {list(WITHHOLDABLE)}")
-            self.out.clarified_fields += 1
-            if f in self.withheld:
-                del self.withheld[f]
-            else:
-                self.out.avoidable_fields += 1                                      # E-04: already known and valid
+            if f in self.withheld and self.answerer is not None:                    # demo: the person's answer
+                try:
+                    setattr(self.w.profile, f, _valid_answer(f, given.get(f)))
+                except (TypeError, ValueError):
+                    unanswered.append(f)
+                    continue
+            self.withheld.pop(f, None)
             answers[f] = getattr(self.w.profile, f)
         notes: list[str] = []
         self._revoke("the profile changed", notes)
-        return {"answers": answers, **({"notices": notes} if notes else {})}
+        return {"answers": answers, **({"unanswered": unanswered} if unanswered else {}),
+                **({"notices": notes} if notes else {})}
 
     def t_declare_constraints(self, exclude_ingredients=(), exclude_recipes=(), slot_max_minutes=(), pantry_add=None):
         from .schema import NoteConstraints

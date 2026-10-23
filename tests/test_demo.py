@@ -150,3 +150,47 @@ def test_study_summary_counts_only_what_was_recorded(live):
     assert s["sessions"] == 1 and m["ordered"] == 0 and m["carts_declined_by_person"] == 1
     assert m["understood"] == "2 (n=1)" and m["knew_cart"] == "—"
     assert s["preferred_mode"] == {"confirm": 1} and s["self_reported_minutes_per_week_now"] == {"median": 90, "n": 1}
+
+
+# ---- a real person answers request_input; presenter controls
+def test_person_answer_is_validated_and_a_bad_answer_keeps_the_field_missing():
+    from meal.env import StoreEnv
+    from eval.harness import load_cases
+    o01 = {c.case_id: c for c in load_cases(case_set="ops")}["o01"]
+    env = StoreEnv(o01, answerer=lambda f, q: {"budget_sgd": -5})
+    r = env.call("request_input", fields=["budget_sgd"], question="budget?")
+    assert r["unanswered"] == ["budget_sgd"] and env.withheld == {"budget_sgd": None}
+    env = StoreEnv(o01, answerer=lambda f, q: {"budget_sgd": "25"})
+    assert env.call("request_input", fields=["budget_sgd"], question="budget?")["answers"] == {"budget_sgd": 25.0}
+    assert env.withheld == {} and env.w.profile.budget_sgd == 25.0
+
+
+def test_blank_budget_reaches_the_person_as_a_question(live):
+    call, sessions = live
+    form = dict(FORM, profile=dict(FORM["profile"], budget_sgd=None))
+    sid = call("/api/start", form)["sid"]
+    s = server.SESSIONS_LIVE[sid]
+    assert s.env.withheld == {"budget_sgd": None}
+    t = threading.Thread(target=lambda: s.env.call("request_input", fields=["budget_sgd"], question="What is your budget?"))
+    t.start()
+    q = wait(call, sid, "awaiting_input")["pending_question"]
+    assert q == {"fields": ["budget_sgd"], "question": "What is your budget?"}
+    call("/api/answer", {"sid": sid, "answers": {"budget_sgd": 22}})
+    t.join(2)
+    assert s.env.w.profile.budget_sgd == 22.0 and s.questions[0]["answers"] == {"budget_sgd": 22}
+
+
+def test_presenter_controls_hit_the_current_cart_and_mark_the_session(live):
+    call, sessions = live
+    sid = call("/api/start", FORM)["sid"]
+    wait(call, sid, "awaiting_approval")
+    s = server.SESSIONS_LIVE[sid]
+    biggest = max(s.env.out.cart, key=lambda k: s.env.out.cart[k] * s.env.w.store[k].price_sgd)
+    assert biggest in call("/api/inject", {"sid": sid, "what": "sell_out"})["detail"]
+    assert "plan only" in call("/api/inject", {"sid": sid, "what": "plan_only"})["detail"]
+    call("/api/approve", {"sid": sid, "approve": False, "comment": "x"})
+    wait(call, sid, "done")
+    assert s.env.w.store[biggest].stock == 0 and s.env.case.autonomy == "plan_only"
+    call("/api/survey", {"sid": sid, "survey": {}})
+    from scripts.study_summary import load, summary
+    assert summary(load(sessions))["sessions"] == 0 and summary(load(sessions))["excluded_presenter_sessions"] == 1
