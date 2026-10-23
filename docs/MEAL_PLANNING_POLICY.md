@@ -33,12 +33,12 @@ scope is kept below as future work.
 | Store events and re-planning (§6) | Implemented, measured |
 | Approval of the exact cart, simulated order (§7, O-01) | Implemented, measured |
 | Binding-constraint rule for infeasible requests (§5.2) | Implemented, measured |
-| Natural-language preferences in a free-text note (§3) | Implemented, tested (case set `nl`, 16 cases); no LLM run yet |
+| Natural-language preferences in a free-text note and mid-run messages (§3) | Implemented, measured (case sets `nl`, 16 cases, and `nl_events`, 8 cases; E-04) |
 | Out-of-scope requests for weight loss / calorie / medical diet (P-02) | Implemented as a graded behaviour (`decline_request`); detection is the model's, scoring is code |
 | Untrusted catalogue text, prompt-injection cases (A-02) | Implemented, tested (n14–n16) |
 | Order idempotency and receipt check (O-04) | **Planned** |
-| Three autonomy modes: ① plan only, ② confirm each order, ③ pre-authorized within limits (§7.1) | Implemented, tested (case set `autonomy`, 12 cases); no LLM run yet |
-| Energy, macros, body fat, standing authorization, progress tracking | Future work (§12) |
+| Three autonomy modes: ① plan only, ② confirm each order, ③ pre-authorized within limits (§7.1) | Implemented, measured (case set `autonomy`, 12 cases; E-04) |
+| Energy, macros, body fat, persistent state and repeat cycles, progress tracking | Future work (§12) |
 | Real retailers or payments | Never in this project |
 
 ## 2. Evidence and assumptions
@@ -275,8 +275,9 @@ One-run debug scores were optimistic (agent 16/16 and 8/8); only the 3-run figur
 
 v0.2 §3–§5 and §9: eligibility by age and BMI, Mifflin–St Jeor energy estimate with activity
 factors, deficit targets with a 1,500 kcal/day floor, a 20/50/30 macro preset, full-day nutrition
-validation with nutrient provenance, body-fat goals, standing authorization (O-02) and progress
-tracking. Before any of these: nutrient data for every food and portion, a qualified nutrition
+validation with nutrient provenance, body-fat goals and progress tracking; from the group's 22 Oct
+proposal, also persistent purchase/delivery/consumption state, repeat cycles and scheduling (its §9).
+Standing authorization (O-02) is implemented in this version as mode ③. Before any of these: nutrient data for every food and portion, a qualified nutrition
 reviewer for the thresholds, and a new frozen benchmark.
 
 ## 13. Remaining work (owners to be filled in by the group)
