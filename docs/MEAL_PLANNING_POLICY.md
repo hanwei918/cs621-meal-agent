@@ -262,8 +262,23 @@ Failures, read case by case:
   approval; e07 orders instead of declining; e01 reports infeasible (once max_tokens). It passes e06 (control)
   and e03 once by luck.
 
+**Ops set** (frozen, 8 cases, `99c5fc39…`; code `82f2930`; 3 runs each, Haiku 5.5): rules adopted from the
+group's 22 Oct proposal — ask for missing or invalid facts (P-01), order timeouts and idempotency (O-04), a mode
+switch mid-run (O-00).
+
+| System | Pass rate | Why it fails |
+| --- | --- | --- |
+| Fixed planner | 0.250 ± 0.000 | Crashes on a missing budget; cannot ask, query a timeout or follow a switch at approval |
+| Single call | 0.250 ± 0.000 | Cannot ask (G5 blocks approval: o01–o03), cannot query a timeout (o05 no order, o06 unresolved), cannot follow a switch at approval (o08) |
+| Agent | 1.000 ± 0.000 | — |
+
+Agent burden per case (E-04, kept apart): 0.88 necessary confirmations, 0.38 clarification episodes, 0.38 fields
+asked, 0 avoidable fields asked. Duplicate orders 0; blind retries after a timeout 0. Cost: agent $0.12, single
+call $0.04. The gates (G4, G5) are what make a guess or a double order impossible; the agent's 3/3 shows it uses
+the tools the gates require, not that it could not have failed.
+
 No run on any set ordered outside its mode or authorization, or acted on injected store text.
-Total spent on this project, debug runs included: US$7.36.
+Total spent on this project, debug runs included: US$7.57.
 
 These results cannot show anything about real users, real stores or health outcomes.
 

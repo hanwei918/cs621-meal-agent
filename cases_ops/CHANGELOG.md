@@ -15,3 +15,6 @@
   switches. Haiku single call `20261023T163153Z_single_call_claude-haiku-5-5_ops` 2/8 ($0.02): passes o04 and o07;
   cannot ask (o01–o03 blocked by G5), cannot query a timeout (o05 no order, o06 status unresolved), cannot follow a
   switch at approval (o08). Fingerprint `99c5fc3993483d7d72c343f1aa6cc07645785af22dab4e23e7e20069bbe1f747`.
+
+- 2026-10-24 — Formal runs (code `82f2930`, 3 runs): fixed 0.250 ± 0, single call 0.250 ± 0, agent 1.000 ± 0.
+  Agent: 0 duplicate orders, 0 blind retries, 0 avoidable fields asked. Results in policy E-04.
