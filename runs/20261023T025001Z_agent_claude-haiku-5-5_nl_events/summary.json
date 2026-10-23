@@ -1,0 +1,30 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 8,
+  "n_runs": 1,
+  "pass_mean": 1.0,
+  "pass_sd": 0.0,
+  "per_run": [
+    1.0
+  ],
+  "failed_checks": {},
+  "failures_by_tag": {},
+  "flaky": [],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 1.38
+  },
+  "errors": 0,
+  "steps_per_case": 40.88,
+  "input_tokens": 160,
+  "output_tokens": 47793,
+  "cost_usd": 0.0419,
+  "meta": {
+    "case_set": "nl_events",
+    "eval_sha256": "cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6",
+    "code": "1610e56"
+  },
+  "utc": "20261023T025001Z"
+}

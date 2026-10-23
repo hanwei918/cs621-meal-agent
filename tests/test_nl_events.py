@@ -11,6 +11,7 @@ E = {c.case_id: c for c in load_cases(case_set="nl_events")}
 
 def test_frozen_sets_are_untouched():
     assert eval_fingerprint("nl").startswith("27dc68c1")
+    assert eval_fingerprint("nl_events").startswith("cdc92aea")
 
 
 def test_message_arrives_as_a_notice_after_its_step():

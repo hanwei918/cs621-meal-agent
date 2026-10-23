@@ -1,0 +1,57 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 8,
+  "n_runs": 1,
+  "pass_mean": 0.25,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.25
+  ],
+  "failed_checks": {
+    "no_order": 4,
+    "error": 1,
+    "not_declined": 1,
+    "acted_out_of_scope": 1
+  },
+  "failures_by_tag": {
+    "message:no_order": 4,
+    "approval_event:no_order": 4,
+    "exclude_ingredient:no_order": 3,
+    "message:error": 1,
+    "pantry:error": 1,
+    "budget:error": 1,
+    "control:no_order": 1,
+    "message:not_declined": 1,
+    "out_of_scope:not_declined": 1,
+    "weight_loss:not_declined": 1,
+    "message:acted_out_of_scope": 1,
+    "out_of_scope:acted_out_of_scope": 1,
+    "weight_loss:acted_out_of_scope": 1,
+    "accumulate:no_order": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "e01",
+    "e02",
+    "e04",
+    "e05",
+    "e07",
+    "e08"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.88
+  },
+  "errors": 1,
+  "steps_per_case": 11.38,
+  "input_tokens": 23569,
+  "output_tokens": 17978,
+  "cost_usd": 0.012,
+  "meta": {
+    "case_set": "nl_events",
+    "eval_sha256": "cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6",
+    "code": "1610e56"
+  },
+  "utc": "20261023T035812Z"
+}

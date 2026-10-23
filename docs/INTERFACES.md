@@ -39,7 +39,7 @@ infeasibility reported with the gold binding constraint.
 | | Contract | Status |
 |---|---|---|
 | ① | `Event.kind = "user_message"`, `Event.text`; `Gold.note` = reading of the note plus every message | ✅ |
-| ① | `scripts/build_nl_events_cases.py` → `cases_nl_events/e01..e08` | ✅ 8 cases, 3 boundary · ⬜ freeze after the debug run |
+| ① | `scripts/build_nl_events_cases.py` → `cases_nl_events/e01..e08` | ✅ 8 cases, 3 boundary · frozen 2026-10-23 |
 | ④ | The message is a notice (`User message: "…"`) and revokes approval like any event | ✅ |
 | ③ | Prompt: re-declare the full set, a message only narrows, decline if it turns out of scope | ✅ · ⬜ LLM run on `--set nl_events` |
 
