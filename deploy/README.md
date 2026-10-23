@@ -13,9 +13,12 @@ the same list explicitly.
 
 ## Account and project — personal only
 
-The demo lives in a **new project owned by zhouhanwei421@gmail.com**. Never deploy to an EW project
-(`essential-werkz`, `roadshow-tracker-6f04e`, `starhub-bangkok-2026`). Every command below names the
-account and project explicitly instead of relying on the CLI defaults.
+The demo lives in project `cs621-meal-demo`, owned by zhouhanwei421@gmail.com. The CLI defaults on this
+machine may point at a former employer's account and project; never rely on them. Every command below names
+the account and project explicitly.
+
+Before every deploy: `gcloud meta list-files-for-upload . | wc -l` must print **19**. Any other number:
+stop and find out why.
 
 ## Protections
 
@@ -65,3 +68,13 @@ Dockerfile `ARG`, sessions record `code: unknown` — then pass `--set-env-vars 
 gcloud run services delete meal-demo --region asia-southeast1 --project <PROJECT> --account zhouhanwei421@gmail.com
 ```
 Delete the service (or set `--max-instances 0`) when the study ends, and rotate the demo API key.
+
+## Deployed (2026-10-24)
+
+- Link: https://cs621-meal-demo.web.app (Hosting → Cloud Run `meal-demo`, asia-southeast1, revision
+  `meal-demo-00001`, code `14f6389`).
+- Checked live: every /api call and every source path is 401 without the passcode; Hosting serves one
+  file (robots.txt); fixed planner and one Haiku run completed with the passcode (US$0.0044).
+- Two check sessions in Firestore start with `ZZTEST_`: exclude them from the study.
+- The first deploy uploaded 20 files instead of 19 (this README, written after the check; Cloud Build source
+  bucket only, not in the image). `.gcloudignore` now excludes it.

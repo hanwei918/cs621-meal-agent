@@ -16,3 +16,4 @@
 **/__pycache__/
 eval/harness.py
 deploy/hosting/
+deploy/README.md

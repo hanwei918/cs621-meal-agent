@@ -85,6 +85,12 @@ writes one JSON file to `user-study/sessions/` (git-ignored, stays on the laptop
 
 ## 5. Running it
 
+Shared link: **https://cs621-meal-demo.web.app** — send each participant the passcode and their own
+participant code (P01, P02 …) separately. After the study: `scripts/export_sessions.py cs621-meal-demo`,
+drop the `ZZTEST_` check sessions, then `scripts/study_summary.py`.
+
+Local alternative:
+
 ```bash
 cd "/Users/hanweizhou/Desktop/SMU/CS621 AI/meal-agent"
 export ANTHROPIC_API_KEY=...        # in the shell only, never in a file
