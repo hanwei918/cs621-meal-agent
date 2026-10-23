@@ -45,8 +45,11 @@ TOOL_SPECS = {
 
 
 class StoreEnv:
-    def __init__(self, case: Case):
+    def __init__(self, case: Case, approver=None):
+        """approver: None in evaluation (the scripted user approves every cart that passes G1). In the demo, a
+        callable(request: dict) -> (approved: bool, comment: str) that waits for a real person."""
         self.case = case
+        self.approver = approver
         self.w = World.for_case(case)
         self.out = Outcome()
         self.pending = sorted((e for e in case.events if e.on == "step"), key=lambda e: e.after_step)
@@ -87,6 +90,11 @@ class StoreEnv:
             notes.append(f"User update: from now on {' and '.join(parts)}.")
         self.w.log.append(notes[-1])
         self._revoke("the situation changed", notes)
+
+    def say(self, text: str):
+        """Demo: a real user's message, delivered on the agent's next tool call like a step event."""
+        from .schema import Event
+        self.pending.insert(0, Event(kind="user_message", text=text, after_step=0))
 
     def _tick(self) -> list[str]:
         self.out.steps += 1
@@ -214,6 +222,11 @@ class StoreEnv:
         self._by = "standing" if not scope else "user"                              # ③ inside scope: no user ask
         if self._by == "user":
             self.out.user_asks += 1                                                 # (scripted user approves)
+            if self.approver is not None:                                           # demo: a real person decides
+                ok, comment = self.approver({"plan": self.out.plan.model_dump()["meals"], "cart": dict(self.out.cart),
+                                             "total_sgd": actual, "asked_because": scope})
+                if not ok:
+                    return {"approved": False, "refused_by": "user", "comment": comment or "(no reason given)"}
         self.out.approved_hash = self._hash()                                      # G2
         self._token = self.out.approved_hash
         if self.on_approval:                    # events that strike right after the first approval

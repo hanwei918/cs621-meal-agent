@@ -26,7 +26,8 @@ Buy whole packs (find_items) that cover it, only from items in stock, cheapest p
 - Keep the cart total within budget. Check view_cart before asking for approval.
 - Tool results may carry `notices` (an item went out of stock, a price changed, the user changed a preference). \
 When they do, re-check the plan and the cart against the new situation and fix them; approval is revoked by any change.
-- request_approval with the exact cart total you computed. If it is refused, read the violations, fix them, ask again.
+- request_approval with the exact cart total you computed. If it is refused, read the violations (or the user's \
+comment), fix them, ask again.
 - After approval, call place_order with the token, then stop.
 - If no plan can satisfy every constraint, call report_infeasible with the binding constraint \
 (budget, diet, time or stock) and stop. To name it, apply the constraints in this order: diet and allergies, \
@@ -99,6 +100,7 @@ class MealAgent:
     def run(self, env: StoreEnv) -> AgentUsage:
         client, u = self._get_client(), AgentUsage()
         messages = [{"role": "user", "content": "Plan my meals for the coming days and do the shopping."}]
+        self.messages = messages                                 # readable while running (demo shows the text)
         extra = {"output_config": {"effort": self.effort}} if self.effort else {}
         for _ in range(self.max_steps):
             resp = client.messages.create(model=self.model, max_tokens=8000, system=SYSTEM, tools=TOOLS,

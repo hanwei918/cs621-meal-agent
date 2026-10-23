@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {"name": "meal-demo", "runtimeExecutable": ".venv/bin/python", "runtimeArgs": ["demo/server.py"], "port": 8621}
+  ]
+}

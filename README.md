@@ -25,9 +25,13 @@ Natural language (case set `nl`, `cases_nl/`): constraints in a free-text note, 
 injected store text — see policy §3, P-02, §8. `run.py --set nl` (frozen).
 Messages mid-run (case set `nl_events`, `cases_nl_events/`): the user speaks after N steps or at approval.
 
+Demo and user study: `.venv/bin/python demo/server.py` → http://127.0.0.1:8621 (a real person approves,
+declines and messages; same gates). Protocol in `docs/USER-STUDY.md`; sessions stay local in
+`user-study/sessions/`; `scripts/study_summary.py` summarises them.
+
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                 # 72 tests, each seen failing first
+.venv/bin/python -m pytest -q                 # 78 tests, each seen failing first
 .venv/bin/python run.py --system oracle       # must be 1.000
 .venv/bin/python run.py --system reckless     # must be 0.000
 ```

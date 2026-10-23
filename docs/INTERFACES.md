@@ -34,6 +34,14 @@ infeasibility reported with the gold binding constraint.
 | ② | Scoring grades against `Gold.note`, never the agent's reading; `not_declined`, `acted_out_of_scope`, `wrong_decline` | ✅ |
 | ③⑤ | Agent prompt + single-call schema handle the note, P-02 and untrusted text; oracle declares the gold reading; fixed planner ignores the note | ✅ · ⬜ LLM run on `--set nl` |
 
+## Demo and user study (2026-10-23)
+
+| | Contract | Status |
+|---|---|---|
+| ④ | `StoreEnv(case, approver=None)`: `approver(request) -> (approved, comment)` replaces the scripted user; a decline returns `refused_by: user` + comment. `env.say(text)` delivers a message on the next call | ✅ |
+| — | `demo/server.py` (stdlib only) + `demo/index.html`: setup, "what it understood", approval card, mid-run messages, plan, cart, steps, questionnaire | ✅ |
+| — | `docs/USER-STUDY.md` protocol; `scripts/study_summary.py` | ✅ · ⬜ sessions with participants |
+
 ## Messages mid-run (2026-10-23)
 
 | | Contract | Status |
