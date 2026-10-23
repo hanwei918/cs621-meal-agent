@@ -3,5 +3,6 @@
     "public": "deploy/hosting",
     "ignore": ["**/.*"],
     "rewrites": [{ "source": "**", "run": { "serviceId": "meal-demo", "region": "asia-southeast1" } }]
-  }
+  },
+  "firestore": { "rules": "firestore.rules" }
 }
