@@ -1,0 +1,58 @@
+{
+  "case_id": "e02",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "user_message",
+      "text": "Hold on, please take out anything with egg. I've gone right off eggs."
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "egg"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r09",
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "approval_event",
+    "exclude_ingredient"
+  ],
+  "boundary": false,
+  "derivation": "message at approval: the first cart (cheapest is egg fried rice) must be re-planned without egg: pasta + salad [witness total S$12.80]"
+}

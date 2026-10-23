@@ -1,0 +1,51 @@
+{
+  "case_id": "e05",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "user_message",
+      "text": "Looks good, thanks!"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": null,
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "approval_event",
+    "control"
+  ],
+  "boundary": false,
+  "derivation": "the message adds nothing; the approval it revoked must simply be asked for again and the order placed [witness total S$14.00]"
+}

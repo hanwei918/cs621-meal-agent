@@ -1,0 +1,30 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 16,
+  "n_runs": 1,
+  "pass_mean": 1.0,
+  "pass_sd": 0.0,
+  "per_run": [
+    1.0
+  ],
+  "failed_checks": {},
+  "failures_by_tag": {},
+  "flaky": [],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.88
+  },
+  "errors": 0,
+  "steps_per_case": 10.25,
+  "input_tokens": 54411,
+  "output_tokens": 45118,
+  "cost_usd": 0.0289,
+  "meta": {
+    "case_set": "nl",
+    "eval_sha256": "27dc68c16e3330ca819a4a7033ca6fb563f5624dd4bd9e56915a406bc12071dd",
+    "code": "8e41fa6"
+  },
+  "utc": "20261022T145430Z"
+}

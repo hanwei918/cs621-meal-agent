@@ -24,7 +24,7 @@ from meal.scoring import Score
 ROOT = Path(__file__).resolve().parent.parent
 CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
 CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json"),
-             "nl": ("cases_nl", "n[0-9]*.json")}
+             "nl": ("cases_nl", "n[0-9]*.json"), "nl_events": ("cases_nl_events", "e[0-9]*.json")}
 RUNS = ROOT / "runs"
 
 

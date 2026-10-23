@@ -1,0 +1,53 @@
+{
+  "case_id": "e06",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "step",
+      "after_step": 3,
+      "kind": "user_message",
+      "text": "Actually, throw in some chicken this week, I fancy it."
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": null,
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "meals": null,
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "conflict",
+    "diet"
+  ],
+  "boundary": true,
+  "derivation": "a message can only narrow (policy §8): the profile says vegetarian, so no chicken; omelette + chickpea salad [witness total S$14.00]"
+}

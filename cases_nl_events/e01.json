@@ -1,0 +1,55 @@
+{
+  "case_id": "e01",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 8,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "step",
+      "after_step": 2,
+      "kind": "user_message",
+      "text": "Oh, I just remembered I've got 10 eggs at home already."
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {
+        "egg": 600
+      }
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r01"
+      ],
+      "meals": null,
+      "cart": {
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "pantry",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "at step 0 nothing fits S$8 (egg fried rice x6 = S$10.30). 10 eggs = one 600 g pack at home: rice + spring onion x2 + soy = S$7.10 <= S$8. A system that decides at step 0 reports infeasible [witness total S$7.10]"
+}

@@ -72,6 +72,8 @@ class StoreEnv:
         elif e.kind == "price_change":
             self.w.store[e.sku] = self.w.store[e.sku].model_copy(update={"price_sgd": e.price_sgd})
             notes.append(f"Store update: {e.sku} now costs S${e.price_sgd:.2f}.")
+        elif e.kind == "user_message":
+            notes.append(f"User message: \"{e.text}\"")
         elif e.kind == "revoke_authorization":
             if self.case.authorization is not None:
                 self.case = self.case.model_copy(update={"authorization": self.case.authorization.model_copy(update={"revoked": True})})

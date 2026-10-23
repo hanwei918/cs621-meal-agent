@@ -25,7 +25,7 @@ def order(case, ids, declare=None):
     for s, n in cart.items():
         env.call("add_to_cart", sku=s, packs=n)
     r = env.call("request_approval", reported_total_sgd=cart_total(cart, env.w))
-    if r.get("approved"):
+    if r.get("approved") and not r.get("notices"):          # an approval-time event revokes it at once
         env.call("place_order", token=r["token"])
     return env
 

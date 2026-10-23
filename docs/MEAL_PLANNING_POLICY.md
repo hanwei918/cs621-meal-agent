@@ -80,6 +80,11 @@ Grading never uses the agent's reading. Each case's gold states the constraints 
 against that reading. Declaring too little, or nothing, fails the case even if the gate approved.
 Note exclusions rank with diet and allergies in the binding-constraint order (§5.2).
 
+The user may also speak mid-run (a `user_message` event, case set `nl_events`). A message is read like
+the note: the agent declares the full updated set again, and the message revokes any approval. A message
+can only narrow; "throw in some chicken" does not lift a vegetarian profile. The gold reading covers the
+note and every message.
+
 ### Gates
 
 | Rule | Condition | Response | Status |

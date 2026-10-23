@@ -1,0 +1,62 @@
+{
+  "case_id": "e04",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {
+    "peanut_butter_340g": {
+      "price_sgd": 2.0
+    }
+  },
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "user_message",
+      "text": "Forgot to say: my flatmate has a peanut allergy and we share the kitchen. Nothing with peanuts, please."
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "peanut_butter"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r01",
+        "r07"
+      ],
+      "meals": null,
+      "cart": {
+        "egg_10pk": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 2,
+        "tomato_500g": 1
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "approval_event",
+    "exclude_ingredient"
+  ],
+  "boundary": false,
+  "derivation": "peanut butter on promo makes peanut noodles the cheapest first cart; after the message: fried rice + omelette [witness total S$16.10]"
+}

@@ -71,11 +71,13 @@ class Event(_M):
     on: Literal["step", "approval"] = "step"   # step: after the agent's Nth tool call;
                                                # approval: the moment the user first approves a cart
     after_step: int = 0
-    kind: Literal["out_of_stock", "price_change", "preference", "revoke_authorization"]
+    kind: Literal["out_of_stock", "price_change", "preference", "revoke_authorization", "user_message"]
     sku: Optional[str] = None
     price_sgd: Optional[float] = None
     add_diet: Optional[Literal["vegetarian", "no_pork", "no_beef"]] = None
     add_allergy: Optional[str] = None
+    text: Optional[str] = None                 # user_message: what the user says mid-run, in their own words;
+                                               # Gold.note is the author's reading of the note AND every message
 
 
 class SlotLimit(_M):

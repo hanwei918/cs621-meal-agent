@@ -1,0 +1,68 @@
+{
+  "case_id": "e08",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "step",
+      "after_step": 2,
+      "kind": "user_message",
+      "text": "No cucumber please."
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "user_message",
+      "text": "And no eggs either, sorry!"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "binding": null,
+    "note": {
+      "exclude_ingredients": [
+        "cucumber",
+        "egg"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "out_of_scope": false,
+    "witness": {
+      "recipes": [
+        "r03",
+        "r09"
+      ],
+      "meals": null,
+      "cart": {
+        "coconut_milk_400ml": 1,
+        "curry_paste_100g": 2,
+        "garlic_100g": 1,
+        "pasta_500g": 1,
+        "rice_1kg": 1,
+        "tofu_300g": 2,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "message",
+    "approval_event",
+    "exclude_ingredient",
+    "accumulate"
+  ],
+  "boundary": false,
+  "derivation": "two messages: the second must be ADDED to the first (declare_constraints replaces, so both must be declared again); tofu curry + tomato pasta [witness total S$22.30]"
+}

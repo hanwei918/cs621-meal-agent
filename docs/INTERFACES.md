@@ -29,10 +29,19 @@ infeasibility reported with the gold binding constraint.
 | | Contract | Status |
 |---|---|---|
 | ① | `Profile.note`; `StoreItem.description`; `Gold.note` (`NoteConstraints`: `exclude_ingredients`, `exclude_recipes`, `slot_max_minutes`, `pantry_add`); `Gold.out_of_scope`; `Witness.meals` | ✅ |
-| ① | `scripts/build_nl_cases.py` → `cases_nl/n01..n16`; prints whether each note *bites* (the cheapest note-blind plan breaks the gold reading) | ✅ 16 cases, 9 boundary · ⬜ freeze after the debug run |
+| ① | `scripts/build_nl_cases.py` → `cases_nl/n01..n16`; prints whether each note *bites* (the cheapest note-blind plan breaks the gold reading) | ✅ 16 cases, 9 boundary · frozen 2026-10-23 |
 | ④ | `declare_constraints` (validated ids, revokes approval, then enforced by G1); `decline_request` | ✅ |
 | ② | Scoring grades against `Gold.note`, never the agent's reading; `not_declined`, `acted_out_of_scope`, `wrong_decline` | ✅ |
 | ③⑤ | Agent prompt + single-call schema handle the note, P-02 and untrusted text; oracle declares the gold reading; fixed planner ignores the note | ✅ · ⬜ LLM run on `--set nl` |
+
+## Messages mid-run (2026-10-23)
+
+| | Contract | Status |
+|---|---|---|
+| ① | `Event.kind = "user_message"`, `Event.text`; `Gold.note` = reading of the note plus every message | ✅ |
+| ① | `scripts/build_nl_events_cases.py` → `cases_nl_events/e01..e08` | ✅ 8 cases, 3 boundary · ⬜ freeze after the debug run |
+| ④ | The message is a notice (`User message: "…"`) and revokes approval like any event | ✅ |
+| ③ | Prompt: re-declare the full set, a message only narrows, decline if it turns out of scope | ✅ · ⬜ LLM run on `--set nl_events` |
 
 ## Three autonomy modes (2026-10-22)
 
