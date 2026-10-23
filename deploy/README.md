@@ -81,3 +81,4 @@ Delete the service (or set `--max-instances 0`) when the study ends, and rotate 
 - 2026-10-24: revision `meal-demo-00003`, code `9d1de84` (agent with request_input, intent ids, status query).
   Live check: Haiku run with the passcode declared "no egg", ordered S$27.20 with `intent_id`, no violations
   (US$0.0046). Upload list was 19 files before deploying.
+- 2026-10-24: revisions `00004`–`00005`, code `371b732`: question sheet, presenter controls (`?presenter=1`). Live checks: inject needs the passcode; sell-out reached the fixed planner (no re-plan, no order); blank budget with fixed rules stops with a plain reason. Upload list 19 files each time.
