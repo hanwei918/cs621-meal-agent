@@ -78,3 +78,6 @@ Delete the service (or set `--max-instances 0`) when the study ends, and rotate 
 - Two check sessions in Firestore start with `ZZTEST_`: exclude them from the study.
 - The first deploy uploaded 20 files instead of 19 (this README, written after the check; Cloud Build source
   bucket only, not in the image). `.gcloudignore` now excludes it.
+- 2026-10-24: revision `meal-demo-00003`, code `9d1de84` (agent with request_input, intent ids, status query).
+  Live check: Haiku run with the passcode declared "no egg", ordered S$27.20 with `intent_id`, no violations
+  (US$0.0046). Upload list was 19 files before deploying.
