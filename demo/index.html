@@ -2,195 +2,364 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Meal Agent Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #e3e1da;
-  --accent: #2f6f4f; --accent-ink: #ffffff; --warn: #a2541b; --warn-bg: #fbefe4; --bad: #a3262a; --bad-bg: #fbe8e8;
-  --ok-bg: #e7f2ec; --note-bg: #eef3f8; --note-ink: #23476b;
+  --bg: #f5f1e8; --paper: #fffdf8; --ink: #22201b; --muted: #77716a; --faint: #a39d94; --line: #e7e0d2;
+  --green: #2e6b4a; --green-soft: #e3efe7; --green-ink: #ffffff;
+  --tomato: #c8502f; --tomato-soft: #fbe9e2;
+  --amber: #a8640f; --amber-soft: #fbf0dc;
+  --blue-soft: #e8eef6; --blue-ink: #2a4a6e;
+  --shadow: 0 1px 2px rgba(60,45,20,.06), 0 6px 24px rgba(60,45,20,.07);
+  --radius: 16px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #161614; --panel: #1f1f1c; --ink: #ecebe6; --muted: #a09e96; --line: #34332f;
-    --accent: #6fbf94; --accent-ink: #0f1a14; --warn: #e6a36d; --warn-bg: #3a2a1c; --bad: #ef8a8d; --bad-bg: #3a1e1f;
-    --ok-bg: #1d3227; --note-bg: #1c2733; --note-ink: #a9c8e6;
+    --bg: #171613; --paper: #211f1b; --ink: #f0ece4; --muted: #aaa398; --faint: #7d776e; --line: #35322c;
+    --green: #74c39a; --green-soft: #1f3529; --green-ink: #10180f;
+    --tomato: #ee8a6c; --tomato-soft: #3b231b;
+    --amber: #e8b062; --amber-soft: #382a15;
+    --blue-soft: #1e2833; --blue-ink: #a9c6e6;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.25);
   }
 }
+:root[data-theme="dark"] {
+  --bg: #171613; --paper: #211f1b; --ink: #f0ece4; --muted: #aaa398; --faint: #7d776e; --line: #35322c;
+  --green: #74c39a; --green-soft: #1f3529; --green-ink: #10180f; --tomato: #ee8a6c; --tomato-soft: #3b231b;
+  --amber: #e8b062; --amber-soft: #382a15; --blue-soft: #1e2833; --blue-ink: #a9c6e6;
+}
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
-header h1 { font-size: 17px; margin: 0; font-weight: 650; }
-header .sub { color: var(--muted); font-size: 13px; }
-.pill { margin-left: auto; padding: 3px 10px; border-radius: 99px; font-size: 13px; background: var(--line); }
-.pill.running { background: var(--note-bg); color: var(--note-ink); }
-.pill.awaiting_approval { background: var(--warn-bg); color: var(--warn); }
-.pill.done { background: var(--ok-bg); color: var(--accent); }
-.pill.error { background: var(--bad-bg); color: var(--bad); }
-main { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px 20px; max-width: 1280px; margin: 0 auto; }
-@media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
-@media (max-width: 560px) { header .sub { display: none; } }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
-.card h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
-label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-input[type=text], input[type=number], input[type=date], textarea, select { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); font: inherit; }
-textarea { min-height: 76px; resize: vertical; }
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.checks { display: flex; flex-wrap: wrap; gap: 6px 12px; }
-.checks label { display: flex; align-items: center; gap: 5px; margin: 0; color: var(--ink); font-size: 14px; }
-.modes label { display: block; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; color: var(--ink); cursor: pointer; }
-.modes label:has(input:checked) { border-color: var(--accent); background: var(--ok-bg); }
-.modes small { display: block; color: var(--muted); margin-left: 22px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.chip { font-size: 12px; padding: 3px 8px; border: 1px dashed var(--line); border-radius: 99px; cursor: pointer; color: var(--muted); background: none; }
-button.primary { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
-button.secondary { background: none; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 9px 16px; font: inherit; cursor: pointer; }
-button:disabled { opacity: .45; cursor: not-allowed; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+h1, h2, .display { font-family: Fraunces, Georgia, serif; letter-spacing: -.01em; }
+button { font: inherit; color: inherit; }
 .hidden { display: none !important; }
-.understood { background: var(--note-bg); color: var(--note-ink); border-radius: 8px; padding: 10px 12px; }
-.understood ul { margin: 4px 0 0; padding-left: 18px; }
-.approval { border: 2px solid var(--warn); }
-.approval h2 { color: var(--warn); }
-.total { font-size: 22px; font-weight: 700; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { color: var(--muted); font-weight: 500; font-size: 12px; }
-td.num { text-align: right; font-variant-numeric: tabular-nums; }
-.min { color: var(--muted); font-size: 12px; }
-.steps { max-height: 340px; overflow: auto; font-size: 13px; }
-.step { padding: 4px 0; border-bottom: 1px dashed var(--line); }
-.step .t { color: var(--muted); font-variant-numeric: tabular-nums; display: inline-block; width: 44px; }
-.notice { background: var(--warn-bg); color: var(--warn); border-radius: 6px; padding: 2px 6px; margin: 3px 0 0 44px; }
-.refused { color: var(--bad); }
-.result { font-size: 16px; }
-.result.ok { background: var(--ok-bg); }
-.result.bad { background: var(--bad-bg); }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 10px; max-width: 1080px; margin: 0 auto; padding: 18px 20px 6px; }
+.logo { width: 34px; height: 34px; border-radius: 10px; background: var(--green); color: var(--green-ink); display: grid; place-items: center; font-size: 18px; }
+.top h1 { font-size: 20px; margin: 0; }
+.top .tag { color: var(--muted); font-size: 13px; }
+.status { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; padding: 5px 12px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.status.running .dot { background: var(--blue-ink); animation: pulse 1.2s infinite; }
+.status.awaiting_approval .dot { background: var(--amber); animation: pulse 1s infinite; }
+.status.done .dot { background: var(--green); }
+.status.error .dot { background: var(--tomato); }
+@keyframes pulse { 50% { opacity: .3; } }
+
+/* stepper */
+.steps-bar { max-width: 1080px; margin: 6px auto 0; padding: 0 20px; display: flex; gap: 6px; }
+.stp { flex: 1; font-size: 12px; color: var(--faint); padding-top: 8px; border-top: 3px solid var(--line); }
+.stp.on { color: var(--ink); border-color: var(--green); }
+.stp b { font-weight: 600; }
+
+main { max-width: 1080px; margin: 0 auto; padding: 18px 20px 120px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card + .card { margin-top: 16px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+
+/* setup */
+.setup { max-width: 720px; margin: 0 auto; }
+.hero { text-align: center; margin: 10px 0 22px; }
+.hero h2 { font-size: 30px; margin: 0 0 6px; }
+.hero p { color: var(--muted); margin: 0; }
+.field { margin-top: 18px; }
+.field > label, .lbl { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 7px; }
+input[type=text], input[type=password], input[type=number], input[type=date], textarea, select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; outline: none; }
+input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+textarea { min-height: 84px; resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 640px) { .grid4 { grid-template-columns: 1fr 1fr; } }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 640px) { .modes { grid-template-columns: 1fr; } }
+.mode { position: relative; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; cursor: pointer; background: var(--paper); transition: border-color .15s, background .15s; }
+.mode input { position: absolute; opacity: 0; }
+.mode .ic { font-size: 22px; }
+.mode b { display: block; margin-top: 4px; }
+.mode span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.mode:has(input:checked) { border-color: var(--green); background: var(--green-soft); }
+.mode:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--green-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tog { border: 1.5px solid var(--line); background: var(--paper); border-radius: 99px; padding: 6px 13px; font-size: 14px; cursor: pointer; }
+.tog[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+.tog.allergy[aria-pressed="true"] { background: var(--tomato); border-color: var(--tomato); color: #fff; }
+.ideas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.idea { font-size: 12.5px; padding: 4px 10px; border: 1px dashed var(--faint); border-radius: 99px; background: none; color: var(--muted); cursor: pointer; }
+.idea:hover { color: var(--ink); border-color: var(--ink); }
+details.more { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.btn { border: 0; border-radius: 12px; padding: 12px 20px; font-weight: 600; cursor: pointer; }
+.btn.primary { background: var(--green); color: var(--green-ink); }
+.btn.ghost { background: transparent; border: 1.5px solid var(--line); }
+.btn.big { width: 100%; padding: 15px; font-size: 16px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.fine { color: var(--faint); font-size: 12.5px; text-align: center; margin: 12px 0 0; }
+
+/* live board */
+.board { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 880px) { .board { grid-template-columns: 1fr; } }
+.summary { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 16px; }
+.pill { font-size: 12.5px; padding: 4px 10px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
+.pill.k { color: var(--ink); }
+.linkbtn { margin-left: auto; background: none; border: 0; color: var(--green); font-weight: 600; cursor: pointer; font-size: 14px; }
+.understood { display: flex; flex-wrap: wrap; gap: 8px; }
+.u { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 99px; font-size: 14px; background: var(--blue-soft); color: var(--blue-ink); }
+.u.no { background: var(--tomato-soft); color: var(--tomato); }
+.u.time { background: var(--amber-soft); color: var(--amber); }
+.u.home { background: var(--green-soft); color: var(--green); }
+.empty { color: var(--faint); font-size: 14px; }
+.days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .days { grid-template-columns: 1fr; } }
+.day h3 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+.meal { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 12px; background: var(--bg); margin-bottom: 8px; }
+.meal .em { font-size: 24px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--paper); flex: none; }
+.meal .nm { font-weight: 500; font-size: 14px; line-height: 1.25; }
+.meal .sl { font-size: 12px; color: var(--muted); }
+.receipt { font-variant-numeric: tabular-nums; }
+.rline { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+.rline small { color: var(--muted); }
+.rtotal { display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; font-weight: 600; }
+.rtotal .display { font-size: 22px; }
+.feed { max-height: 380px; overflow: auto; margin: 0 -4px; padding: 0 4px; }
+.ev { display: flex; gap: 10px; padding: 7px 0; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+.ev:last-child { border-bottom: 0; }
+.ev .i { width: 22px; text-align: center; flex: none; }
+.ev .t { margin-left: auto; color: var(--faint); font-size: 12px; flex: none; }
+.ev.bad .x { color: var(--tomato); }
+.ev .note { display: block; margin-top: 3px; font-size: 12.5px; background: var(--amber-soft); color: var(--amber); border-radius: 6px; padding: 3px 7px; }
+.thinking { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13.5px; padding: 8px 0 0; }
+.thinking .b { display: inline-flex; gap: 3px; }
+.thinking .b i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); animation: pulse 1s infinite; }
+.thinking .b i:nth-child(2) { animation-delay: .2s; } .thinking .b i:nth-child(3) { animation-delay: .4s; }
 .msgrow { display: flex; gap: 8px; }
-.msgrow input { flex: 1; }
-.likert { display: grid; grid-template-columns: 1fr repeat(5, 34px); gap: 4px; align-items: center; font-size: 14px; margin: 6px 0; }
-.likert .h { font-size: 11px; color: var(--muted); text-align: center; }
-.likert input { justify-self: center; }
-.say { white-space: pre-wrap; font-size: 14px; border-left: 3px solid var(--line); padding-left: 10px; margin: 6px 0; }
-.foot { color: var(--muted); font-size: 12px; padding: 0 20px 20px; text-align: center; }
+.msgrow input { flex: 1; min-width: 0; }
+.sent { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.bubble { background: var(--green); color: var(--green-ink); padding: 6px 12px; border-radius: 14px 14px 4px 14px; font-size: 14px; max-width: 90%; }
+
+/* result */
+.result { display: flex; gap: 14px; align-items: flex-start; }
+.result .big { font-size: 34px; line-height: 1; }
+.result h2 { margin: 0 0 4px; font-size: 22px; }
+.result p { margin: 0; color: var(--muted); }
+.result.bad h2 { color: var(--tomato); }
+.say { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--line); background: var(--bg); border-radius: 0 10px 10px 0; font-size: 14px; white-space: pre-wrap; max-height: 220px; overflow: auto; }
+.warn { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: var(--tomato-soft); color: var(--tomato); font-size: 14px; }
+
+/* approval sheet */
+.scrim { position: fixed; inset: 0; background: rgba(20,16,10,.38); z-index: 10; backdrop-filter: blur(2px); }
+.sheet { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: min(640px, 100%); max-height: 88vh; overflow: auto;
+  background: var(--paper); border-radius: 22px 22px 0 0; z-index: 11; padding: 22px 22px calc(22px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.2); animation: up .22s ease-out; }
+@keyframes up { from { transform: translate(-50%, 30px); opacity: 0; } }
+.sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: -8px auto 14px; }
+.sheet h2 { margin: 0; font-size: 22px; }
+.sheet .why { color: var(--amber); background: var(--amber-soft); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; margin-top: 10px; }
+.sheet .tot { display: flex; align-items: baseline; justify-content: space-between; margin: 14px 0 6px; }
+.sheet .tot .display { font-size: 34px; }
+.sheet .mini { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; margin: 10px 0; }
+.sheet .mini div { background: var(--bg); border-radius: 10px; padding: 8px; font-size: 12.5px; }
+.sheet .mini b { display: block; font-size: 11px; color: var(--muted); font-weight: 600; }
+.sheet .actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 14px; }
+
+/* survey */
+.likert { margin: 14px 0; }
+.likert .q { font-size: 14.5px; margin-bottom: 7px; }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 10px; padding: 8px 0; cursor: pointer; font-weight: 600; }
+.scale button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+.ends { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); margin-top: 3px; }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.thanks { text-align: center; padding: 18px 0 4px; }
+.thanks .display { font-size: 24px; }
+@media (max-width: 560px) {
+  .top .tag { display: none; }
+  .hero h2 { font-size: 24px; }
+  .card { padding: 16px; }
+  .grid2 { grid-template-columns: 1fr; }
+  .stp { font-size: 0; } .stp b { font-size: 12px; }
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>Meal agent</h1><span class="sub">3-day plan + groceries · synthetic store · no real payments</span>
-  <span id="pill" class="pill">idle</span>
-</header>
+<div class="top">
+  <div class="logo" aria-hidden="true">🥬</div>
+  <div><h1>Meal Agent</h1><div class="tag">3 days of home cooking, shopped for you</div></div>
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">ready</span></div>
+</div>
+<div class="steps-bar" aria-hidden="true">
+  <div class="stp on" id="s1"><b>1</b> Set up</div>
+  <div class="stp" id="s2"><b>2</b> It plans & shops</div>
+  <div class="stp" id="s3"><b>3</b> You decide</div>
+  <div class="stp" id="s4"><b>4</b> Your view</div>
+</div>
+
 <main>
-  <section>
+  <!-- ======================= setup ======================= -->
+  <section id="setupView" class="setup">
+    <div class="hero">
+      <h2>What should this week taste like?</h2>
+      <p>Set your limits, say the rest in your own words. Nothing is bought outside the rules you choose.</p>
+    </div>
     <div class="card">
-      <h2>Your setup</h2>
-      <div id="passBox" class="hidden"><label>Passcode (from the organiser)</label><input id="passcode" type="password" autocomplete="off"></div>
-      <label>Participant code (from the organiser)</label><input id="participant" type="text" value="P01">
-      <label>Who decides on the order?</label>
-      <div class="modes">
-        <label><input type="radio" name="mode" value="plan_only"> ① Plan only
-          <small>It builds the plan and shopping list. It never orders.</small></label>
-        <label><input type="radio" name="mode" value="confirm" checked> ② Ask me every time
-          <small>It shows you the cart; nothing is bought until you approve.</small></label>
-        <label><input type="radio" name="mode" value="delegated"> ③ Order within my limits
-          <small>Inside the limits below it orders without asking; otherwise it asks.</small></label>
+      <div class="grid2">
+        <div id="passBox" class="hidden"><label class="lbl" for="passcode">Passcode</label><input id="passcode" type="password" autocomplete="off"></div>
+        <div><label class="lbl" for="participant">Participant code</label><input id="participant" type="text" value="P01"></div>
       </div>
-      <div id="authBox" class="hidden">
-        <div class="row">
-          <div><label>Per order (S$)</label><input id="maxOrder" type="number" value="30" min="0" step="1"></div>
-          <div><label>Per month (S$)</label><input id="maxPeriod" type="number" value="80" min="0" step="1"></div>
-        </div>
-        <div class="row">
-          <div><label>Already spent (S$)</label><input id="spent" type="number" value="0" min="0" step="1"></div>
-          <div><label>Valid until</label><input id="until" type="date" value="2026-12-31"></div>
+
+      <div class="field">
+        <span class="lbl">Who decides on the order?</span>
+        <div class="modes">
+          <label class="mode"><input type="radio" name="mode" value="plan_only"><span class="ic">📝</span><b>Plan only</b><span>A plan and shopping list. It never buys.</span></label>
+          <label class="mode"><input type="radio" name="mode" value="confirm" checked><span class="ic">✋</span><b>Ask me every time</b><span>You see the cart. Nothing is bought until you approve.</span></label>
+          <label class="mode"><input type="radio" name="mode" value="delegated"><span class="ic">🔑</span><b>Within my limits</b><span>Orders on its own inside your limits; otherwise asks.</span></label>
         </div>
       </div>
-      <div class="row">
-        <div><label>Budget (S$)</label><input id="budget" type="number" value="30" min="1" step="1"></div>
-        <div><label>Max minutes / meal</label><input id="minutes" type="number" value="30" min="5" step="5"></div>
+      <div id="authBox" class="field hidden">
+        <div class="grid4">
+          <div><label class="lbl" for="maxOrder">Per order S$</label><input id="maxOrder" type="number" value="30" min="0"></div>
+          <div><label class="lbl" for="maxPeriod">Per month S$</label><input id="maxPeriod" type="number" value="80" min="0"></div>
+          <div><label class="lbl" for="spent">Spent so far S$</label><input id="spent" type="number" value="0" min="0"></div>
+          <div><label class="lbl" for="until">Valid until</label><input id="until" type="date" value="2026-12-31"></div>
+        </div>
       </div>
-      <div class="row">
-        <div><label>Servings</label><input id="servings" type="number" value="1" min="1" max="4"></div>
-        <div><label>Days</label><input id="days" type="number" value="3" min="1" max="3"></div>
+
+      <div class="field grid2">
+        <div><label class="lbl" for="budget">Budget for 3 days (S$)</label><input id="budget" type="number" value="30" min="1"></div>
+        <div><label class="lbl" for="minutes">Max cooking time per meal (min)</label><input id="minutes" type="number" value="30" min="5" step="5"></div>
       </div>
-      <label>Diet</label>
-      <div class="checks" id="diet">
-        <label><input type="checkbox" value="vegetarian"> vegetarian</label>
-        <label><input type="checkbox" value="no_pork"> no pork</label>
-        <label><input type="checkbox" value="no_beef"> no beef</label>
+
+      <div class="field">
+        <span class="lbl">I don't eat</span>
+        <div class="chips" id="diet">
+          <button type="button" class="tog" data-v="vegetarian" aria-pressed="false">🥕 Meat or fish (vegetarian)</button>
+          <button type="button" class="tog" data-v="no_pork" aria-pressed="false">🚫 Pork</button>
+          <button type="button" class="tog" data-v="no_beef" aria-pressed="false">🚫 Beef</button>
+        </div>
       </div>
-      <label>Allergies</label>
-      <div class="checks" id="allergies">
-        <label><input type="checkbox" value="egg"> egg</label><label><input type="checkbox" value="gluten"> gluten</label>
-        <label><input type="checkbox" value="soy"> soy</label><label><input type="checkbox" value="peanut"> peanut</label>
-        <label><input type="checkbox" value="shellfish"> shellfish</label><label><input type="checkbox" value="dairy"> dairy</label>
+      <div class="field">
+        <span class="lbl">Allergies</span>
+        <div class="chips" id="allergies">
+          <button type="button" class="tog allergy" data-v="egg" aria-pressed="false">Egg</button>
+          <button type="button" class="tog allergy" data-v="gluten" aria-pressed="false">Gluten</button>
+          <button type="button" class="tog allergy" data-v="soy" aria-pressed="false">Soy</button>
+          <button type="button" class="tog allergy" data-v="peanut" aria-pressed="false">Peanut</button>
+          <button type="button" class="tog allergy" data-v="shellfish" aria-pressed="false">Shellfish</button>
+          <button type="button" class="tog allergy" data-v="dairy" aria-pressed="false">Dairy</button>
+        </div>
       </div>
-      <label>Anything else? Say it in your own words</label>
-      <textarea id="note" placeholder="e.g. I've gone off eggs. Wednesday dinner has to be quick."></textarea>
-      <div class="chips" id="noteChips">
-        <button class="chip">No cucumber, it makes me sick.</button>
-        <button class="chip">Cannot take spicy one lah.</button>
-        <button class="chip">I still have a bag of rice at home.</button>
-        <button class="chip">First dinner must be 10 min max.</button>
+
+      <div class="field">
+        <label class="lbl" for="note">Anything else? Say it like you'd text a friend</label>
+        <textarea id="note" placeholder="e.g. I've gone off eggs. The first dinner has to be quick, I'm home late."></textarea>
+        <div class="ideas" id="ideas">
+          <button type="button" class="idea">No cucumber, it makes me sick.</button>
+          <button type="button" class="idea">Cannot take spicy one lah.</button>
+          <button type="button" class="idea">I still have a bag of rice at home.</button>
+          <button type="button" class="idea">First dinner must be 10 min max.</button>
+        </div>
       </div>
-      <label>Who runs it</label>
-      <select id="system">
-        <option value="agent|claude-haiku-5-5">Agent · Claude Haiku 5.5</option>
-        <option value="agent|claude-sonnet-5-5">Agent · Claude Sonnet 5.5</option>
-        <option value="fixed|none">Fixed rules (no AI, reads no text)</option>
-      </select>
-      <p style="margin:14px 0 0"><button class="primary" id="start">Start</button></p>
-      <p class="min" style="margin:8px 0 0">Do not enter real health or medical details. This is a study prototype, not advice.</p>
+
+      <details class="more">
+        <summary>More options</summary>
+        <div class="field grid2">
+          <div><label class="lbl" for="servings">Servings per meal</label><input id="servings" type="number" value="1" min="1" max="4"></div>
+          <div><label class="lbl" for="system">Who runs it</label>
+            <select id="system">
+              <option value="agent|claude-haiku-5-5">Agent · Claude Haiku 5.5</option>
+              <option value="agent|claude-sonnet-5-5">Agent · Claude Sonnet 5.5</option>
+              <option value="fixed|none">Fixed rules (no AI, reads no text)</option>
+            </select></div>
+        </div>
+      </details>
+
+      <div class="field"><button class="btn primary big" id="start">Plan my meals</button></div>
+      <p class="fine">Fake store, no real payments. Please don't type real health or medical details. Not nutrition advice.</p>
     </div>
   </section>
 
-  <section>
-    <div class="card hidden" id="understoodCard">
-      <h2>What it understood from your note</h2>
-      <div class="understood" id="understood"></div>
-    </div>
+  <!-- ======================= live ======================= -->
+  <section id="liveView" class="hidden">
+    <div class="summary" id="summary"></div>
+    <div class="board">
+      <div>
+        <div class="card hidden" id="resultCard"></div>
+        <div class="card" id="understoodCard">
+          <p class="eyebrow">What it understood from your words</p>
+          <div class="understood" id="understood"></div>
+        </div>
+        <div class="card">
+          <p class="eyebrow">Your 3 days</p>
+          <div id="plan"></div>
+        </div>
+        <div class="card hidden" id="surveyCard">
+          <p class="eyebrow">Your view · 1 = strongly disagree, 5 = strongly agree</p>
+          <div id="likert"></div>
+          <div class="field"><span class="lbl">Was its reading of your words right?</span>
+            <div class="seg" id="reading">
+              <button type="button" class="tog" data-v="fully right" aria-pressed="false">Fully right</button>
+              <button type="button" class="tog" data-v="partly right" aria-pressed="false">Partly</button>
+              <button type="button" class="tog" data-v="wrong" aria-pressed="false">Wrong</button>
+              <button type="button" class="tog" data-v="I wrote no note" aria-pressed="false">I wrote nothing</button>
+            </div></div>
+          <div class="field"><label class="lbl" for="missed">What did it miss or get wrong?</label><input id="missed" type="text"></div>
+          <div class="field"><span class="lbl">Which would you actually use?</span>
+            <div class="seg" id="prefMode">
+              <button type="button" class="tog" data-v="plan_only" aria-pressed="false">📝 Plan only</button>
+              <button type="button" class="tog" data-v="confirm" aria-pressed="false">✋ Ask every time</button>
+              <button type="button" class="tog" data-v="delegated" aria-pressed="false">🔑 Within limits</button>
+              <button type="button" class="tog" data-v="none" aria-pressed="false">None</button>
+            </div></div>
+          <div class="field grid2">
+            <div><label class="lbl" for="minutesNow">Minutes a week you spend planning + shopping now</label><input id="minutesNow" type="number" min="0" step="5"></div>
+            <div><label class="lbl" for="wouldDelegate">What would make you let it order without asking?</label><input id="wouldDelegate" type="text"></div>
+          </div>
+          <div class="field"><button class="btn primary big" id="saveSurvey">Save my answers</button></div>
+        </div>
+        <div class="card hidden" id="thanksCard"><div class="thanks"><div class="display">Thank you! 🙏</div><p class="empty">Your answers are saved. You can try another mode.</p>
+          <button class="btn ghost" id="again">Try another setup</button></div></div>
+      </div>
 
-    <div class="card approval hidden" id="approvalCard">
-      <h2>Your approval is needed</h2>
-      <div id="approvalWhy" class="min"></div>
-      <div id="approvalPlan"></div>
-      <div id="approvalCart" style="margin-top:8px"></div>
-      <p>Total <span class="total" id="approvalTotal"></span></p>
-      <label>If you decline, tell it why (optional)</label>
-      <input id="declineComment" type="text" placeholder="e.g. too much pasta">
-      <p style="display:flex;gap:8px;margin:12px 0 0">
-        <button class="primary" id="approveBtn">Approve this order</button>
-        <button class="secondary" id="declineBtn">Decline</button>
-      </p>
-    </div>
-
-    <div class="card hidden" id="resultCard"><h2>Result</h2><div id="result" class="result"></div><div id="agentSays"></div></div>
-
-    <div class="card hidden" id="msgCard">
-      <h2>Tell it something while it works</h2>
-      <div class="msgrow"><input id="msg" type="text" placeholder="e.g. Actually, no eggs either."><button class="secondary" id="send">Send</button></div>
-      <div id="sent" class="min"></div>
-    </div>
-
-    <div class="card hidden" id="planCard"><h2>Plan</h2><div id="plan"></div></div>
-    <div class="card hidden" id="cartCard"><h2>Cart</h2><div id="cart"></div></div>
-    <div class="card hidden" id="stepsCard"><h2>What it did</h2><div class="steps" id="steps"></div></div>
-
-    <div class="card hidden" id="surveyCard">
-      <h2>Your view (1 = strongly disagree, 5 = strongly agree)</h2>
-      <div id="likert"></div>
-      <label>Was its reading of your note right?</label>
-      <select id="readRight"><option value="">—</option><option>fully right</option><option>partly right</option><option>wrong</option><option>I wrote no note</option></select>
-      <label>What did it miss or get wrong?</label><input id="missed" type="text">
-      <label>Which mode would you actually use?</label>
-      <select id="prefMode"><option value="">—</option><option value="plan_only">① Plan only</option><option value="confirm">② Ask me every time</option><option value="delegated">③ Order within my limits</option><option value="none">None of them</option></select>
-      <label>Roughly how many minutes a week do you spend planning meals and buying groceries now?</label>
-      <input id="minutesNow" type="number" min="0" step="5">
-      <label>What would make you let it order without asking?</label><input id="wouldDelegate" type="text">
-      <p style="margin:12px 0 0"><button class="primary" id="saveSurvey">Save session</button> <span id="saved" class="min"></span></p>
+      <div>
+        <div class="card hidden" id="msgCard">
+          <p class="eyebrow">Tell it something while it works</p>
+          <div class="msgrow"><input id="msg" type="text" placeholder="e.g. Actually, no eggs either."><button class="btn primary" id="send">Send</button></div>
+          <div class="sent" id="sent"></div>
+        </div>
+        <div class="card" id="cartCard">
+          <p class="eyebrow">Cart</p>
+          <div id="cart"></div>
+        </div>
+        <div class="card">
+          <p class="eyebrow">What it's doing</p>
+          <div class="feed" id="feed"></div>
+          <div class="thinking" id="thinking"><span class="b"><i></i><i></i><i></i></span><span>working…</span></div>
+        </div>
+      </div>
     </div>
   </section>
 </main>
-<p class="foot">CS621 group project · synthetic catalogue · every check that decides whether money is spent is code, not the model</p>
+
+<!-- ======================= approval sheet ======================= -->
+<div class="scrim hidden" id="scrim"></div>
+<div class="sheet hidden" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="grab"></div>
+  <h2 id="sheetTitle">Approve this order?</h2>
+  <div class="why hidden" id="why"></div>
+  <div class="tot"><span class="empty">Total</span><span class="display" id="sheetTotal"></span></div>
+  <div class="mini" id="sheetPlan"></div>
+  <div class="receipt" id="sheetCart"></div>
+  <div class="field"><label class="lbl" for="declineComment">Not quite? Tell it why and it will try again</label>
+    <input id="declineComment" type="text" placeholder="e.g. too much pasta, cheaper please"></div>
+  <div class="actions">
+    <button class="btn ghost" id="declineBtn">Decline</button>
+    <button class="btn primary" id="approveBtn">Approve S$<span id="approveAmt"></span></button>
+  </div>
+</div>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -198,16 +367,18 @@ const LIKERT = [
   ["understood", "It understood what I wrote."],
   ["knew_cart", "I knew what it would buy before any money was spent."],
   ["approve_easy", "Approving or declining took little effort."],
-  ["trust_mode", "I would trust this mode to handle my weekly groceries."],
-  ["saves_time", "It would save me time compared with planning and shopping myself."],
+  ["trust_mode", "I would trust this mode with my weekly groceries."],
+  ["saves_time", "It would save me time compared with doing it myself."],
 ];
-let cat = {recipes: {}, ingredients: {}}, timer = null, lastStatus = "idle", sid = null;
+const EMOJI = {r01: "🍳", r02: "🥦", r03: "🍛", r04: "🥜", r05: "🥟", r06: "🐟", r07: "🍅", r08: "🍜", r09: "🍝", r10: "🥗", r11: "🍤", r12: "🍄"};
 const SLOT = {1: "Lunch", 2: "Dinner"};
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MODE = {plan_only: "📝 Plan only", confirm: "✋ Ask every time", delegated: "🔑 Within limits"};
+let cat = {recipes: {}, ingredients: {}}, timer = null, sid = null, form = null, survey = {};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const money = x => "S$" + Number(x || 0).toFixed(2);
 const rname = id => cat.recipes[id]?.name || id;
 const iname = id => cat.ingredients[id]?.name || id;
-
+const show = (id, on) => $(id).classList.toggle("hidden", !on);
 const hdrs = () => ({"Content-Type": "application/json", "X-Passcode": $("passcode").value});
 const get = url => fetch(url, {headers: hdrs()}).then(r => r.json());
 const post = (url, body) => fetch(url, {method: "POST", headers: hdrs(), body: JSON.stringify(body)}).then(r => r.json());
@@ -216,141 +387,166 @@ function loadCatalog() {
     c.recipes.forEach(r => cat.recipes[r.id] = r); c.ingredients.forEach(i => cat.ingredients[i.id] = i); return true; });
 }
 get("/api/config").then(c => { show("passBox", c.passcode_required); if (!c.passcode_required) loadCatalog(); });
-$("likert").innerHTML = `<div class="likert"><span></span>${[1,2,3,4,5].map(n => `<span class="h">${n}</span>`).join("")}</div>` +
-  LIKERT.map(([k, q]) => `<div class="likert"><span>${q}</span>${[1,2,3,4,5].map(n => `<input type="radio" name="lk_${k}" value="${n}" aria-label="${n}">`).join("")}</div>`).join("");
-document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => $("authBox").classList.toggle("hidden", mode() !== "delegated"));
-document.querySelectorAll("#noteChips .chip").forEach(b => b.onclick = e => { e.preventDefault(); $("note").value = ($("note").value + " " + b.textContent).trim(); });
+
+// ---------- setup interactions
+function toggles(id, single) {
+  $(id).querySelectorAll(".tog").forEach(b => b.onclick = () => {
+    if (single) $(id).querySelectorAll(".tog").forEach(x => x !== b && x.setAttribute("aria-pressed", "false"));
+    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+  });
+}
+const picked = id => [...$(id).querySelectorAll('.tog[aria-pressed="true"]')].map(b => b.dataset.v);
+["diet", "allergies"].forEach(id => toggles(id, false));
+["reading", "prefMode"].forEach(id => toggles(id, true));
 const mode = () => document.querySelector("input[name=mode]:checked").value;
-const checked = id => [...document.querySelectorAll(`#${id} input:checked`)].map(i => i.value);
+document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => show("authBox", mode() === "delegated"));
+document.querySelectorAll("#ideas .idea").forEach(b => b.onclick = () => { $("note").value = ($("note").value + " " + b.textContent).trim(); $("note").focus(); });
+$("likert").innerHTML = LIKERT.map(([k, q]) => `<div class="likert"><div class="q">${q}</div>
+  <div class="scale" data-k="${k}">${[1,2,3,4,5].map(n => `<button type="button" aria-pressed="false" aria-label="${n}">${n}</button>`).join("")}</div>
+  <div class="ends"><span>disagree</span><span>agree</span></div></div>`).join("");
+document.querySelectorAll(".scale").forEach(s => s.querySelectorAll("button").forEach((b, i) => b.onclick = () => {
+  s.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", "false")); b.setAttribute("aria-pressed", "true"); survey[s.dataset.k] = i + 1;
+}));
+
+function stage(n) { [1, 2, 3, 4].forEach(i => $("s" + i).classList.toggle("on", i <= n)); }
 
 $("start").onclick = async () => {
   const [system, model] = $("system").value.split("|");
-  const form = {participant: $("participant").value, mode: mode(), system, model, note: $("note").value,
+  form = {participant: $("participant").value, mode: mode(), system, model, note: $("note").value,
     profile: {budget_sgd: +$("budget").value, max_cook_minutes: +$("minutes").value, servings: +$("servings").value,
-              days: +$("days").value, meals_per_day: 2, diet: checked("diet"), allergies: checked("allergies")},
+              days: 3, meals_per_day: 2, diet: picked("diet"), allergies: picked("allergies")},
     authorization: {max_order_sgd: +$("maxOrder").value, max_period_sgd: +$("maxPeriod").value,
                     already_spent_sgd: +$("spent").value, valid_until: $("until").value}};
-  if (!Object.keys(cat.recipes).length && !(await loadCatalog())) { alert("Wrong passcode."); return; }
+  if (!Object.keys(cat.recipes).length && !(await loadCatalog())) { alert("That passcode doesn't work."); return; }
   const r = await post("/api/start", form);
   if (r.error) { alert(r.error); return; }
-  sid = r.sid;
-  $("saved").textContent = ""; $("sent").textContent = ""; $("missed").value = ""; $("wouldDelegate").value = "";
-  document.querySelectorAll("#likert input").forEach(i => i.checked = false);
-  ["resultCard", "surveyCard"].forEach(id => $(id).classList.add("hidden"));
+  sid = r.sid; survey = {};
+  document.querySelectorAll('.scale button, #reading .tog, #prefMode .tog').forEach(b => b.setAttribute("aria-pressed", "false"));
+  ["missed", "wouldDelegate", "minutesNow", "msg"].forEach(id => $(id).value = "");
+  $("sent").innerHTML = ""; $("feed").innerHTML = "";
+  show("setupView", false); show("liveView", true); show("resultCard", false); show("surveyCard", false); show("thanksCard", false);
+  $("summary").innerHTML = [MODE[form.mode], money(form.profile.budget_sgd), `≤ ${form.profile.max_cook_minutes} min`,
+    ...form.profile.diet, ...form.profile.allergies.map(a => "no " + a)].map((t, i) => `<span class="pill ${i ? "" : "k"}">${esc(t)}</span>`).join("")
+    + `<button class="linkbtn" id="edit">Change setup</button>`;
+  $("edit").onclick = backToSetup;
+  window.scrollTo({top: 0, behavior: "smooth"});
   clearInterval(timer); timer = setInterval(poll, 700); poll();
 };
-$("approveBtn").onclick = () => post("/api/approve", {sid, approve: true}).then(poll);
-$("declineBtn").onclick = () => post("/api/approve", {sid, approve: false, comment: $("declineComment").value}).then(() => { $("declineComment").value = ""; poll(); });
+function backToSetup() { clearInterval(timer); sid = null; show("liveView", false); show("setupView", true); hideSheet(); stage(1); setStatus("idle"); }
+$("again").onclick = backToSetup;
+
+$("approveBtn").onclick = () => { hideSheet(); post("/api/approve", {sid, approve: true}).then(poll); };
+$("declineBtn").onclick = () => { hideSheet(); post("/api/approve", {sid, approve: false, comment: $("declineComment").value}).then(() => { $("declineComment").value = ""; poll(); }); };
 $("send").onclick = async () => {
   const t = $("msg").value.trim(); if (!t) return;
   await post("/api/message", {sid, text: t}); $("msg").value = "";
-  $("sent").innerHTML += `<div>You said: “${esc(t)}”</div>`;
+  $("sent").insertAdjacentHTML("beforeend", `<div class="bubble">${esc(t)}</div>`);
 };
 $("msg").onkeydown = e => { if (e.key === "Enter") $("send").click(); };
 $("saveSurvey").onclick = async () => {
-  const s = {};
-  LIKERT.forEach(([k]) => { const v = document.querySelector(`input[name=lk_${k}]:checked`); s[k] = v ? +v.value : null; });
-  Object.assign(s, {reading: $("readRight").value, missed: $("missed").value, preferred_mode: $("prefMode").value,
-    minutes_per_week_now: $("minutesNow").value === "" ? null : +$("minutesNow").value, would_delegate_if: $("wouldDelegate").value});
+  const s = Object.assign({}, survey, {reading: picked("reading")[0] || "", missed: $("missed").value,
+    preferred_mode: picked("prefMode")[0] || "", minutes_per_week_now: $("minutesNow").value === "" ? null : +$("minutesNow").value,
+    would_delegate_if: $("wouldDelegate").value});
   const r = await post("/api/survey", {sid, survey: s});
-  $("saved").textContent = r.saved_to ? "Saved. Thank you!" : (r.error || "not saved");
+  if (r.saved_to) { show("surveyCard", false); show("thanksCard", true); stage(4); } else alert(r.error || "Not saved");
 };
 
-function understood(d) {
-  if (!d) return "<em>Nothing declared yet.</em>";
-  const li = [];
-  if (d.exclude_ingredients?.length) li.push("No " + d.exclude_ingredients.map(iname).join(", "));
-  if (d.exclude_recipes?.length) li.push("Not: " + d.exclude_recipes.map(rname).join(", "));
-  (d.slot_max_minutes || []).forEach(s => li.push(`Day ${s.day} ${SLOT[s.slot] || "meal " + s.slot}: ${s.minutes} min or less`));
-  Object.entries(d.pantry_add || {}).forEach(([i, g]) => li.push(`Already at home: ${iname(i)} ${g} g`));
-  return li.length ? `<ul>${li.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "No extra constraints.";
+// ---------- rendering
+function understood(d, live) {
+  if (!d) return `<span class="empty">${!$("note").value.trim() ? "You didn't add anything in your own words."
+    : live ? "Reading your words…" : "It took nothing from your words."}</span>`;
+  const out = [];
+  (d.exclude_ingredients || []).forEach(i => out.push(["no", "✕ No " + iname(i).toLowerCase()]));
+  (d.exclude_recipes || []).forEach(r => out.push(["no", "✕ Not " + rname(r)]));
+  (d.slot_max_minutes || []).forEach(s => out.push(["time", `⏱ Day ${s.day} ${(SLOT[s.slot] || "meal").toLowerCase()} ≤ ${s.minutes} min`]));
+  Object.entries(d.pantry_add || {}).forEach(([i, g]) => out.push(["home", `🏠 ${iname(i)} at home · ${g} g`]));
+  return out.length ? out.map(([k, t]) => `<span class="u ${k}">${esc(t)}</span>`).join("") : `<span class="empty">Nothing extra to follow.</span>`;
 }
-function planTable(meals) {
-  if (!meals?.length) return "<em>No plan yet.</em>";
-  const days = [...new Set(meals.map(m => m.day))].sort();
-  return `<table><tr><th></th>${days.map(d => `<th>Day ${d}</th>`).join("")}</tr>` + [1, 2].map(s =>
-    `<tr><th>${SLOT[s]}</th>${days.map(d => { const m = meals.find(x => x.day === d && x.slot === s);
-      return `<td>${m ? esc(m.name || rname(m.recipe_id)) + ` <span class="min">${m.minutes ?? cat.recipes[m.recipe_id]?.minutes ?? ""} min</span>` : "—"}</td>`; }).join("")}</tr>`).join("") + "</table>";
+function planHTML(meals) {
+  if (!meals?.length) return `<span class="empty">No plan yet.</span>`;
+  return `<div class="days">${[1, 2, 3].map(d => `<div class="day"><h3>Day ${d}</h3>${[1, 2].map(s => {
+    const m = meals.find(x => x.day === d && x.slot === s);
+    return m ? `<div class="meal"><span class="em">${EMOJI[m.recipe_id] || "🍽️"}</span><div><div class="nm">${esc(m.name || rname(m.recipe_id))}</div>
+      <div class="sl">${SLOT[s]} · ${m.minutes ?? cat.recipes[m.recipe_id]?.minutes} min</div></div></div>`
+             : `<div class="meal"><span class="em">·</span><div class="sl">${SLOT[s]}</div></div>`; }).join("")}</div>`).join("")}</div>`;
 }
-function cartTable(lines, total) {
-  if (!lines?.length) return "<em>Empty.</em>";
-  return `<table><tr><th>Item</th><th>Packs</th><th class="num">S$</th></tr>` +
-    lines.map(l => `<tr><td>${esc(l.sku)}</td><td>${l.packs}</td><td class="num">${Number(l.line_sgd).toFixed(2)}</td></tr>`).join("") +
-    (total != null ? `<tr><th colspan="2">Total</th><th class="num">${Number(total).toFixed(2)}</th></tr>` : "") + "</table>";
+function cartHTML(lines, total) {
+  if (!lines?.length) return `<span class="empty">Empty so far.</span>`;
+  return `<div class="receipt">${lines.map(l => `<div class="rline"><span>${esc(l.item || l.sku)} <small>${l.pack_g ? l.pack_g + " g" : ""} × ${l.packs}</small></span><span>${Number(l.line_sgd).toFixed(2)}</span></div>`).join("")}
+    ${total != null ? `<div class="rtotal"><span>Total</span><span class="display">${money(total)}</span></div>` : ""}</div>`;
 }
-function stepText(s) {
+const ICON = {get_profile: "👤", search_recipes: "📖", get_recipe: "📖", find_items: "🛒", set_plan: "🗓️", add_to_cart: "➕",
+  remove_from_cart: "➖", view_cart: "🧾", declare_constraints: "✍️", decline_request: "🙅", report_infeasible: "⚠️",
+  submit_plan: "📝", request_approval: "✋", place_order: "✅"};
+function evText(s) {
   const a = s.args || {}, r = s.result || {};
   const T = {
-    get_profile: () => "Read your profile",
-    search_recipes: () => "Looked through recipes",
-    get_recipe: () => "Checked " + rname(a.recipe_id),
-    find_items: () => "Checked the store for " + iname(a.ingredient),
-    set_plan: () => "Made a plan",
-    add_to_cart: () => `Added ${a.packs} × ${a.sku}`,
-    remove_from_cart: () => `Removed ${a.packs} × ${a.sku}`,
-    view_cart: () => "Checked the cart",
-    declare_constraints: () => "Wrote down what your words mean",
-    decline_request: () => "Declined: " + (a.reason || ""),
-    report_infeasible: () => `No plan fits (${a.binding})`,
-    submit_plan: () => r.submitted ? "Submitted the plan" : "Plan refused by the checks",
-    request_approval: () => r.approved ? `Got approval (${r.by === "standing" ? "within your limits" : "from you"})` :
-      r.refused_by === "user" ? "You declined: " + (r.comment || "") : `Approval refused by the checks`,
-    place_order: () => r.ordered ? "Placed the order · " + money(r.total_sgd) : "Order refused (no valid approval)",
+    get_profile: () => "Read your setup", search_recipes: () => "Looked through the recipes",
+    get_recipe: () => "Checked " + rname(a.recipe_id), find_items: () => "Priced " + iname(a.ingredient).toLowerCase(),
+    set_plan: () => "Made a plan", add_to_cart: () => `Added ${a.packs} × ${a.sku}`, remove_from_cart: () => `Removed ${a.packs} × ${a.sku}`,
+    view_cart: () => "Checked the cart", declare_constraints: () => "Wrote down what your words mean",
+    decline_request: () => "Declined: " + (a.reason || ""), report_infeasible: () => `No plan fits (${a.binding})`,
+    submit_plan: () => r.submitted ? "Submitted the plan" : "Plan stopped by the checks",
+    request_approval: () => r.approved ? (r.by === "standing" ? "Approved within your limits" : "You approved") :
+      r.refused_by === "user" ? "You declined" + (r.comment ? ": " + r.comment : "") : "Stopped by the checks — fixing",
+    place_order: () => r.ordered ? "Order placed · " + money(r.total_sgd) : "Order refused (no valid approval)",
   };
-  let t = (T[s.tool] || (() => s.tool))();
-  const bad = r.error || (r.violations && !r.approved && !r.submitted);
-  let html = `<div class="step"><span class="t">${s.t}s</span><span class="${bad ? "refused" : ""}">${esc(t)}</span>`;
-  if (r.violations && !r.approved) html += `<div class="notice">${esc(r.violations.join("; "))}</div>`;
-  if (r.error) html += `<div class="notice">${esc(r.error)}</div>`;
-  (r.notices || []).forEach(n => html += `<div class="notice">${esc(n)}</div>`);
-  return html + "</div>";
+  const bad = r.error || (r.violations && !r.approved && !r.submitted) || r.refused_by;
+  const notes = [...(r.violations && !r.approved ? [r.violations.join("; ")] : []), ...(r.error ? [r.error] : []), ...(r.notices || [])];
+  return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${ICON[s.tool] || "•"}</span><span class="x">${esc((T[s.tool] || (() => s.tool))())}
+    ${notes.map(n => `<span class="note">${esc(n)}</span>`).join("")}</span><span class="t">${Math.round(s.t)}s</span></div>`;
 }
-function show(id, on) { $(id).classList.toggle("hidden", !on); }
+function setStatus(st) {
+  $("status").className = "status " + st;
+  $("statusText").textContent = {idle: "ready", running: "working", awaiting_approval: "needs you", done: "done", error: "error"}[st] || st;
+}
+function hideSheet() { show("sheet", false); show("scrim", false); }
 
 async function poll() {
   if (!sid) return;
   const s = await get("/api/state?sid=" + encodeURIComponent(sid));
-  $("pill").textContent = s.status === "awaiting_approval" ? "waiting for you" : s.status;
-  $("pill").className = "pill " + s.status;
   if (s.status === "idle") return;
+  setStatus(s.status);
   const live = s.status === "running" || s.status === "awaiting_approval";
-  $("start").disabled = live;
-  show("understoodCard", !!$("note").value.trim() || !!s.declared);
-  $("understood").innerHTML = understood(s.declared);
-  show("msgCard", live);
-  show("planCard", s.plan.length > 0); $("plan").innerHTML = planTable(s.plan);
-  show("cartCard", s.cart.length > 0); $("cart").innerHTML = cartTable(s.cart, s.total_sgd);
-  show("stepsCard", s.steps.length > 0);
-  const box = $("steps"), atEnd = box.scrollTop + box.clientHeight >= box.scrollHeight - 10;
-  box.innerHTML = s.steps.map(stepText).join(""); if (atEnd) box.scrollTop = box.scrollHeight;
+  stage(s.status === "awaiting_approval" || !live ? 3 : 2);
+  $("understood").innerHTML = understood(s.declared, live);
+  $("plan").innerHTML = planHTML(s.plan);
+  $("cart").innerHTML = cartHTML(s.cart, s.cart.length ? s.total_sgd : null);
+  const feed = $("feed"), atEnd = feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 10;
+  feed.innerHTML = s.steps.map(evText).join("") || `<span class="empty">Starting…</span>`;
+  if (atEnd) feed.scrollTop = feed.scrollHeight;
+  show("thinking", s.status === "running"); show("msgCard", live);
+
   const pa = s.pending_approval;
-  show("approvalCard", !!pa);
-  if (pa) {
-    $("approvalPlan").innerHTML = planTable(pa.plan);
-    $("approvalCart").innerHTML = cartTable(pa.cart, null);
-    $("approvalTotal").textContent = money(pa.total_sgd);
-    $("approvalWhy").textContent = s.mode === "delegated" && pa.asked_because ? "Asked because: " + pa.asked_because.join("; ") : "";
-  }
+  if (pa && $("sheet").classList.contains("hidden")) {
+    $("sheetTotal").textContent = money(pa.total_sgd); $("approveAmt").textContent = Number(pa.total_sgd).toFixed(2);
+    $("sheetPlan").innerHTML = [1, 2, 3].map(d => `<div><b>Day ${d}</b>${pa.plan.filter(m => m.day === d).sort((a, b) => a.slot - b.slot)
+      .map(m => `${EMOJI[m.recipe_id] || "🍽️"} ${esc(m.name)}`).join("<br>")}</div>`).join("");
+    $("sheetCart").innerHTML = cartHTML(pa.cart, null);
+    const why = s.mode === "delegated" && pa.asked_because?.length ? "It's asking because " + pa.asked_because.join("; ") : "";
+    $("why").textContent = why; show("why", !!why);
+    show("sheet", true); show("scrim", true);
+  } else if (!pa) hideSheet();
+
   if (!live) {
     clearInterval(timer);
-    const r = s.result; let text, ok = true;
-    if (s.status === "error") { text = "Error: " + s.error; ok = false; }
-    else if (r.declined) text = "It declined this request: " + r.decline_reason;
-    else if (r.ordered) text = `Ordered · ${money(r.order_total_sgd)} · approved ${r.approved_by === "standing" ? "within your limits, without asking" : "by you"}`;
-    else if (r.submitted) text = "Plan and shopping list ready. Nothing was ordered (plan-only mode).";
-    else if (r.infeasible) { text = `No plan fits your constraints (binding: ${r.binding}).`; ok = false; }
-    else if (r.stopped_for_cost) { text = "Stopped: this run reached its spending limit."; ok = false; }
-    else { text = "Stopped without an order."; ok = false; }
-    if (r.violations_against_profile_and_declared?.length) { ok = false; text += " ⚠ " + r.violations_against_profile_and_declared.join("; "); }
-    text += ` · you were asked ${r.user_asks}× · ${s.elapsed_s}s · ${money(s.cost_usd).replace("S$", "US$")}`;
-    $("result").textContent = text; $("result").className = "result " + (ok ? "ok" : "bad");
-    $("agentSays").innerHTML = s.agent_text.length ? `<label>It said</label><div class="say">${esc(s.agent_text[s.agent_text.length - 1])}</div>` : "";
-    show("resultCard", true); show("surveyCard", !s.saved_to);
-    if (s.saved_to) $("saved").textContent = "Saved. Thank you!";
+    const r = s.result; let icon = "✅", title, sub = "", ok = true;
+    if (s.status === "error") { icon = "⚠️"; title = "Something went wrong"; sub = s.error; ok = false; }
+    else if (r.declined) { icon = "🙅"; title = "It declined this request"; sub = r.decline_reason; }
+    else if (r.ordered) { title = "Ordered · " + money(r.order_total_sgd); sub = r.approved_by === "standing" ? "Inside your limits, so it didn't need to ask you." : "You approved this cart."; }
+    else if (r.submitted) { icon = "📝"; title = "Your plan and shopping list are ready"; sub = "Nothing was ordered (plan-only mode)."; }
+    else if (r.infeasible) { icon = "🤔"; title = "No plan fits everything"; sub = `The ${r.binding} limit can't be met. Try a little more budget or time.`; ok = false; }
+    else if (r.stopped_for_cost) { icon = "⏸️"; title = "Stopped at its spending limit"; ok = false; }
+    else { icon = "⏹️"; title = "Stopped without an order"; ok = false; }
+    sub += ` · asked you ${r.user_asks}× · ${Math.round(s.elapsed_s)} s`;
+    const v = r.violations_against_profile_and_declared || [];
+    const said = s.agent_text.length ? `<div class="say">${esc(s.agent_text[s.agent_text.length - 1])}</div>` : "";
+    $("resultCard").innerHTML = `<div class="result ${ok ? "" : "bad"}"><span class="big">${icon}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div></div>
+      ${v.length ? `<div class="warn">⚠ ${esc(v.join("; "))}</div>` : ""}${said}`;
+    show("resultCard", true);
+    if (s.saved_to) { show("surveyCard", false); show("thanksCard", true); stage(4); } else show("surveyCard", true);
   }
-  lastStatus = s.status;
 }
-poll();
 </script>
 </body>
 </html>

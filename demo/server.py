@@ -209,8 +209,11 @@ class Session:
         names = {r.id: (r.name, r.minutes) for r in w.recipes.values()}
         plan = [{"day": m.day, "slot": m.slot, "recipe_id": m.recipe_id, "name": names[m.recipe_id][0],
                  "minutes": names[m.recipe_id][1]} for m in o.plan.meals if m.recipe_id in names]
-        cart = [{"sku": s, "packs": n, "price_sgd": w.store[s].price_sgd, "line_sgd": round(n * w.store[s].price_sgd, 2)}
-                for s, n in o.cart.items() if s in w.store]
+        def line(s, n):
+            it = w.store[s]
+            return {"sku": s, "packs": n, "item": w.ingredients[it.ingredient].name, "pack_g": it.pack_g,
+                    "price_sgd": it.price_sgd, "line_sgd": round(n * it.price_sgd, 2)}
+        cart = [line(s, n) for s, n in o.cart.items() if s in w.store]
         checks = violations(o.plan, o.cart, w) if o.order is not None else []
         pa = self.pending_approval
         return {
@@ -221,7 +224,7 @@ class Session:
             "pending_approval": None if pa is None else {
                 "total_sgd": pa["total_sgd"], "asked_because": pa.get("asked_because"),
                 "plan": [dict(m, name=names[m["recipe_id"]][0], minutes=names[m["recipe_id"]][1]) for m in pa["plan"]],
-                "cart": [{"sku": s, "packs": n, "line_sgd": round(n * w.store[s].price_sgd, 2)} for s, n in pa["cart"].items()]},
+                "cart": [line(s, n) for s, n in pa["cart"].items()]},
             "result": {"ordered": o.order is not None, "order_total_sgd": o.order_total_sgd, "approved_by": o.approved_by,
                        "submitted": o.submitted, "declined": o.declined, "decline_reason": o.decline_reason,
                        "infeasible": o.declared_infeasible, "binding": o.declared_binding,
