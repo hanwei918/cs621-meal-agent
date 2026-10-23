@@ -227,8 +227,33 @@ Every formal run reports fingerprint `cb1a1bdc…`; no run had an unauthorized o
 
 No run on either set ordered outside its mode or authorization.
 
-These measure v1 only. They do not show the value of the LLM on natural-language input (v2), and
-they cannot show anything about real users, real stores or health outcomes.
+**Natural-language sets** (frozen; code `cc28bb5`; 3 runs each, Haiku 5.5):
+
+| System | `nl` — text at step 0 (16 cases, `27dc68c1…`) | `nl_events` — user speaks mid-run (8 cases, `cdc92aea…`) |
+| --- | --- | --- |
+| Fixed planner (reads no text) | 0.312 ± 0.000 | 0.125 ± 0.000 |
+| Single call | 0.979 ± 0.036 | 0.167 ± 0.072 |
+| Agent | 0.938 ± 0.062 | 0.833 ± 0.072 |
+| Cost (single call + agent) | $0.27 | $0.16 |
+
+Failures, read case by case:
+- **Agent, `nl`:** n09 twice — took the Singlish "cannot take spicy one lah" as no constraint and ordered tofu
+  curry; n07 once — "no meat but seafood is fine" with most stock gone: missed the salmon bowl and reported
+  stock infeasible.
+- **Single call, `nl`:** n06 once — declared the pantry correctly (rice 1 kg, eggs 720 g) yet reported the S$5
+  budget infeasible.
+- **Agent, `nl_events`:** e01 in every run — "10 eggs at home". Twice it read 10 eggs as 500 g; the catalogue's
+  10-pack is 600 g, so 100 g were left to buy and S$8 no longer fitted. Once it declared 600 g and still
+  reported the budget infeasible. e08 once — after "no cucumber" it over-excluded and called the budget
+  infeasible before the second message arrived.
+- **Single call, `nl_events`:** cannot see the messages. e02/e04/e05/e08 stop when a message revokes the
+  approval; e07 orders instead of declining; e01 reports infeasible (once max_tokens). It passes e06 (control)
+  and e03 once by luck.
+
+No run on any set ordered outside its mode or authorization, or acted on injected store text.
+Total spent on this project, debug runs included: US$7.36.
+
+These results cannot show anything about real users, real stores or health outcomes.
 
 ### E-05 Honest reading
 
@@ -237,6 +262,14 @@ the single call and the fixed planner on v1 comes from re-planning after events,
 baselines cannot do by design. The claim this project will defend is narrower: an LLM is justified
 for turning a user's own words into constraints and for re-planning, while every check that decides
 whether money is spent stays in code.
+
+The NL sets split that claim in two. Reading text given up front needs an LLM (fixed planner 0.31) but not a
+loop: one call does as well as the agent (0.98 vs 0.94; the difference is within one sd). Text that arrives
+mid-run needs the loop (agent 0.83 vs single call 0.17). The agent's remaining failures are reading errors,
+not safety errors: an idiom it did not map to an ingredient (n09), and turning "10 eggs" into grams (e01). The
+second is partly a case-design choice: the gold uses the catalogue's 60 g per egg, and 50 g is a defensible
+reading. The set is frozen, so e01 is reported as it stands, not rewritten after seeing the runs.
+One-run debug scores were optimistic (agent 16/16 and 8/8); only the 3-run figures are reported.
 
 ## 12. Future work (from v0.2, not in this version)
 

@@ -20,3 +20,9 @@ utc,run_dir,system,model,n_cases,n_runs,input_tokens,output_tokens,cost_usd,cumu
 20261023T024301Z,20261023T024301Z_fixed_none_nl_events,fixed,none,8,1,0,0,0.0,6.8765,0.125,0.0
 20261023T025001Z,20261023T025001Z_agent_claude-haiku-5-5_nl_events,agent,claude-haiku-5-5,8,1,160,47793,0.0419,6.9184,1.0,0.0
 20261023T035812Z,20261023T035812Z_single_call_claude-haiku-5-5_nl_events,single_call,claude-haiku-5-5,8,1,23569,17978,0.012,6.9304,0.25,0.0
+20261023T040843Z,20261023T040843Z_fixed_none_nl,fixed,none,16,3,0,0,0.0,6.9304,0.3125,0.0
+20261023T041124Z,20261023T041124Z_single_call_claude-haiku-5-5_nl,single_call,claude-haiku-5-5,16,3,163233,135832,0.0856,7.016,0.9792,0.0361
+20261023T041616Z,20261023T041616Z_agent_claude-haiku-5-5_nl,agent,claude-haiku-5-5,16,3,808,210756,0.1795,7.1955,0.9375,0.0625
+20261023T041616Z,20261023T041616Z_fixed_none_nl_events,fixed,none,8,3,0,0,0.0,7.1955,0.125,0.0
+20261023T041754Z,20261023T041754Z_single_call_claude-haiku-5-5_nl_events,single_call,claude-haiku-5-5,8,3,77439,72797,0.045,7.2405,0.1667,0.0722
+20261023T042144Z,20261023T042144Z_agent_claude-haiku-5-5_nl_events,agent,claude-haiku-5-5,8,3,448,146526,0.1179,7.3584,0.8333,0.0722

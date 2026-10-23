@@ -19,3 +19,7 @@
   extra recipes in n09); over-declaration is not penalised and is reported separately. Reading: this set shows
   that language understanding is needed (fixed planner 5/16), NOT that a loop is needed: all text arrives at
   step 0. Messages mid-run are case set `nl_events`. Fingerprint `27dc68c16e3330ca819a4a7033ca6fb563f5624dd4bd9e56915a406bc12071dd`.
+
+- 2026-10-23 — Formal runs (code `cc28bb5`, 3 runs): fixed 0.312 ± 0, single call 0.979 ± 0.036, agent
+  0.938 ± 0.062. Failures in policy E-04. Note: the agent prompt changed between the debug runs (`8e41fa6`)
+  and these (one paragraph on mid-run messages); the cases did not.

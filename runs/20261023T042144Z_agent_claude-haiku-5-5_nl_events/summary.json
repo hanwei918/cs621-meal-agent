@@ -1,0 +1,45 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 8,
+  "n_runs": 3,
+  "pass_mean": 0.8333,
+  "pass_sd": 0.0722,
+  "per_run": [
+    0.875,
+    0.875,
+    0.75
+  ],
+  "failed_checks": {
+    "no_order": 4
+  },
+  "failures_by_tag": {
+    "message:no_order": 4,
+    "pantry:no_order": 3,
+    "budget:no_order": 3,
+    "approval_event:no_order": 1,
+    "exclude_ingredient:no_order": 1,
+    "accumulate:no_order": 1
+  },
+  "flaky": [
+    "e08"
+  ],
+  "always_fail": [
+    "e01"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 1.17
+  },
+  "errors": 0,
+  "steps_per_case": 38.96,
+  "input_tokens": 448,
+  "output_tokens": 146526,
+  "cost_usd": 0.1179,
+  "meta": {
+    "case_set": "nl_events",
+    "eval_sha256": "cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6",
+    "code": "cc28bb5"
+  },
+  "utc": "20261023T042144Z"
+}

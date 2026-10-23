@@ -17,3 +17,8 @@
   luck** (it happened to put a 10-minute salad at day 1 dinner); e01 hit max_tokens on the step-0-infeasible
   budget (as v1 c16), counted as a failure; e02/e04/e05/e08 stopped when the message revoked approval; e07
   ordered instead of declining. Fingerprint `cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6`.
+
+- 2026-10-23 — Formal runs (code `cc28bb5`, 3 runs): fixed 0.125 ± 0, single call 0.167 ± 0.072, agent
+  0.833 ± 0.072. e01 failed in every agent run (2× read 10 eggs as 500 g, 1× declared 600 g and still called the
+  budget infeasible). The gold (600 g, the catalogue's 10-pack) is kept: the set is frozen and the gold is not
+  changed after seeing outputs. The ambiguity is reported in policy E-05.
