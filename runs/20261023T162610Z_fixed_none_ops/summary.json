@@ -1,0 +1,62 @@
+{
+  "system": "fixed",
+  "model": "none",
+  "n_cases": 8,
+  "n_runs": 1,
+  "pass_mean": 0.25,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.25
+  ],
+  "failed_checks": {
+    "error": 2,
+    "no_order": 2,
+    "status_unresolved": 1,
+    "not_submitted": 1
+  },
+  "failures_by_tag": {
+    "needs_input:error": 2,
+    "budget:error": 1,
+    "needs_input:no_order": 1,
+    "invalid:no_order": 1,
+    "allergy:error": 1,
+    "order_timeout:no_order": 1,
+    "not_placed:no_order": 1,
+    "order_timeout:status_unresolved": 1,
+    "placed:status_unresolved": 1,
+    "mode_switch:not_submitted": 1,
+    "plan_only:not_submitted": 1,
+    "approval_event:not_submitted": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "o01",
+    "o02",
+    "o03",
+    "o05",
+    "o06",
+    "o08"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.5
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.5,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "errors": 2,
+  "steps_per_case": 24.5,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0,
+  "meta": {
+    "case_set": "ops",
+    "eval_sha256": "99c5fc3993483d7d72c343f1aa6cc07645785af22dab4e23e7e20069bbe1f747",
+    "code": "65eaf6c-dirty"
+  },
+  "utc": "20261023T162610Z"
+}

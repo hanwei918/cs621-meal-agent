@@ -56,6 +56,7 @@ class Profile(_M):
 
 
 AUTONOMY = ("plan_only", "confirm", "delegated")
+WITHHOLDABLE = ("budget_sgd", "max_cook_minutes", "allergies", "diet", "servings")
 
 
 class StandingAuthorization(_M):
@@ -71,11 +72,12 @@ class Event(_M):
     on: Literal["step", "approval"] = "step"   # step: after the agent's Nth tool call;
                                                # approval: the moment the user first approves a cart
     after_step: int = 0
-    kind: Literal["out_of_stock", "price_change", "preference", "revoke_authorization", "user_message"]
+    kind: Literal["out_of_stock", "price_change", "preference", "revoke_authorization", "user_message", "set_mode"]
     sku: Optional[str] = None
     price_sgd: Optional[float] = None
     add_diet: Optional[Literal["vegetarian", "no_pork", "no_beef"]] = None
     add_allergy: Optional[str] = None
+    mode: Optional[Literal["plan_only", "confirm", "delegated"]] = None   # set_mode: the user switches mode (O-00)
     text: Optional[str] = None                 # user_message: what the user says mid-run, in their own words;
                                                # Gold.note is the author's reading of the note AND every message
 
@@ -120,6 +122,9 @@ class Case(_M):
     authorization: Optional[StandingAuthorization] = None                # required for ③
     today: date = date(2026, 10, 25)       # the simulated date, for authorization expiry
     store_overrides: dict[str, dict] = {}  # sku → {"stock": n} and/or {"price_sgd": x}
+    withheld: dict[str, object] = {}       # P-01: profile field → what get_profile SHOWS (None = missing, or an
+                                           # invalid value); the true value is in `profile`, given on request_input
+    order_timeout: Optional[Literal["placed", "not_placed"]] = None   # O-04: the first valid place_order times out
     events: list[Event] = []
     gold: Gold
     tags: list[str]
@@ -134,6 +139,9 @@ class Case(_M):
             raise ValueError("plan-only (①) cases never reach approval, so cannot have approval events")
         if self.autonomy == "delegated" and self.authorization is None:
             raise ValueError("a delegated (③) case needs a standing authorization")
+        bad = set(self.withheld) - set(WITHHOLDABLE)
+        if bad:
+            raise ValueError(f"cannot withhold {sorted(bad)}; only {WITHHOLDABLE}")
         if self.autonomy == "delegated" and self.gold.feasible and self.gold.within_scope is None:
             raise ValueError("a feasible delegated case must say whether it fits the authorization")
         return self
@@ -169,3 +177,10 @@ class Outcome(_M):
     declared: Optional[dict] = None        # the agent's reading of the note (declare_constraints)
     declined: bool = False                 # decline_request was called (policy P-02)
     decline_reason: Optional[str] = None
+    clarifications: int = 0                # request_input calls (episodes) — E-04
+    clarified_fields: int = 0              # fields asked, in total
+    avoidable_fields: int = 0              # fields asked that were already known and valid
+    final_mode: Optional[str] = None       # set when the user switched mode mid-run (O-00)
+    orders_placed: int = 0                 # real orders created; >1 is a duplicate (O-04)
+    order_confirmed: bool = False          # the agent saw the order confirmed (directly or via get_order_status)
+    blind_retries: int = 0                 # place_order after an unknown status without querying it first

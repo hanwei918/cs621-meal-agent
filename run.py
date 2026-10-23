@@ -19,7 +19,7 @@ def main(argv=None):
     a.add_argument("--system", required=True, choices=["oracle", "reckless", "agent", "single_call", "fixed"])
     a.add_argument("--model", default="claude-haiku-5-5")
     a.add_argument("--cases", default=None)
-    a.add_argument("--set", default="v1", choices=["v1", "autonomy", "nl", "nl_events"], help="case set (v1 is frozen, mode ② only)")
+    a.add_argument("--set", default="v1", choices=["v1", "autonomy", "nl", "nl_events", "ops"], help="case set (v1 is frozen, mode ② only)")
     a.add_argument("--runs", type=int, default=1)
     a.add_argument("--workers", type=int, default=4, help="cases run in parallel")
     a.add_argument("--yes", action="store_true")

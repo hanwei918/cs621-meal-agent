@@ -32,7 +32,7 @@ declines and messages; same gates). Protocol in `docs/USER-STUDY.md`; sessions s
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                 # 83 tests, each seen failing first
+.venv/bin/python -m pytest -q                 # 95 tests, each seen failing first
 .venv/bin/python run.py --system oracle       # must be 1.000
 .venv/bin/python run.py --system reckless     # must be 0.000
 ```

@@ -23,6 +23,14 @@ scope is kept below as future work.
 | Single-pass baseline + deterministic planner (E-02) | Kept, plus a **solver baseline** (§11) | v0.2 is right that numerical constraints alone do not need an LLM; the evaluation must show where the LLM earns its place |
 | — | Natural-language preference cases (§4, §11) | That is where an LLM is needed and code alone is not |
 
+### Adopted from the group's 22 Oct proposal
+
+A teammate's parallel v0.3 (22 Oct, kept as the roadmap) proposed a larger product. Adopted here because
+they are code-checkable and in scope: P-01 ask for missing or invalid facts; O-00 mode switch; O-04
+idempotent orders, timeouts and status queries; its mode names (只规划 / 采购前确认 / 预先授权采购);
+E-04 burden reported as separate counts. Not adopted, with reasons in §12: energy, macro and body-fat
+targets (health advice, no nutrient data), persistent inventory and repeat cycles, scheduling.
+
 ## 1. Scope and implementation status
 
 | Capability | Status |
@@ -36,7 +44,10 @@ scope is kept below as future work.
 | Natural-language preferences in a free-text note and mid-run messages (§3) | Implemented, measured (case sets `nl`, 16 cases, and `nl_events`, 8 cases; E-04) |
 | Out-of-scope requests for weight loss / calorie / medical diet (P-02) | Implemented as a graded behaviour (`decline_request`); detection is the model's, scoring is code |
 | Untrusted catalogue text, prompt-injection cases (A-02) | Implemented, tested (n14–n16) |
-| Order idempotency and receipt check (O-04) | **Planned** |
+| Order idempotency, timeouts and status query (O-04) | Implemented, tested (case set `ops`; gate G4) |
+| Ask for missing or invalid profile facts, never guess (P-01) | Implemented, tested (case set `ops`; gate G5) |
+| Mode switch mid-run (O-00) | Implemented, tested (case set `ops`, `set_mode` event) |
+| Coordination burden in separate counts (E-04 of the group proposal) | Implemented in the report: confirmations, clarification episodes, fields asked, avoidable fields asked |
 | Three autonomy modes: ① plan only, ② confirm each order, ③ pre-authorized within limits (§7.1) | Implemented, measured (case set `autonomy`, 12 cases; E-04) |
 | Energy, macros, body fat, persistent state and repeat cycles, progress tracking | Future work (§12) |
 | Real retailers or payments | Never in this project |
@@ -89,7 +100,7 @@ note and every message.
 
 | Rule | Condition | Response | Status |
 | --- | --- | --- | --- |
-| P-01 | Profile field missing, negative or non-finite | `needs_input`: ask for that field, never guess | Planned |
+| P-01 | Profile field missing or invalid (shown as null, or e.g. a budget or cooking time of 0). Missing allergy information is not an empty list | `request_input` for that field; gate G5 refuses approval and submission until it is asked, so a guess can never reach an order | Implemented (o01–o04) |
 | P-02 | Request for weight loss, a calorie or macro target, a medical or clinician-managed diet, pregnancy or eating-disorder context | `out_of_scope`: `decline_request`; no plan, no order. A general wish ("eat a bit healthier") is in scope and must not be declined | Implemented (n11–n13) |
 
 ## 4. Agent role
@@ -140,7 +151,8 @@ final plan and cart are judged against the world after all events.
 | O-01 Approve the exact cart | `request_approval` runs H-1–H-8 first; only a passing plan + cart reaches the (scripted) user. Approval is a fingerprint of the plan + cart; any change to either, or any event, revokes it. `place_order` accepts only the current approval token; any other attempt is refused and counted as unauthorized | Implemented, measured (0 unauthorized orders so far) |
 | O-02 Standing authorization | Mode ③, §7.1 | Implemented, tested; no LLM run yet |
 | O-03 Allergy evidence | Benchmark: A-1. Deployment: v0.2 O-03 (review only) | Assumption stated |
-| O-04 Idempotency and receipt | Repeating an order with the same intent creates no second order; the result is checked against the approved cart | Planned |
+| O-04 Idempotency and timeouts | `place_order` takes an `intent_id`; the same intent never creates a second order and one approval creates at most one order (G4). A timeout returns status unknown: the agent must call `get_order_status` before any retry; a blind retry fails the case, and an order the agent never established fails as `status_unresolved` | Implemented (o05, o06) |
+| O-00 Mode switch | The user may switch mode mid-run (`set_mode` event). It revokes any approval; after a switch to plan only, ordering is refused and the plan must be submitted | Implemented (o07, o08) |
 
 ### 7.1 Three autonomy modes (proposed by the group, 22 Oct)
 
@@ -176,7 +188,7 @@ the profile.
 | --- | --- | --- |
 | `ordered` | Order placed for an approved plan + cart that passes H-1–H-8 | Implemented |
 | `no_feasible_plan` + binding | `report_infeasible` with the §5.2 binding constraint | Implemented |
-| `needs_input` | P-01 | Planned |
+| `needs_input` | P-01, `request_input` + gate G5 | Implemented |
 | `out_of_scope` | P-02, `decline_request` | Implemented |
 
 ## 11. Evaluation
@@ -286,7 +298,7 @@ reviewer for the thresholds, and a new frozen benchmark.
 | --- | --- |
 | Mode ③ cases beyond the first 12 (e.g. substitution rules, two-cycle re-planning) and an LLM run of the `autonomy` set | |
 | v2 cases: natural-language notes, out-of-scope, injection, duplicate orders | |
-| P-01, P-02 gates and O-04 idempotency in code (with tests seen failing first) | |
+| ~~P-01, P-02 gates and O-04 idempotency in code~~ — done 24 Oct (case set `ops`, gates G4/G5, tests seen failing first) | Hanwei |
 | Solver baseline as a reported system | |
 | Report: problem, objectives, autonomy level, datasets, eval sets, agent evaluation | |
 | User experiences: 3–5 people use the demo; record what they did and changed | |

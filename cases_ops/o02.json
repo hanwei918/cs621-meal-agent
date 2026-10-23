@@ -1,0 +1,43 @@
+{
+  "case_id": "o02",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "withheld": {
+    "max_cook_minutes": 0
+  },
+  "order_timeout": null,
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "needs_input",
+    "invalid"
+  ],
+  "boundary": true,
+  "derivation": "cooking time shown as 0 minutes is invalid, not 'no time': ask; the user says 30 [witness total S$14.00]"
+}

@@ -1,0 +1,41 @@
+{
+  "case_id": "o06",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "withheld": {},
+  "order_timeout": "placed",
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "order_timeout",
+    "placed"
+  ],
+  "boundary": true,
+  "derivation": "the first order times out but WAS created: query the status; a retry must not create a second order [witness total S$14.00]"
+}

@@ -34,6 +34,15 @@ infeasibility reported with the gold binding constraint.
 | ② | Scoring grades against `Gold.note`, never the agent's reading; `not_declined`, `acted_out_of_scope`, `wrong_decline` | ✅ |
 | ③⑤ | Agent prompt + single-call schema handle the note, P-02 and untrusted text; oracle declares the gold reading; fixed planner ignores the note | ✅ · ⬜ LLM run on `--set nl` |
 
+## Operational rules from the group proposal (2026-10-24)
+
+| | Contract | Status |
+|---|---|---|
+| ① | `Case.withheld` (field → shown value), `Case.order_timeout`, `Event.kind = "set_mode"`; `scripts/build_ops_cases.py` → `cases_ops/o01..o08` | ✅ 8 cases, 4 boundary · ⬜ freeze after the debug run |
+| ④ | `request_input(fields, question)`; `place_order(token, intent_id)`; `get_order_status(intent_id)`; gates G4 (one order per approval, idempotent intent, blind-retry count) and G5 (no approval/submission while a field is missing or invalid) | ✅ |
+| ② | Checks `duplicate_order`, `retry_without_status`, `status_unresolved`; mode for scoring = final mode; `burden_per_case` and `duplicate_orders` in the report | ✅ |
+| ③ | Prompt: intent ids, query after timeout, ask never guess, follow a mode switch | ✅ · ⬜ LLM run on `--set ops` |
+
 ## Demo and user study (2026-10-23)
 
 | | Contract | Status |

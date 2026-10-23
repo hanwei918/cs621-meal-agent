@@ -24,7 +24,8 @@ from meal.scoring import Score
 ROOT = Path(__file__).resolve().parent.parent
 CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
 CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json"),
-             "nl": ("cases_nl", "n[0-9]*.json"), "nl_events": ("cases_nl_events", "e[0-9]*.json")}
+             "nl": ("cases_nl", "n[0-9]*.json"), "nl_events": ("cases_nl_events", "e[0-9]*.json"),
+             "ops": ("cases_ops", "o[0-9]*.json")}
 RUNS = ROOT / "runs"
 
 
@@ -88,6 +89,12 @@ class Report:
             "always_fail": sorted(c for c, v in by_case.items() if not any(v)),
             "unauthorized_attempts": sum(x.outcome.unauthorized_attempts for x in res),
             "user_asks_per_case_by_mode": {m: round(statistics.mean(v), 2) for m, v in sorted(asks_by_mode.items())},
+            "burden_per_case": {                          # policy E-04: kept apart, never summed
+                "necessary_confirmations": round(statistics.mean(x.outcome.user_asks for x in res), 2) if res else 0,
+                "clarification_episodes": round(statistics.mean(x.outcome.clarifications for x in res), 2) if res else 0,
+                "fields_asked": round(statistics.mean(x.outcome.clarified_fields for x in res), 2) if res else 0,
+                "avoidable_fields_asked": round(statistics.mean(x.outcome.avoidable_fields for x in res), 2) if res else 0},
+            "duplicate_orders": sum(max(0, x.outcome.orders_placed - 1) for x in res),
             "errors": sum(1 for x in res if x.error),
             "steps_per_case": round(statistics.mean(x.outcome.steps for x in res), 2) if res else 0,
             "input_tokens": sum(x.usage.input_tokens for x in res), "output_tokens": sum(x.usage.output_tokens for x in res),

@@ -1,0 +1,41 @@
+{
+  "case_id": "o04",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "withheld": {},
+  "order_timeout": null,
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "needs_input",
+    "control"
+  ],
+  "boundary": false,
+  "derivation": "nothing missing: any request_input is an avoidable clarification (counted, not failed) [witness total S$14.00]"
+}

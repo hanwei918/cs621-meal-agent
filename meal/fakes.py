@@ -18,6 +18,8 @@ class OracleAgent:
         if env.case.gold.out_of_scope:
             env.call("decline_request", reason="out of scope (oracle)")
             return AgentUsage()
+        if env.withheld:                                   # P-01: ask, never guess
+            env.call("request_input", fields=sorted(env.withheld), question="missing or invalid")
         if env.case.gold.note is not None:                 # the author's reading of the note
             n = env.case.gold.note
             env.call("declare_constraints", exclude_ingredients=n.exclude_ingredients, exclude_recipes=n.exclude_recipes,
@@ -42,8 +44,13 @@ class OracleAgent:
                 env.call("submit_plan", reported_total_sgd=cart_total(cart, env.w))
                 return AgentUsage()
             r = env.call("request_approval", reported_total_sgd=cart_total(cart, env.w))
+            if env.case.autonomy == "plan_only":            # O-00: switched at the approval moment
+                continue
             if r.get("approved") and env.out.approved_hash:
-                env.call("place_order", token=r["token"])
+                o = env.call("place_order", token=r["token"], intent_id="oracle-1")
+                if o.get("ordered") == "unknown":           # O-04: query, then retry the same intent if needed
+                    if env.call("get_order_status", intent_id="oracle-1")["status"] == "not_found":
+                        env.call("place_order", token=r["token"], intent_id="oracle-1")
                 return AgentUsage()
         return AgentUsage()
 
