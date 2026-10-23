@@ -27,11 +27,12 @@ Messages mid-run (case set `nl_events`, `cases_nl_events/`): the user speaks aft
 
 Demo and user study: `.venv/bin/python demo/server.py` → http://127.0.0.1:8621 (a real person approves,
 declines and messages; same gates). Protocol in `docs/USER-STUDY.md`; sessions stay local in
-`user-study/sessions/`; `scripts/study_summary.py` summarises them.
+`user-study/sessions/`; `scripts/study_summary.py` summarises them. Shared link (Firebase Hosting → Cloud Run, passcode, spend caps):
+`deploy/README.md`.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                 # 78 tests, each seen failing first
+.venv/bin/python -m pytest -q                 # 83 tests, each seen failing first
 .venv/bin/python run.py --system oracle       # must be 1.000
 .venv/bin/python run.py --system reckless     # must be 0.000
 ```

@@ -83,7 +83,8 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
   <section>
     <div class="card">
       <h2>Your setup</h2>
-      <label>Participant code</label><input id="participant" type="text" value="P01">
+      <div id="passBox" class="hidden"><label>Passcode (from the organiser)</label><input id="passcode" type="password" autocomplete="off"></div>
+      <label>Participant code (from the organiser)</label><input id="participant" type="text" value="P01">
       <label>Who decides on the order?</label>
       <div class="modes">
         <label><input type="radio" name="mode" value="plan_only"> ① Plan only
@@ -200,23 +201,27 @@ const LIKERT = [
   ["trust_mode", "I would trust this mode to handle my weekly groceries."],
   ["saves_time", "It would save me time compared with planning and shopping myself."],
 ];
-let cat = {recipes: {}, ingredients: {}}, timer = null, lastStatus = "idle";
+let cat = {recipes: {}, ingredients: {}}, timer = null, lastStatus = "idle", sid = null;
 const SLOT = {1: "Lunch", 2: "Dinner"};
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const money = x => "S$" + Number(x || 0).toFixed(2);
 const rname = id => cat.recipes[id]?.name || id;
 const iname = id => cat.ingredients[id]?.name || id;
 
-fetch("/api/catalog").then(r => r.json()).then(c => {
-  c.recipes.forEach(r => cat.recipes[r.id] = r); c.ingredients.forEach(i => cat.ingredients[i.id] = i);
-});
+const hdrs = () => ({"Content-Type": "application/json", "X-Passcode": $("passcode").value});
+const get = url => fetch(url, {headers: hdrs()}).then(r => r.json());
+const post = (url, body) => fetch(url, {method: "POST", headers: hdrs(), body: JSON.stringify(body)}).then(r => r.json());
+function loadCatalog() {
+  return get("/api/catalog").then(c => { if (c.error) return false;
+    c.recipes.forEach(r => cat.recipes[r.id] = r); c.ingredients.forEach(i => cat.ingredients[i.id] = i); return true; });
+}
+get("/api/config").then(c => { show("passBox", c.passcode_required); if (!c.passcode_required) loadCatalog(); });
 $("likert").innerHTML = `<div class="likert"><span></span>${[1,2,3,4,5].map(n => `<span class="h">${n}</span>`).join("")}</div>` +
   LIKERT.map(([k, q]) => `<div class="likert"><span>${q}</span>${[1,2,3,4,5].map(n => `<input type="radio" name="lk_${k}" value="${n}" aria-label="${n}">`).join("")}</div>`).join("");
 document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => $("authBox").classList.toggle("hidden", mode() !== "delegated"));
 document.querySelectorAll("#noteChips .chip").forEach(b => b.onclick = e => { e.preventDefault(); $("note").value = ($("note").value + " " + b.textContent).trim(); });
 const mode = () => document.querySelector("input[name=mode]:checked").value;
 const checked = id => [...document.querySelectorAll(`#${id} input:checked`)].map(i => i.value);
-const post = (url, body) => fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}).then(r => r.json());
 
 $("start").onclick = async () => {
   const [system, model] = $("system").value.split("|");
@@ -225,18 +230,20 @@ $("start").onclick = async () => {
               days: +$("days").value, meals_per_day: 2, diet: checked("diet"), allergies: checked("allergies")},
     authorization: {max_order_sgd: +$("maxOrder").value, max_period_sgd: +$("maxPeriod").value,
                     already_spent_sgd: +$("spent").value, valid_until: $("until").value}};
+  if (!Object.keys(cat.recipes).length && !(await loadCatalog())) { alert("Wrong passcode."); return; }
   const r = await post("/api/start", form);
   if (r.error) { alert(r.error); return; }
+  sid = r.sid;
   $("saved").textContent = ""; $("sent").textContent = ""; $("missed").value = ""; $("wouldDelegate").value = "";
   document.querySelectorAll("#likert input").forEach(i => i.checked = false);
   ["resultCard", "surveyCard"].forEach(id => $(id).classList.add("hidden"));
   clearInterval(timer); timer = setInterval(poll, 700); poll();
 };
-$("approveBtn").onclick = () => post("/api/approve", {approve: true}).then(poll);
-$("declineBtn").onclick = () => post("/api/approve", {approve: false, comment: $("declineComment").value}).then(() => { $("declineComment").value = ""; poll(); });
+$("approveBtn").onclick = () => post("/api/approve", {sid, approve: true}).then(poll);
+$("declineBtn").onclick = () => post("/api/approve", {sid, approve: false, comment: $("declineComment").value}).then(() => { $("declineComment").value = ""; poll(); });
 $("send").onclick = async () => {
   const t = $("msg").value.trim(); if (!t) return;
-  await post("/api/message", {text: t}); $("msg").value = "";
+  await post("/api/message", {sid, text: t}); $("msg").value = "";
   $("sent").innerHTML += `<div>You said: “${esc(t)}”</div>`;
 };
 $("msg").onkeydown = e => { if (e.key === "Enter") $("send").click(); };
@@ -245,8 +252,8 @@ $("saveSurvey").onclick = async () => {
   LIKERT.forEach(([k]) => { const v = document.querySelector(`input[name=lk_${k}]:checked`); s[k] = v ? +v.value : null; });
   Object.assign(s, {reading: $("readRight").value, missed: $("missed").value, preferred_mode: $("prefMode").value,
     minutes_per_week_now: $("minutesNow").value === "" ? null : +$("minutesNow").value, would_delegate_if: $("wouldDelegate").value});
-  const r = await post("/api/survey", s);
-  $("saved").textContent = r.saved_to ? "Saved to " + r.saved_to : (r.error || "not saved");
+  const r = await post("/api/survey", {sid, survey: s});
+  $("saved").textContent = r.saved_to ? "Saved. Thank you!" : (r.error || "not saved");
 };
 
 function understood(d) {
@@ -301,7 +308,8 @@ function stepText(s) {
 function show(id, on) { $(id).classList.toggle("hidden", !on); }
 
 async function poll() {
-  const s = await fetch("/api/state").then(r => r.json());
+  if (!sid) return;
+  const s = await get("/api/state?sid=" + encodeURIComponent(sid));
   $("pill").textContent = s.status === "awaiting_approval" ? "waiting for you" : s.status;
   $("pill").className = "pill " + s.status;
   if (s.status === "idle") return;
@@ -331,13 +339,14 @@ async function poll() {
     else if (r.ordered) text = `Ordered · ${money(r.order_total_sgd)} · approved ${r.approved_by === "standing" ? "within your limits, without asking" : "by you"}`;
     else if (r.submitted) text = "Plan and shopping list ready. Nothing was ordered (plan-only mode).";
     else if (r.infeasible) { text = `No plan fits your constraints (binding: ${r.binding}).`; ok = false; }
+    else if (r.stopped_for_cost) { text = "Stopped: this run reached its spending limit."; ok = false; }
     else { text = "Stopped without an order."; ok = false; }
     if (r.violations_against_profile_and_declared?.length) { ok = false; text += " ⚠ " + r.violations_against_profile_and_declared.join("; "); }
     text += ` · you were asked ${r.user_asks}× · ${s.elapsed_s}s · ${money(s.cost_usd).replace("S$", "US$")}`;
     $("result").textContent = text; $("result").className = "result " + (ok ? "ok" : "bad");
     $("agentSays").innerHTML = s.agent_text.length ? `<label>It said</label><div class="say">${esc(s.agent_text[s.agent_text.length - 1])}</div>` : "";
     show("resultCard", true); show("surveyCard", !s.saved_to);
-    if (s.saved_to) $("saved").textContent = "Saved to " + s.saved_to;
+    if (s.saved_to) $("saved").textContent = "Saved. Thank you!";
   }
   lastStatus = s.status;
 }

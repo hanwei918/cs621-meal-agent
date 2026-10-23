@@ -1,0 +1,67 @@
+# Shared demo: Firebase Hosting → Cloud Run
+
+Participants open one link (`https://<project>.web.app`), enter a passcode, and test on their own time.
+Hosting serves only `deploy/hosting/robots.txt` and forwards everything else to the Cloud Run service
+`meal-demo`, which runs `demo/server.py` in a container built from `Dockerfile`.
+
+## What goes out (check before every deploy)
+
+`gcloud meta list-files-for-upload .` must list exactly the 19 files the server needs (Dockerfile,
+`meal/*.py`, `eval/__init__.py`, `eval/pricing.py`, `data/*.json`, `demo/server.py`, `demo/index.html`,
+`deploy/requirements-demo.txt`). No cases, runs, user-study data, docs or `.git`. The Dockerfile copies
+the same list explicitly.
+
+## Account and project — personal only
+
+The demo lives in a **new project owned by zhouhanwei421@gmail.com**. Never deploy to an EW project
+(`essential-werkz`, `roadshow-tracker-6f04e`, `starhub-bangkok-2026`). Every command below names the
+account and project explicitly instead of relying on the CLI defaults.
+
+## Protections
+
+| | Where | Default |
+| --- | --- | --- |
+| Passcode on every API call | `DEMO_PASSCODE` (Secret Manager) | required |
+| Spend per run (agent stops) | `DEMO_SESSION_CAP` | US$0.05 |
+| Spend in total (new runs refused) | `DEMO_TOTAL_CAP`, counter in Firestore `meta/spend` | US$2.00 |
+| Runs at once | `DEMO_MAX_LIVE` | 3 |
+| One instance (sessions live in memory) | `--max-instances 1` | |
+| Anthropic key | Secret Manager, never in code or chat | |
+| Hard ceiling | A **separate API key** in a Console workspace with its own spend limit | recommended |
+
+## One-time setup (owner, in a terminal)
+
+```bash
+gcloud auth login zhouhanwei421@gmail.com
+firebase login:use zhouhanwei421@gmail.com          # or: firebase login:add
+# Console: create project <PROJECT>, link billing (Blaze), create Firestore (Native, asia-southeast1)
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com secretmanager.googleapis.com \
+  artifactregistry.googleapis.com firestore.googleapis.com --project <PROJECT> --account zhouhanwei421@gmail.com
+printf '%s' "$ANTHROPIC_API_KEY" | gcloud secrets create anthropic-key --data-file=- --project <PROJECT> --account zhouhanwei421@gmail.com
+printf '%s' '<passcode>' | gcloud secrets create demo-passcode --data-file=- --project <PROJECT> --account zhouhanwei421@gmail.com
+```
+
+## Deploy
+
+```bash
+gcloud run deploy meal-demo --source . --region asia-southeast1 \
+  --project <PROJECT> --account zhouhanwei421@gmail.com \
+  --allow-unauthenticated --max-instances 1 --no-cpu-throttling --memory 512Mi --timeout 300 \
+  --set-secrets ANTHROPIC_API_KEY=anthropic-key:latest,DEMO_PASSCODE=demo-passcode:latest \
+  --set-env-vars DEMO_SESSION_CAP=0.05,DEMO_TOTAL_CAP=2,DEMO_MAX_LIVE=3 \
+  --set-build-env-vars CODE_REV=$(git rev-parse --short HEAD)
+firebase deploy --only hosting --project <PROJECT>
+```
+
+Note: Cloud Build reads `CODE_REV` only as a build arg; if `--set-build-env-vars` does not reach the
+Dockerfile `ARG`, sessions record `code: unknown` — then pass `--set-env-vars CODE_REV=...` instead.
+
+## After the study
+
+```bash
+.venv/bin/pip install google-cloud-firestore && gcloud auth application-default login
+.venv/bin/python scripts/export_sessions.py <PROJECT>
+.venv/bin/python scripts/study_summary.py
+gcloud run services delete meal-demo --region asia-southeast1 --project <PROJECT> --account zhouhanwei421@gmail.com
+```
+Delete the service (or set `--max-instances 0`) when the study ends, and rotate the demo API key.

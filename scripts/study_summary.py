@@ -17,7 +17,8 @@ LIKERT = ["understood", "knew_cart", "approve_easy", "trust_mode", "saves_time"]
 
 
 def load(d: Path = SESSIONS) -> list[dict]:
-    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(d.glob("*.json"))]
+    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(d.glob("*.json"))
+            if not p.name.startswith("_")]                         # _spend.json is the demo's spend counter
 
 
 def summary(recs: list[dict]) -> dict:

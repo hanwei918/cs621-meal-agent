@@ -38,15 +38,16 @@ def test_say_delivers_on_the_next_call():
 
 @pytest.fixture
 def live(tmp_path, monkeypatch):
-    monkeypatch.setattr(server, "SESSIONS", tmp_path)
-    server.CURRENT["s"] = None
+    monkeypatch.setattr(server, "STORE", server.FileStore(tmp_path))
+    monkeypatch.setattr(server, "PASSCODE", "")
+    server.SESSIONS_LIVE.clear()
     srv = server.serve(0)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     base = f"http://127.0.0.1:{srv.server_address[1]}"
 
-    def call(path, body=None):
+    def call(path, body=None, passcode=""):
         req = urllib.request.Request(base + path, data=None if body is None else json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json"})
+                                     headers={"Content-Type": "application/json", "X-Passcode": passcode})
         try:
             return json.loads(urllib.request.urlopen(req, timeout=5).read())
         except urllib.error.HTTPError as e:                              # 4xx bodies are JSON too
@@ -55,9 +56,9 @@ def live(tmp_path, monkeypatch):
     srv.shutdown()
 
 
-def wait(call, *statuses):
+def wait(call, sid, *statuses):
     for _ in range(100):
-        s = call("/api/state")
+        s = call(f"/api/state?sid={sid}")
         if s["status"] in statuses:
             return s
         time.sleep(0.05)
@@ -68,38 +69,82 @@ FORM = {"participant": "T01", "mode": "confirm", "system": "fixed", "note": "",
         "profile": {"budget_sgd": 30, "max_cook_minutes": 30, "diet": ["vegetarian"], "allergies": []}}
 
 
-def test_end_to_end_decline_then_approve_then_save(live):
+def test_end_to_end_approve_then_save(live):
     call, sessions = live
-    assert call("/api/start", FORM)["ok"]
-    s = wait(call, "awaiting_approval")
+    sid = call("/api/start", FORM)["sid"]
+    s = wait(call, sid, "awaiting_approval")
     assert s["pending_approval"]["total_sgd"] > 0 and s["result"]["ordered"] is False
-    assert call("/api/start", FORM).get("error")                         # one session at a time
-    call("/api/approve", {"approve": True})
-    s = wait(call, "done")
+    call("/api/approve", {"sid": sid, "approve": True})
+    s = wait(call, sid, "done")
     assert s["result"]["ordered"] and s["result"]["approved_by"] == "user"
     assert s["result"]["violations_against_profile_and_declared"] == []
-    saved = call("/api/survey", {"understood": 4})["saved_to"]
+    assert call("/api/survey", {"sid": sid, "survey": {"understood": 4}})["saved_to"]
     rec = json.loads(next(sessions.glob("T01_confirm_*.json")).read_text())
-    assert rec["survey"]["understood"] == 4 and rec["approvals"][0]["approved"] is True and saved
+    assert rec["survey"]["understood"] == 4 and rec["approvals"][0]["approved"] is True
+
+
+def test_two_participants_do_not_see_each_other(live):
+    call, _ = live
+    a = call("/api/start", FORM)["sid"]
+    b = call("/api/start", dict(FORM, participant="T02"))["sid"]
+    wait(call, a, "awaiting_approval"); wait(call, b, "awaiting_approval")
+    call("/api/approve", {"sid": a, "approve": False, "comment": "no"})
+    assert wait(call, a, "done")["result"]["ordered"] is False
+    assert call(f"/api/state?sid={b}")["status"] == "awaiting_approval"      # b untouched by a's decline
+    assert call("/api/state?sid=guess")["status"] == "idle"
+
+
+def test_passcode_is_required_when_set(live, monkeypatch):
+    call, _ = live
+    monkeypatch.setattr(server, "PASSCODE", "pear42")
+    assert call("/api/config")["passcode_required"] is True
+    assert call("/api/start", FORM)["error"] == "wrong passcode"
+    assert call("/api/catalog")["error"] == "wrong passcode"
+    assert "sid" in call("/api/start", FORM, passcode="pear42")
+
+
+def test_too_many_live_runs_are_refused(live, monkeypatch):
+    call, _ = live
+    monkeypatch.setattr(server, "MAX_LIVE", 1)
+    call("/api/start", FORM)
+    assert "busy" in call("/api/start", FORM)["error"]
+
+
+def test_total_spend_cap_refuses_new_agent_runs_but_not_the_free_planner(live, monkeypatch):
+    call, sessions = live
+    server.STORE.add_spend(2.5)
+    monkeypatch.setattr(server, "TOTAL_CAP", 2.0)
+    assert "spending limit" in call("/api/start", dict(FORM, system="agent"))["error"]
+    assert "sid" in call("/api/start", FORM)
+
+
+def test_agent_stops_at_its_spend_cap():
+    from meal.agent import MealAgent
+    from tests.test_agent import FakeClient, resp, use
+    client = FakeClient([lambda m, i=i: resp([use("get_profile", {}, i)]) for i in range(10)])
+    a = MealAgent("claude-haiku-5-5", client=client, max_cost_usd=0.0)
+    a.run(StoreEnv(N["n08"]))
+    assert a.stopped_for_cost and len(client.sent) == 1
 
 
 def test_declining_in_the_ui_stops_a_planner_that_cannot_replan(live):
     call, _ = live
-    call("/api/start", FORM)
-    wait(call, "awaiting_approval")
-    call("/api/approve", {"approve": False, "comment": "no"})
-    s = wait(call, "done")
+    sid = call("/api/start", FORM)["sid"]
+    wait(call, sid, "awaiting_approval")
+    call("/api/approve", {"sid": sid, "approve": False, "comment": "no"})
+    s = wait(call, sid, "done")
     assert not s["result"]["ordered"] and s["result"]["user_asks"] == 1
 
 
 def test_study_summary_counts_only_what_was_recorded(live):
     from scripts.study_summary import load, summary
     call, sessions = live
-    call("/api/start", FORM)
-    wait(call, "awaiting_approval")
-    call("/api/approve", {"approve": False, "comment": "too dear"})
-    wait(call, "done")
-    call("/api/survey", {"understood": 2, "trust_mode": 4, "preferred_mode": "confirm", "minutes_per_week_now": 90})
+    sid = call("/api/start", FORM)["sid"]
+    wait(call, sid, "awaiting_approval")
+    call("/api/approve", {"sid": sid, "approve": False, "comment": "too dear"})
+    wait(call, sid, "done")
+    call("/api/survey", {"sid": sid, "survey": {"understood": 2, "trust_mode": 4, "preferred_mode": "confirm",
+                                                "minutes_per_week_now": 90}})
     s = summary(load(sessions))
     m = s["by_mode"]["confirm"]
     assert s["sessions"] == 1 and m["ordered"] == 0 and m["carts_declined_by_person"] == 1

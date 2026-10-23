@@ -1,0 +1,7 @@
+{
+  "hosting": {
+    "public": "deploy/hosting",
+    "ignore": ["**/.*"],
+    "rewrites": [{ "source": "**", "run": { "serviceId": "meal-demo", "region": "asia-southeast1" } }]
+  }
+}

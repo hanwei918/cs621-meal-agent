@@ -1,0 +1,18 @@
+# Upload to Cloud Build ONLY what the Dockerfile copies. Everything else stays on this machine.
+*
+!Dockerfile
+!deploy/
+!deploy/requirements-demo.txt
+!meal/
+!meal/*.py
+!eval/
+!eval/__init__.py
+!eval/pricing.py
+!data/
+!data/*.json
+!demo/
+!demo/server.py
+!demo/index.html
+**/__pycache__/
+eval/harness.py
+deploy/hosting/

@@ -51,7 +51,8 @@ Every check that decides whether money is spent is code (gates G1–G3), not the
 
 - **Participants:** 5–8 classmates or friends who cook at least sometimes. Not representative; the
   aim is to find problems and calibrate claims, not to estimate a population rate.
-- **Length:** about 25 minutes, one person at a time, on the facilitator's laptop.
+- **Length:** about 25 minutes. In person on the facilitator's laptop, or remotely on the shared link
+  (`deploy/README.md`) with the passcode and a participant code sent to each person.
 - **Consent (read aloud):** "This is a class project prototype with a fake store; nothing is bought.
   We record what you type, the agent's actions and your answers, under a code like P03, not your name.
   Please do not type real health or medical details. You can stop at any time."

@@ -87,8 +87,11 @@ TOOLS = [{"name": n, "description": TOOL_SPECS[n], "input_schema": SCHEMAS[n]} f
 
 
 class MealAgent:
-    def __init__(self, model: str, client=None, effort: str | None = None, max_steps: int = 40):
+    def __init__(self, model: str, client=None, effort: str | None = None, max_steps: int = 40,
+                 max_cost_usd: float | None = None):
         self.model, self.effort, self.max_steps = model, effort, max_steps
+        self.max_cost_usd = max_cost_usd                         # demo: stop a run that spends more than this
+        self.stopped_for_cost = False
         self._client = client
 
     def _get_client(self):
@@ -99,6 +102,7 @@ class MealAgent:
 
     def run(self, env: StoreEnv) -> AgentUsage:
         client, u = self._get_client(), AgentUsage()
+        self.usage = u                                           # live, for the demo's spend caps
         messages = [{"role": "user", "content": "Plan my meals for the coming days and do the shopping."}]
         self.messages = messages                                 # readable while running (demo shows the text)
         extra = {"output_config": {"effort": self.effort}} if self.effort else {}
@@ -111,6 +115,12 @@ class MealAgent:
             u.cache_read_tokens += getattr(us, "cache_read_input_tokens", 0) or 0
             u.cache_write_tokens += getattr(us, "cache_creation_input_tokens", 0) or 0
             messages.append({"role": "assistant", "content": resp.content})
+            if self.max_cost_usd is not None:
+                from eval.pricing import cost_usd
+                if cost_usd(self.model, u.input_tokens, u.output_tokens, u.cache_write_tokens,
+                            u.cache_read_tokens) > self.max_cost_usd:
+                    self.stopped_for_cost = True
+                    break
             if resp.stop_reason != "tool_use":
                 break                                            # end_turn, refusal, max_tokens: stop
             results = []
