@@ -24,6 +24,7 @@ def ready(case, ids=("r07", "r10"), ask=None):
 def test_frozen_sets_are_untouched():
     assert eval_fingerprint("v1").startswith("cb1a1bdc") and eval_fingerprint("autonomy").startswith("66a15b01")
     assert eval_fingerprint("nl").startswith("27dc68c1") and eval_fingerprint("nl_events").startswith("cdc92aea")
+    assert eval_fingerprint("ops").startswith("99c5fc39")
 
 
 # ---- P-01
