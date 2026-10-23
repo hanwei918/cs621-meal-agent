@@ -606,7 +606,7 @@ async function poll() {
   if (!live) {
     clearInterval(timer);
     const r = s.result; let icon = "✅", title, sub = "", ok = true;
-    if (s.status === "error") { icon = "⚠️"; title = "Something went wrong"; sub = s.error; ok = false; }
+    if (s.status === "error") { icon = "⚠️"; title = "It stopped"; sub = (s.error || "").replace(/^RuntimeError: /, ""); ok = false; }
     else if (r.declined) { icon = "🙅"; title = "It declined this request"; sub = r.decline_reason; }
     else if (r.ordered) { title = "Ordered · " + money(r.order_total_sgd); sub = r.approved_by === "standing" ? "Inside your limits, so it didn't need to ask you." : "You approved this cart."; }
     else if (r.submitted) { icon = "📝"; title = "Your plan and shopping list are ready"; sub = "Nothing was ordered (plan-only mode)."; }

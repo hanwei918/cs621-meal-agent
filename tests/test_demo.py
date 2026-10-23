@@ -194,3 +194,10 @@ def test_presenter_controls_hit_the_current_cart_and_mark_the_session(live):
     call("/api/survey", {"sid": sid, "survey": {}})
     from scripts.study_summary import load, summary
     assert summary(load(sessions))["sessions"] == 0 and summary(load(sessions))["excluded_presenter_sessions"] == 1
+
+
+def test_fixed_rules_with_a_blank_field_stop_with_a_plain_reason(live):
+    call, _ = live
+    sid = call("/api/start", dict(FORM, profile=dict(FORM["profile"], budget_sgd=None)))["sid"]
+    s = wait(call, sid, "error")
+    assert "cannot ask" in s["error"] and "budget_sgd" in s["error"] and not s["result"]["ordered"]

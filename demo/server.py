@@ -234,6 +234,9 @@ class Session:
 
     def _run(self):
         try:
+            if self.model == "none" and self.env.withheld:      # the fixed planner has no way to ask
+                raise RuntimeError("Fixed rules cannot ask questions, so they stop here. Fill in "
+                                   + ", ".join(sorted(self.env.withheld)) + " or choose the agent.")
             self.agent.run(self.env)
             self.status = "done"
         except Exception as e:                   # surfaced in the UI; the session can still be saved
