@@ -69,6 +69,10 @@ NUDGE = ("You stopped without a result: nothing was ordered, submitted, reported
          "or, if no valid plan exists, call report_infeasible with the binding constraint.")
 
 
+CUT_OFF = ("Your last reply hit the length limit and was cut off, so any tool call in it was not run. Continue in "
+           "smaller steps: call the tools directly and do not write out the whole plan as text first.")
+
+
 def finished(out) -> bool:
     """A run has a result only if one of these is true; anything else is a silent give-up (policy E-07)."""
     return bool(out.order_confirmed or out.submitted or out.declared_infeasible or out.declined or out.review_status)
@@ -117,10 +121,11 @@ TOOLS = [{"name": n, "description": TOOL_SPECS[n], "input_schema": SCHEMAS[n]} f
 
 class MealAgent:
     def __init__(self, model: str, client=None, effort: str | None = None, max_steps: int = 40,
-                 max_cost_usd: float | None = None, max_nudges: int = 1):
+                 max_cost_usd: float | None = None, max_nudges: int = 1, max_tokens: int = 16000):
         self.model, self.effort, self.max_steps = model, effort, max_steps
         self.max_cost_usd = max_cost_usd                         # demo: stop a run that spends more than this
         self.max_nudges = max_nudges                             # 0 = the agent as evaluated before 24 Oct
+        self.max_tokens = max_tokens                             # 8000 before 24 Oct: long weeks were cut off
         self.stopped_for_cost = False
         self._client = client
 
@@ -139,7 +144,7 @@ class MealAgent:
         u.stop_reason = "max_steps"
         for _ in range(self.max_steps):
             u.turns += 1
-            resp = client.messages.create(model=self.model, max_tokens=8000, system=SYSTEM, tools=TOOLS,
+            resp = client.messages.create(model=self.model, max_tokens=self.max_tokens, system=SYSTEM, tools=TOOLS,
                                           messages=messages, cache_control={"type": "ephemeral"}, **extra)
             us = resp.usage
             u.input_tokens += us.input_tokens
@@ -154,6 +159,12 @@ class MealAgent:
                     self.stopped_for_cost = True
                     u.stop_reason = "cost"
                     break
+            if resp.stop_reason == "max_tokens" and u.nudges < self.max_nudges:
+                u.nudges += 1                                    # cut off: never run a possibly truncated call
+                cut = [{"type": "tool_result", "tool_use_id": b.id, "is_error": True, "content": "cut off; not run"}
+                       for b in resp.content if b.type == "tool_use"]
+                messages.append({"role": "user", "content": cut + [{"type": "text", "text": CUT_OFF}]})
+                continue
             if resp.stop_reason != "tool_use":
                 if resp.stop_reason == "end_turn" and not finished(env.out) and u.nudges < self.max_nudges:
                     u.nudges += 1                                # a silent give-up: say so once, then continue

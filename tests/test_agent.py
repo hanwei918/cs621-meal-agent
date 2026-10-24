@@ -134,3 +134,21 @@ def test_only_one_nudge_and_none_after_a_result():
     client = FakeClient([lambda m: resp([use("report_infeasible", {"binding": "budget", "explanation": "x"}, 1)]),
                          lambda m: resp([], stop="end_turn")])
     assert MealAgent("claude-haiku-5-5", client=client).run(_c03()).nudges == 0
+
+
+def test_a_cut_off_reply_is_not_run_and_the_agent_is_told_to_continue():
+    from meal.agent import CUT_OFF
+    seen = []
+    script = [lambda m: resp([use("set_plan", {"meals": []}, 1)], stop="max_tokens"),   # truncated tool call
+              lambda m: (seen.append(m[-1]["content"]), resp([use("report_infeasible",
+                                                                 {"binding": "budget", "explanation": "x"}, 2)]))[1]]
+    env = _c03()
+    u = MealAgent("claude-haiku-5-5", client=FakeClient(script)).run(env)
+    assert u.nudges == 1 and env.out.steps == 1                       # set_plan was NOT executed
+    assert seen[0][0]["is_error"] and seen[0][-1]["text"] == CUT_OFF and env.out.declared_infeasible
+
+
+def test_output_limit_is_16000():
+    client = FakeClient([lambda m: resp([], stop="end_turn")])
+    MealAgent("claude-haiku-5-5", client=client, max_nudges=0).run(_c03())
+    assert client.sent[0]["max_tokens"] == 16000
