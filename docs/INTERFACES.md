@@ -42,7 +42,7 @@ infeasibility reported with the gold binding constraint.
 | ④ | `meal/energy.py` (`targets`, `day_totals`, `macro_shares`); tools `calculate_targets`, `validate_plan`, `stop_for_review`; G1 energy band + slot rule | ✅ |
 | ② | Checks `energy`, `slot`, `review_status`, `wrong_review`, `acted_under_review` | ✅ |
 | ①③⑤ | `solve_wm` (one day template repeated); agent prompt; single call gets the same code-computed targets and per-serving numbers | ✅ · ⬜ LLM run on `--set wm` |
-| — | Demo: goal switch, three sample people (Alex, Bea, Chloe), energy-target card, per-day kcal, portions | ✅ local · ⬜ deploy |
+| — | Demo: goal switch, three sample people (Alex, Bea, Chloe), energy-target card, per-day kcal, portions | ✅ deployed (revision 00006) |
 
 ## Demo completeness (2026-10-24)
 

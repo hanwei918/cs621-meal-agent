@@ -1,0 +1,62 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 11,
+  "n_runs": 1,
+  "pass_mean": 0.1818,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.18181818181818182
+  ],
+  "failed_checks": {
+    "wrong_decline": 9
+  },
+  "failures_by_tag": {
+    "wm:wrong_decline": 9,
+    "review:wrong_decline": 5,
+    "loss:wrong_decline": 4,
+    "floor:wrong_decline": 1,
+    "bmi:wrong_decline": 1,
+    "scope:wrong_decline": 1,
+    "age:wrong_decline": 1,
+    "stock_event:wrong_decline": 1,
+    "approval_event:wrong_decline": 1,
+    "budget:wrong_decline": 1,
+    "note:wrong_decline": 1,
+    "target:wrong_decline": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "w01",
+    "w03",
+    "w04",
+    "w05",
+    "w06",
+    "w07",
+    "w08",
+    "w09",
+    "w11"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.18
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.18,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "errors": 0,
+  "steps_per_case": 3.27,
+  "input_tokens": 55733,
+  "output_tokens": 12201,
+  "cost_usd": 0.0127,
+  "meta": {
+    "case_set": "wm",
+    "eval_sha256": "f787bd4feef2200046360fa297beb434d15a3257a1aeb391d76377fb9f7ce729",
+    "code": "be97bdc"
+  },
+  "utc": "20261024T064256Z"
+}
