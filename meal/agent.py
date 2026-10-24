@@ -136,7 +136,9 @@ class MealAgent:
         messages = [{"role": "user", "content": "Plan my meals for the coming days and do the shopping."}]
         self.messages = messages                                 # readable while running (demo shows the text)
         extra = {"output_config": {"effort": self.effort}} if self.effort else {}
+        u.stop_reason = "max_steps"
         for _ in range(self.max_steps):
+            u.turns += 1
             resp = client.messages.create(model=self.model, max_tokens=8000, system=SYSTEM, tools=TOOLS,
                                           messages=messages, cache_control={"type": "ephemeral"}, **extra)
             us = resp.usage
@@ -150,12 +152,14 @@ class MealAgent:
                 if cost_usd(self.model, u.input_tokens, u.output_tokens, u.cache_write_tokens,
                             u.cache_read_tokens) > self.max_cost_usd:
                     self.stopped_for_cost = True
+                    u.stop_reason = "cost"
                     break
             if resp.stop_reason != "tool_use":
                 if resp.stop_reason == "end_turn" and not finished(env.out) and u.nudges < self.max_nudges:
                     u.nudges += 1                                # a silent give-up: say so once, then continue
                     messages.append({"role": "user", "content": NUDGE})
                     continue
+                u.stop_reason = resp.stop_reason
                 break                                            # end_turn, refusal, max_tokens: stop
             results = []
             for b in resp.content:
@@ -165,5 +169,6 @@ class MealAgent:
                                     "content": json.dumps(out, ensure_ascii=False), "is_error": "error" in out})
             messages.append({"role": "user", "content": results})
             if env.out.order_confirmed or env.out.declared_infeasible or env.out.declined:
+                u.stop_reason = "result"
                 break                                            # done: nothing after L1 / the report
         return u

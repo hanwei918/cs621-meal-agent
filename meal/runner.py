@@ -23,6 +23,8 @@ class AgentUsage:
     cache_read_tokens: int = 0
     cache_write_tokens: int = 0
     nudges: int = 0                       # times the agent tried to stop with no result and was told to finish
+    stop_reason: str = ""                 # why the loop ended: the API stop_reason, "result", "max_steps" or "cost"
+    turns: int = 0                        # model calls made
 
 
 class Agent(Protocol):
