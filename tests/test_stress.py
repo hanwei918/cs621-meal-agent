@@ -9,12 +9,12 @@ WITNESS_SKUS = {"egg_10pk", "tomato_500g", "spring_onion_100g", "chickpeas_400g"
 
 def test_frozen():
     from eval.harness import eval_fingerprint
-    assert eval_fingerprint("stress").startswith("b9a4cd72")
+    assert eval_fingerprint("stress").startswith("540f2948")   # v2: + sya–syc (v1 was b9a4cd72)
 
 
 def test_shape():
     dims = {t.split(":")[1] for c in S for t in c.tags if t.startswith("dim:")}
-    assert len(S) == 42 and dims == {"events", "days", "notes", "mixed"}
+    assert len(S) == 45 and dims == {"events", "days", "notes", "mixed"}
 
 
 def test_events_never_touch_the_witness():

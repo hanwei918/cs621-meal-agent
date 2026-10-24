@@ -6,6 +6,7 @@ Three load dimensions, each varied with everything else fixed, plus a combined l
   days    d = 3, 5, 7 (one event)                                                    3 cases per level
   notes   n = 1, 2, 3, 4 constraints in the user's own words                        3 cases per level
   mixed   k = 3, d = 7, n = 3                                                        3 cases
+  mixed+  k = 5, d = 7, n = 4  (added 24 Oct, stress v2, after the output-limit fix)   3 cases
 
 Gold by construction (the policy, not a run): every case has the same witness — tomato omelette and
 chickpea salad alternating — and events only ever hit items that witness does not use, every note
@@ -102,6 +103,7 @@ def main():
     for n in (1, 2, 3, 4):
         specs += [spec_for(f"sn{n}{'abc'[i]}", "notes", n, 3, 0, n, i) for i in range(3)]
     specs += [spec_for(f"sx{'abc'[i]}", "mixed", "k3d7n3", 7, 3, 3, i) for i in range(3)]
+    specs += [spec_for(f"sy{'abc'[i]}", "mixed", "k5d7n4", 7, 5, 4, i) for i in range(3)]
     for spec in specs:
         case = Case.model_validate(spec)
         env = StoreEnv(case)

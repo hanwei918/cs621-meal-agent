@@ -30,7 +30,7 @@ def level_of(case):
 
 def curve(run_dir: Path) -> tuple[str, dict]:
     meta = json.loads((run_dir / "summary.json").read_text())
-    label = f"{meta['system']} · {meta['model']}"
+    label = f"{meta['system']} · {meta['model']} · {meta['meta'].get('code', '?')}"
     cases = {c.case_id: c for c in load_cases(case_set="stress")}
     by = defaultdict(lambda: defaultdict(list))           # (dim, level) -> run -> [passed]
     for line in (run_dir / "results.jsonl").read_text().splitlines():
@@ -69,8 +69,8 @@ def svg(curves) -> str:
             for (x, y) in pts:
                 parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{col}"/>')
     for ci, (label, c) in enumerate(curves):
-        mx = c.get(("mixed", "k3d7n3"))
-        extra = f" — mixed (3 events, 7 days, 3 constraints): {mx[0]:.0%}" if mx else ""
+        mx, my = c.get(("mixed", "k3d7n3")), c.get(("mixed", "k5d7n4"))
+        extra = (f" — mixed 3 ev·7 d·3 c: {mx[0]:.0%}" if mx else "") + (f", 5 ev·7 d·4 c: {my[0]:.0%}" if my else "")
         parts.append(f'<rect x="{pad}" y="{H + 2 + ci * 13}" width="10" height="3" fill="{COLORS[ci % len(COLORS)]}"/>'
                      f'<text x="{pad + 16}" y="{H + 7 + ci * 13}" fill="#22201b">{label}{extra}</text>')
     parts.append("</svg>")
@@ -81,8 +81,8 @@ def main(dirs):
     curves = [curve(Path(d)) for d in dirs]
     print("| dimension | level | " + " | ".join(lbl for lbl, _ in curves) + " |")
     print("|---|---|" + "---|" * len(curves))
-    keys = sorted({k for _, c in curves for k in c}, key=lambda k: ([d for d, _ in DIMS] + ["mixed"]).index(k[0]) * 100
-                  + (float(k[1]) if k[1].replace(".", "").isdigit() else 99))
+    keys = sorted({k for _, c in curves for k in c}, key=lambda k: (([d for d, _ in DIMS] + ["mixed"]).index(k[0]),
+                  float(k[1]) if k[1].replace(".", "").isdigit() else 0, k[1]))
     for k in keys:
         cells = [f"{c[k][0]:.2f} ± {c[k][1]:.2f} (n={c[k][2]})" if k in c else "—" for _, c in curves]
         print(f"| {k[0]} | {k[1]} | " + " | ".join(cells) + " |")

@@ -26,7 +26,7 @@ CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
 CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json"),
              "nl": ("cases_nl", "n[0-9]*.json"), "nl_events": ("cases_nl_events", "e[0-9]*.json"),
              "ops": ("cases_ops", "o[0-9]*.json"), "wm": ("cases_wm", "w[0-9]*.json"),
-             "stress": ("cases_stress", "s[denx]*.json")}
+             "stress": ("cases_stress", "s[denxy]*.json")}
 RUNS = ROOT / "runs"
 
 

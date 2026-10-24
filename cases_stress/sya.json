@@ -1,0 +1,90 @@
+{
+  "case_id": "sya",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 7,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "The first dinner has to be 10 minutes max. Nothing with peanuts, my flatmate is allergic. Cannot take spicy one lah. I'm off mushrooms at the moment."
+  },
+  "events": [
+    {
+      "on": "step",
+      "after_step": 3,
+      "kind": "out_of_stock",
+      "sku": "coconut_milk_400ml"
+    },
+    {
+      "on": "step",
+      "after_step": 6,
+      "kind": "out_of_stock",
+      "sku": "noodles_400g"
+    },
+    {
+      "on": "step",
+      "after_step": 9,
+      "kind": "price_change",
+      "sku": "garlic_100g",
+      "price_sgd": 2.5
+    },
+    {
+      "on": "step",
+      "after_step": 12,
+      "kind": "price_change",
+      "sku": "broccoli_300g",
+      "price_sgd": 5.5
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "price_change",
+      "sku": "chicken_breast_500g",
+      "price_sgd": 16.25
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "note": {
+      "exclude_ingredients": [
+        "peanut_butter",
+        "curry_paste",
+        "mushrooms"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [
+        {
+          "day": 1,
+          "slot": 2,
+          "minutes": 10
+        }
+      ],
+      "pantry_add": {}
+    },
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "egg_10pk": 2,
+        "spring_onion_100g": 2,
+        "tomato_500g": 3
+      }
+    }
+  },
+  "tags": [
+    "stress",
+    "dim:mixed",
+    "level:k5d7n4"
+  ],
+  "boundary": false,
+  "derivation": "stress mixed=k5d7n4: 5 event(s) on items the witness does not use, 7 days, 4 note constraint(s); witness omelette + chickpea salad, budget = witness × 1.25 [witness S$23.80 of S$30]"
+}
