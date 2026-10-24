@@ -1,0 +1,43 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 45,
+  "n_runs": 3,
+  "pass_mean": 1.0,
+  "pass_sd": 0.0,
+  "per_run": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "failed_checks": {},
+  "failures_by_tag": {},
+  "flaky": [],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 1.4
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 1.4,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "critical_errors": {},
+  "cases_with_critical_error": 0,
+  "nudges": 0,
+  "errors": 0,
+  "steps_per_case": 40.34,
+  "input_tokens": 2760,
+  "output_tokens": 822162,
+  "cost_usd": 0.7002,
+  "meta": {
+    "case_set": "stress",
+    "gates": true,
+    "eval_sha256": "540f294804a4cd213d049db89de749ddf74a3c381c7d0ec5ba7c941ade874a27",
+    "code": "788d60f"
+  },
+  "utc": "20261024T122206Z"
+}

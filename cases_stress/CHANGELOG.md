@@ -17,3 +17,6 @@
 - 2026-10-24 — **stress v2**: + sya–syc (mixed+, 5 events + 7 days + 4 constraints), added because with the output-limit
   fix the agent no longer failed the old mixed level, so the boundary had moved out of the set. The 42 v1 files are
   byte-identical. Fingerprint `540f294804a4cd213d049db89de749ddf74a3c381c7d0ec5ba7c941ade874a27` (v1: `b9a4cd72…`).
+
+- 2026-10-24 — Full v2 runs (code `788d60f`): agent 3 runs 135/135 (all `stop_reason = result`), single call 0.422,
+  fixed 0.400. Chart redrawn with before/after curves. See policy E-07.

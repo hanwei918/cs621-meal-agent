@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 from eval.harness import load_cases  # noqa: E402
 
 DIMS = [("events", "Store events mid-run"), ("days", "Days planned"), ("notes", "Constraints in the note")]
-COLORS = ["#2e6b4a", "#c8502f", "#2a4a6e"]
+COLORS = ["#2e6b4a", "#a3a09a", "#c8502f", "#2a4a6e"]
 
 
 def level_of(case):
@@ -28,9 +28,11 @@ def level_of(case):
     return dim, lvl
 
 
-def curve(run_dir: Path) -> tuple[str, dict]:
+def curve(arg: str) -> tuple[str, dict]:
+    path, _, name = arg.partition("::")                   # "runs/<dir>::Label" names a curve
+    run_dir = Path(path)
     meta = json.loads((run_dir / "summary.json").read_text())
-    label = f"{meta['system']} · {meta['model']} · {meta['meta'].get('code', '?')}"
+    label = name or f"{meta['system']} · {meta['model']} · {meta['meta'].get('code', '?')}"
     cases = {c.case_id: c for c in load_cases(case_set="stress")}
     by = defaultdict(lambda: defaultdict(list))           # (dim, level) -> run -> [passed]
     for line in (run_dir / "results.jsonl").read_text().splitlines():
@@ -44,7 +46,7 @@ def curve(run_dir: Path) -> tuple[str, dict]:
 
 
 def svg(curves) -> str:
-    W, H, pad, gap = 760, 260, 44, 26
+    W, H, pad, gap = 760, 260 + 13 * max(0, len(curves) - 3), 44, 26
     pw = (W - 2 * pad - 2 * gap) / 3
     ph = H - 2 * pad
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H + 26}" font-family="Inter, Arial, sans-serif" font-size="11">',
@@ -62,7 +64,8 @@ def svg(curves) -> str:
         for lv, x in xs.items():
             parts.append(f'<text x="{x}" y="{pad + ph + 16}" text-anchor="middle" fill="#77716a">{lv}</text>')
         for ci, (label, c) in enumerate(curves):
-            pts = [(xs[lv], pad + ph * (1 - c[(dim, lv)][0])) for lv in levels if (dim, lv) in c]
+            off = (ci - (len(curves) - 1) / 2) * 2.5          # overlapping lines stay visible
+            pts = [(xs[lv], pad + ph * (1 - c[(dim, lv)][0]) + off) for lv in levels if (dim, lv) in c]
             col = COLORS[ci % len(COLORS)]
             parts.append('<polyline fill="none" stroke="{}" stroke-width="2" points="{}"/>'.format(
                 col, " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)))
@@ -78,7 +81,7 @@ def svg(curves) -> str:
 
 
 def main(dirs):
-    curves = [curve(Path(d)) for d in dirs]
+    curves = [curve(d) for d in dirs]
     print("| dimension | level | " + " | ".join(lbl for lbl, _ in curves) + " |")
     print("|---|---|" + "---|" * len(curves))
     keys = sorted({k for _, c in curves for k in c}, key=lambda k: (([d for d, _ in DIMS] + ["mixed"]).index(k[0]),

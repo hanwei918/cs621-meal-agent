@@ -100,7 +100,7 @@ class SingleCallBaseline:
         if self.effort:
             oc["effort"] = self.effort
         resp = self._client.messages.create(
-            model=self.model, max_tokens=8000,
+            model=self.model, max_tokens=16000,
             system=[{"type": "text", "text": SINGLE_SYSTEM, "cache_control": {"type": "ephemeral"}}],
             messages=[{"role": "user", "content": f"Situation:\n{situation(env)}\n\nPlan and order."}],
             output_config=oc)

@@ -375,13 +375,31 @@ with a result, no nudge needed. The end-of-turn nudge stays as a guard but has n
 | Days 7 | 8/9 | 8/9 | 9/9 |
 | Mixed (3 events + 7 days + 3 constraints) | 5/9 | 7/9 (noise: 0 nudges) | 9/9 |
 
-Caveats: the rest of the stress set and all other sets were run with the 8,000 limit; their stop reasons were not
-logged, so some earlier "no plan" failures (e.g. wm debug w01) may have the same cause — unverified. With the
-limit raised, the observed boundary moves beyond the mixed level; a harder level is needed to find the new one.
+**Full re-run after the fix (stress v2, 45 cases = v1 + a harder level of 5 events + 7 days + 4 constraints;
+code `788d60f`).** Agent 3 runs: **1.000 ± 0.000 — 135/135**, every run ended with a result (`stop_reason`
+logged: 135 × `result`), no nudge fired. Single call 1 run 0.422; fixed planner 0.400. Chart
+`docs/figures/stress_curve.svg` shows the agent before (grey) and after (green) the fix.
 
-Operating boundary for the report: with the evidence above, delegation (mode ③) is defended up to a week of
-three meals with several constraints and events; the output limit was the binding failure, not reasoning. A run
-that ends without a result must be surfaced as a failure, never treated as a quiet stop.
+| Load | Agent after fix (n = 9) | Agent before fix (n = 9, v1) | Single call (n = 3) | Fixed (n = 3) |
+| --- | --- | --- | --- | --- |
+| Events 0–5 | 1.00 at every level | 1.00 at every level | 1.00 / 0.67 / 0 / 0 / 0 / 0 | 1.00 / 1.00 / 0 / 0 / 0 / 0 |
+| Days 3 / 5 / 7 | 1.00 / 1.00 / 1.00 | 1.00 / 1.00 / 0.89 | 0.33 / 0.33 / 0 | 1.00 / 1.00 / 1.00 |
+| Notes 1–4 | 1.00 at every level | 1.00 at every level | 1.00 at every level | 0.67 / 0.33 / 0 / 0 |
+| Mixed 3 ev · 7 d · 3 c | **1.00** | 0.56 | 0 | 0 |
+| Mixed+ 5 ev · 7 d · 4 c | **1.00** | — | 0 | 0 |
+
+Single-call numbers vary between its single runs (days 3: 1.00 in the first run, 0.33 here), so they are
+indicative only. For parity its output limit is now also 16,000; it never hit the 8,000 limit (0 errors).
+
+**What this does and does not show.** Within this set no boundary remains: the agent's only observed failure mode
+was an engineering limit (output length), now fixed and tested. That is not evidence the agent has no limit —
+the set's loads stop at 5 events, 7 days, 4 constraints and three meals; beyond that is untested. The other case
+sets were measured with the 8,000 limit and without stop-reason logging; their published figures stand as
+measured, and failures there that look like "no plan" (e.g. wm debug w01) may share this cause — unverified.
+
+Operating boundary for the report: delegation (mode ③) is defended up to the tested envelope — one week, three
+meals a day, up to five store events and four stated constraints — with the code gates on (E-06 shows why they
+stay on). Outside that envelope, mode ②. A run that ends without a result must be surfaced as a failure.
 
 ### E-05 Honest reading
 
