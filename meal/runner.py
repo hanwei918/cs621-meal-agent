@@ -22,6 +22,7 @@ class AgentUsage:
     output_tokens: int = 0
     cache_read_tokens: int = 0
     cache_write_tokens: int = 0
+    nudges: int = 0                       # times the agent tried to stop with no result and was told to finish
 
 
 class Agent(Protocol):

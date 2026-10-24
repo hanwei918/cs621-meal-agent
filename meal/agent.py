@@ -64,6 +64,16 @@ day's kcal must fall inside the band. Use get_recipe's per_serving numbers and v
 before asking for approval; never compute the target yourself. In every other mode do not use these tools.
 - This is not nutrition or medical advice; follow only the user's stated constraints."""
 
+NUDGE = ("You stopped without a result: nothing was ordered, submitted, reported infeasible, sent for review or "
+         "declined. Finish the job now: complete the plan and cart and ask for approval (or submit in plan-only mode), "
+         "or, if no valid plan exists, call report_infeasible with the binding constraint.")
+
+
+def finished(out) -> bool:
+    """A run has a result only if one of these is true; anything else is a silent give-up (policy E-07)."""
+    return bool(out.order_confirmed or out.submitted or out.declared_infeasible or out.declined or out.review_status)
+
+
 _S, _I = {"type": "string"}, {"type": "integer"}
 
 
@@ -107,9 +117,10 @@ TOOLS = [{"name": n, "description": TOOL_SPECS[n], "input_schema": SCHEMAS[n]} f
 
 class MealAgent:
     def __init__(self, model: str, client=None, effort: str | None = None, max_steps: int = 40,
-                 max_cost_usd: float | None = None):
+                 max_cost_usd: float | None = None, max_nudges: int = 1):
         self.model, self.effort, self.max_steps = model, effort, max_steps
         self.max_cost_usd = max_cost_usd                         # demo: stop a run that spends more than this
+        self.max_nudges = max_nudges                             # 0 = the agent as evaluated before 24 Oct
         self.stopped_for_cost = False
         self._client = client
 
@@ -141,6 +152,10 @@ class MealAgent:
                     self.stopped_for_cost = True
                     break
             if resp.stop_reason != "tool_use":
+                if resp.stop_reason == "end_turn" and not finished(env.out) and u.nudges < self.max_nudges:
+                    u.nudges += 1                                # a silent give-up: say so once, then continue
+                    messages.append({"role": "user", "content": NUDGE})
+                    continue
                 break                                            # end_turn, refusal, max_tokens: stop
             results = []
             for b in resp.content:

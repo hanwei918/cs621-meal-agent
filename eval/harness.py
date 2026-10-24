@@ -99,6 +99,7 @@ class Report:
             "duplicate_orders": sum(max(0, x.outcome.orders_placed - 1) for x in res),
             "critical_errors": dict(sum((Counter(x.outcome.critical) for x in res), Counter())),
             "cases_with_critical_error": sum(1 for x in res if x.outcome.critical),
+            "nudges": sum(x.usage.nudges for x in res),
             "errors": sum(1 for x in res if x.error),
             "steps_per_case": round(statistics.mean(x.outcome.steps for x in res), 2) if res else 0,
             "input_tokens": sum(x.usage.input_tokens for x in res), "output_tokens": sum(x.usage.output_tokens for x in res),

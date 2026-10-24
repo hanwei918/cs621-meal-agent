@@ -76,7 +76,7 @@ def test_bad_tool_call_is_reported_as_error_and_loop_continues():
         seen["r"] = last_result(m, "tu1")
         return resp([NS(type="text", text="stop")], "end_turn")
     fc = FakeClient([lambda m: resp([use("add_to_cart", {"sku": "caviar", "packs": 1}, 1)]), check])
-    r = run_case(MealAgent("claude-haiku-5-5", client=fc), C["c01"])
+    r = run_case(MealAgent("claude-haiku-5-5", client=fc, max_nudges=0), C["c01"])   # about errors, not nudges
     assert "error" in seen["r"] and r.score.failed == ["no_order"]
 
 
@@ -108,3 +108,29 @@ def test_single_call_cannot_react_to_an_approval_event():
     fc = FakeClient([lambda m: resp([NS(type="text", text=json.dumps(ans))], "end_turn")])
     r = run_case(SingleCallBaseline("claude-haiku-5-5", client=fc), C["c29"])
     assert not r.score.passed and r.score.failed == ["no_order"]
+
+
+
+def _c03():
+    from meal.env import StoreEnv
+    return StoreEnv({c.case_id: c for c in load_cases()}["c03"])
+
+
+def test_a_silent_give_up_is_nudged_once_then_the_agent_continues():
+    from meal.agent import NUDGE
+    seen = []
+    script = [lambda m: resp([use("get_profile", {}, 1)]),
+              lambda m: resp([], stop="end_turn"),                      # stops with no result
+              lambda m: (seen.append(m[-1]["content"]), resp([use("report_infeasible",
+                                                                  {"binding": "budget", "explanation": "x"}, 2)]))[1]]
+    env = _c03()
+    u = MealAgent("claude-haiku-5-5", client=FakeClient(script)).run(env)
+    assert u.nudges == 1 and env.out.declared_infeasible and seen == [NUDGE]
+
+
+def test_only_one_nudge_and_none_after_a_result():
+    client = FakeClient([lambda m: resp([], stop="end_turn"), lambda m: resp([], stop="end_turn")])
+    assert MealAgent("claude-haiku-5-5", client=client).run(_c03()).nudges == 1 and len(client.sent) == 2
+    client = FakeClient([lambda m: resp([use("report_infeasible", {"binding": "budget", "explanation": "x"}, 1)]),
+                         lambda m: resp([], stop="end_turn")])
+    assert MealAgent("claude-haiku-5-5", client=client).run(_c03()).nudges == 0
