@@ -84,3 +84,4 @@ Delete the service (or set `--max-instances 0`) when the study ends, and rotate 
   (US$0.0046). Upload list was 19 files before deploying.
 - 2026-10-24: revisions `00004`–`00005`, code `371b732`: question sheet, presenter controls (`?presenter=1`). Live checks: inject needs the passcode; sell-out reached the fixed planner (no re-plan, no order); blank budget with fixed rules stops with a plain reason. Upload list 19 files each time.
 - 2026-10-24: revision `00006`, code `be97bdc` (weight management: Alex/Bea/Chloe, data_wm). Upload list 23 files. Live: personas served, Chloe stopped for needs_professional_review with no plan or order (US$0.0004).
+- 2026-10-24: revision `00007`, code `fd2bf87` (wm prompt fix: the calculator decides scope). Upload list 23 files; 401 without the passcode.
