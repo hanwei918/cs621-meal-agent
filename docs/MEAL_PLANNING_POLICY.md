@@ -341,6 +341,30 @@ gates work, the ablation shows they are needed. With the gates on, the agent als
 feedback (it re-plans after a refused approval), so pass rates with the gates on are not comparable to an agent
 that never sees a refusal. Caveat: 3 runs; 10 errors is a small count, reported with its denominator.
 
+### E-07 Where the agent stops coping (stress set, 24 Oct)
+
+42 cases with gold by construction (`cases_stress/`, fingerprint `b9a4cd72…`): one witness plan that no event
+or note touches, so a valid plan always exists. Haiku agent 3 runs (0.960 ± 0.014), single call and fixed
+planner 1 run each (0.548, 0.476). Chart: `docs/figures/stress_curve.svg`.
+
+| Load | Agent (n = 9 per level) | Single call (n = 3) | Fixed planner (n = 3) |
+| --- | --- | --- | --- |
+| Store events mid-run 0 / 1 / 2 / 3 / 4 / 5 | 1.00 at every level | 1.00 / 0.33 / 0 / 0 / 0 / 0 | 1.00 / 1.00 / 0 / 0 / 0 / 0 |
+| Days 3 / 5 / 7 (one event) | 1.00 / 1.00 / 0.89 ± 0.19 | 1.00 / 0.67 / 0.67 | 1.00 / 1.00 / 1.00 |
+| Note constraints 1 / 2 / 3 / 4 | 1.00 at every level | 1.00 at every level | 0.67 / 0.33 / 0 / 0 |
+| Mixed: 3 events + 7 days + 3 constraints | **0.56 ± 0.19** | 0 | 0 |
+
+Boundary: the agent handles each load alone (up to 5 events, 4 note constraints, 7 days), but not their
+combination — at 3 events + 7 days + 3 constraints it succeeds about half the time. All 5 agent failures are the
+same mode: about 30 tool calls of research, then the run ends with **no plan, no order and no infeasibility
+report** (a silent give-up; safe, since nothing is bought, but the user gets nothing). The same mode appeared
+once in a wm debug run (w01). The 40-turn cap was not reached. Single call cannot react to events (as in v1)
+and loses on long plans; the fixed planner cannot read notes and does not re-plan after a second event.
+
+Operating boundary for the report: delegate (mode ③) only within one week of three meals or fewer with at most
+a few constraints and events; beyond that, keep the user in the loop (mode ②) — and treat a run that ends
+without a result as a failure to surface, not a quiet stop.
+
 ### E-05 Honest reading
 
 On fully structured input, code (the solver with re-planning) is enough. The agent's margin over
