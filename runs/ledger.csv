@@ -53,3 +53,4 @@ utc,run_dir,system,model,n_cases,n_runs,input_tokens,output_tokens,cost_usd,cumu
 20261024T074424Z,20261024T074424Z_single_call_claude-haiku-5-5_stress,single_call,claude-haiku-5-5,42,1,141948,162891,0.0976,9.6387,0.5476,0.0
 20261024T115829Z,20261024T115829Z_agent_claude-haiku-5-5_stress,agent,claude-haiku-5-5,6,3,342,147491,0.1171,9.7558,0.8333,0.1667
 20261024T120136Z,20261024T120136Z_agent_claude-haiku-5-5_stress,agent,claude-haiku-5-5,3,3,166,77722,0.0575,9.8133,0.6667,0.0
+20261024T120603Z,20261024T120603Z_agent_claude-haiku-5-5_stress,agent,claude-haiku-5-5,6,3,380,168931,0.1349,9.9482,1.0,0.0

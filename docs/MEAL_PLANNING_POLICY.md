@@ -361,9 +361,27 @@ report** (a silent give-up; safe, since nothing is bought, but the user gets not
 once in a wm debug run (w01). The 40-turn cap was not reached. Single call cannot react to events (as in v1)
 and loses on long plans; the fixed planner cannot read notes and does not re-plan after a second event.
 
-Operating boundary for the report: delegate (mode ③) only within one week of three meals or fewer with at most
-a few constraints and events; beyond that, keep the user in the loop (mode ②) — and treat a run that ends
-without a result as a failure to surface, not a quiet stop.
+**Diagnosis and fix (same day).** First hypothesis: the agent "gives up" with a normal end of turn. A nudge for
+that (tell it once that it stopped without a result) was added and the 6 hardest cases re-run ×3: mixed rose
+5/9 → 7/9 but **the nudge never fired** — so the change was noise, not the fix. Logging why each loop ended
+(`usage.stop_reason`, added then) showed every failure was **`max_tokens`**: around turn 5 of a 7-day plan the
+model wrote more than the 8,000-token output limit (it spells the week out as text before the tool call) and the
+reply was cut off. Fix: limit 16,000, and a cut-off reply is never executed — the agent is told once to continue
+in smaller steps. Re-run of the same 6 cases ×3 (code `cc86eb7`): **days 7: 9/9, mixed: 9/9**, every run ended
+with a result, no nudge needed. The end-of-turn nudge stays as a guard but has not fired in any run.
+
+| Agent on sd7a–c and sxa–c, 3 runs each | Before (8,000 tokens) | Nudge only | Limit 16,000 + cut-off recovery |
+| --- | --- | --- | --- |
+| Days 7 | 8/9 | 8/9 | 9/9 |
+| Mixed (3 events + 7 days + 3 constraints) | 5/9 | 7/9 (noise: 0 nudges) | 9/9 |
+
+Caveats: the rest of the stress set and all other sets were run with the 8,000 limit; their stop reasons were not
+logged, so some earlier "no plan" failures (e.g. wm debug w01) may have the same cause — unverified. With the
+limit raised, the observed boundary moves beyond the mixed level; a harder level is needed to find the new one.
+
+Operating boundary for the report: with the evidence above, delegation (mode ③) is defended up to a week of
+three meals with several constraints and events; the output limit was the binding failure, not reasoning. A run
+that ends without a result must be surfaced as a failure, never treated as a quiet stop.
 
 ### E-05 Honest reading
 

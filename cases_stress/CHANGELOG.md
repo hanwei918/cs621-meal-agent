@@ -9,3 +9,7 @@
 - 2026-10-24 — **FROZEN (stress v1)** after the first LLM runs, with no case changed since they were built (gold is by construction, so nothing was tuned to the results; the fingerprint was recorded after the runs). Runs on code
   `a34208b`: Haiku agent 3 runs 0.960 ± 0.014 (5 silent give-ups: sd7c ×1, sxb ×2, sxc ×2), single call 0.548,
   fixed 0.476. Fingerprint `b9a4cd72f25a39d91116448de4cac3b11525248dd518708e756c9fa61a458f91`.
+
+- 2026-10-24 — Agent fix runs on sd7a–c, sxa–c (cases unchanged): nudge only (`e0f03a5`) 15/18, 0 nudges fired →
+  noise; with stop reasons logged, every failure was `max_tokens` (8,000). Limit 16,000 + cut-off recovery
+  (`cc86eb7`): 18/18. See policy E-07.
