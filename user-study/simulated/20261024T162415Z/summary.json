@@ -1,0 +1,19 @@
+{
+  "agent": "claude-haiku-5-5",
+  "simulator": "claude-sonnet-5-5",
+  "runs": 3,
+  "personas": 2,
+  "pass_rate": 1.0,
+  "by_persona": {
+    "wei_ling": "3/3",
+    "jun": "3/3"
+  },
+  "mean_precision": 1.0,
+  "mean_recall": 1.0,
+  "carts_declined_then_ordered": 3,
+  "carts_declined": 3,
+  "critical_errors": 0,
+  "agent_cost_usd": 0.0307,
+  "simulator_cost_usd": 0.023,
+  "label": "SIMULATED PILOT — LLM personas, not human participants"
+}

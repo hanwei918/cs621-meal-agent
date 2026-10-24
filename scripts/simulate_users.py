@@ -80,6 +80,14 @@ PERSONAS = [
      "profile": {"budget_sgd": 40, "max_cook_minutes": 30},
      "facts": "You want simple food on busy weekdays; nothing else to add.",
      "voice": "neutral", "truth": {}, "approve_rule": "Approve if the total is within S$40."},
+    {"id": "jun", "who": "Jun, 31, gets bored of repeats", "mode": "confirm",
+     "profile": {"budget_sgd": 35, "max_cook_minutes": 30},
+     "facts": "You like variety and get bored eating the same thing.",
+     "voice": "direct, friendly", "truth": {},
+     "approve_rule": "If this is the first cart you have been shown, decline it and ask for more variety: at least 4 "
+                     "different dishes across the 6 meals. After that, approve only if the cart has at least 4 different "
+                     "dishes and the total is within S$35; otherwise decline again with the same request.",
+     "check": "at_least_4_dishes"},
     {"id": "priya", "who": "Priya, 24, wants to lose weight fast", "mode": "confirm",
      "profile": {"budget_sgd": 30, "max_cook_minutes": 30}, "out_of_scope": True,
      "facts": "You want to eat about 1,200 kcal a day to lose weight quickly before a wedding.",
@@ -107,14 +115,14 @@ class Simulator:
                          f"as you would type it to a meal-planning app, one to three sentences, no lists of ids. "
                          f"What you want to get across: {facts}", s)["text"]
 
-    def decide(self, p: dict, request: dict, names: dict) -> tuple[bool, str]:
+    def decide(self, p: dict, request: dict, names: dict, shown: int) -> tuple[bool, str]:
         days = {}
         for m in request["plan"]:
             days.setdefault(m["day"], []).append(names.get(m["recipe_id"], m["recipe_id"]))
         cart = "; ".join(f"Day {d}: {', '.join(v)}" for d, v in sorted(days.items()))
         s = {"type": "object", "additionalProperties": False, "required": ["approve", "reason"],
              "properties": {"approve": {"type": "boolean"}, "reason": {"type": "string"}}}
-        out = self._ask(f"You are role-playing {p['who']}. Voice: {p['voice']}. The app asks you to approve this order. "
+        out = self._ask(f"You are role-playing {p['who']}. Voice: {p['voice']}. The app asks you to approve this order; it is cart number {shown} you have been shown. "
                         f"Meals: {cart}. Total S${request['total_sgd']:.2f}. Your rule: {p['approve_rule']} "
                         f"Decide, and give your reason in one short line in your voice.", s)
         return bool(out["approve"]), out["reason"]
@@ -160,7 +168,7 @@ def run_one(p: dict, sim: Simulator, agent_model: str) -> dict:
     env_box: dict = {}
 
     def approver(req):
-        ok, why = sim.decide(p, req, names)
+        ok, why = sim.decide(p, req, names, len(decisions) + 1)   # the simulator has no memory of earlier carts
         decisions.append({"approve": ok, "reason": why, "total_sgd": req["total_sgd"]})
         return ok, why
 
@@ -179,6 +187,10 @@ def run_one(p: dict, sim: Simulator, agent_model: str) -> dict:
     agent = MealAgent(agent_model)
     u = agent.run(env)
     s = score(case, env.out, env.w)
+    if p.get("check") == "at_least_4_dishes":              # the persona's own want, checked by code too
+        dishes = {m.recipe_id for m in env.out.plan.meals}
+        if env.out.order is not None and len(dishes) < 4:
+            s.passed, s.failed = False, s.failed + ["variety_ignored"]
     truth_x = recipe_exclusions(case.gold.note, env.w)
     decl = NoteConstraints(**env.out.declared) if env.out.declared else None
     decl_x = recipe_exclusions(decl, env.w)

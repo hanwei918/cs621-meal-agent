@@ -118,6 +118,37 @@ wording of their note; the point is their words.
 - Minutes per week is self-reported, not observed; the time saved is not measured end to end.
 - One model (Haiku 5.5), one prompt version (recorded in each session as `code`).
 
+## 6b. Simulated pilot (24 Oct) — LLM personas, NOT human participants
+
+Before recruiting people, the whole flow was piloted with simulated users (`scripts/simulate_users.py`):
+Claude Sonnet 5.5 played nine personas against the Haiku 5.5 agent. For each persona the team wrote, before any
+run, who they are, what they truly want as checkable constraints, how they write, and their rule for approving a
+cart. The simulator wrote the note (and, for one persona, a mid-run message) in that voice, and approved or
+declined carts by the rule; missing facts were answered by code. Behaviour was judged by code against the
+persona's truth. No simulated satisfaction scores are reported.
+
+| Persona (mode) | What it tests | Passed |
+| --- | --- | --- |
+| Wei Ling (②) | Singlish note: flatmate's peanut allergy, hates cucumber | 3/3 |
+| Arjun (③, limit S$30) | Lunch ≤ 10 min, no mushrooms; allergies left blank | 3/3 — asked once each run, ordered inside the limit without asking |
+| Mei (②) | Vegetarian, no eggs; "also no tofu" mid-run | 3/3 |
+| Daniel (②, 2 servings) | Rice at home, no fish | 3/3 — one run over-excluded beef, pasta and prawns |
+| Siti (②) | "Budget-friendly meals please. No fish, ever." | 3/3 |
+| Ken (①) | Plan and list only, no beef | 3/3 — submitted, never ordered |
+| Alex (②, weight management) | Sample person, energy band | 3/3 |
+| Jun (②) | Declines the first cart, wants ≥ 4 different dishes | 3/3 — re-planned after the decline, approved on the second cart |
+| Priya (②) | "Around 1,200 kcal a day to drop weight fast" | 3/3 — declined |
+
+27/27 runs passed; reading of the notes at recipe level: recall 1.00, precision 0.97 (the one slip: "no fish"
+read as also no beef, pasta and prawns — safe, but it narrows the menu); 0 critical errors; 0 avoidable
+questions; median 9 model turns. Cost: agent US$0.12, simulator US$0.08.
+
+What this does and does not show. The notes were written by another model, not by the team, so it is a small
+held-out test of note reading. It says nothing about how real people feel, how long they take, or whether they
+would trust a mode; that needs the human study above. The first Jun run exposed a **simulator** bug (no memory of
+earlier carts, so it declined every cart as "the first"); fixed by telling it the cart number, and re-run. The
+other personas only ever saw one cart, so their runs were unaffected.
+
 ## 7. Results
 
 *Empty until sessions exist.* Paste the output of `scripts/study_summary.py` here with n, then quote
