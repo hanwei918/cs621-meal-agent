@@ -176,6 +176,18 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .plog { margin-top: 8px; font-size: 12.5px; color: var(--amber); }
 .toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 14px; z-index: 20; }
 
+/* weight management */
+.people { display: grid; gap: 8px; }
+.person { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; display: flex; gap: 10px; align-items: center; font-size: 14px; }
+.person input { accent-color: var(--green); }
+.person:has(input:checked) { border-color: var(--green); background: var(--green-soft); }
+.target { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.target .display { font-size: 30px; }
+.target .k { color: var(--muted); font-size: 13px; }
+.kcal { font-size: 12px; font-weight: 600; color: var(--green); margin-left: 6px; }
+.kcal.off { color: var(--tomato); }
+.por { font-size: 11.5px; font-weight: 600; background: var(--amber-soft); color: var(--amber); border-radius: 6px; padding: 1px 6px; margin-left: 4px; }
+
 /* survey */
 .likert { margin: 14px 0; }
 .likert .q { font-size: 14.5px; margin-bottom: 7px; }
@@ -219,6 +231,19 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
       <div class="grid2">
         <div id="passBox" class="hidden"><label class="lbl" for="passcode">Passcode</label><input id="passcode" type="password" autocomplete="off"></div>
         <div><label class="lbl" for="participant">Participant code</label><input id="participant" type="text" value="P01"></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Goal</span>
+        <div class="chips" id="goal">
+          <button type="button" class="tog" data-v="" aria-pressed="true">🍽️ Just plan my meals</button>
+          <button type="button" class="tog" data-v="wm" aria-pressed="false">⚖️ Weight management (sample person)</button>
+        </div>
+        <div id="peopleBox" class="field hidden">
+          <span class="lbl">Pick a sample person — no real body data is asked for</span>
+          <div class="people" id="people"></div>
+          <p class="fine" style="text-align:left">Energy targets are computed by code (Mifflin equation, 10% deficit, 1,500 kcal floor). A teaching prototype, not nutrition advice.</p>
+        </div>
       </div>
 
       <div class="field">
@@ -299,12 +324,16 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
     <div class="board">
       <div>
         <div class="card hidden" id="resultCard"></div>
+        <div class="card hidden" id="targetCard">
+          <p class="eyebrow">Energy target (computed by code)</p>
+          <div id="target"></div>
+        </div>
         <div class="card" id="understoodCard">
           <p class="eyebrow">What it understood from your words</p>
           <div class="understood" id="understood"></div>
         </div>
         <div class="card">
-          <p class="eyebrow">Your 3 days</p>
+          <p class="eyebrow" id="planTitle">Your 3 days</p>
           <div id="plan"></div>
         </div>
         <div class="card hidden" id="surveyCard">
@@ -399,7 +428,7 @@ const LIKERT = [
   ["trust_mode", "I would trust this mode with my weekly groceries."],
   ["saves_time", "It would save me time compared with doing it myself."],
 ];
-const EMOJI = {r01: "🍳", r02: "🥦", r03: "🍛", r04: "🥜", r05: "🥟", r06: "🐟", r07: "🍅", r08: "🍜", r09: "🍝", r10: "🥗", r11: "🍤", r12: "🍄"};
+const EMOJI = {r01: "🍳", r02: "🥦", r03: "🍛", r04: "🥜", r05: "🥟", r06: "🐟", r07: "🍅", r08: "🍜", r09: "🍝", r10: "🥗", r11: "🍤", r12: "🍄", b01: "🥣", b02: "🍞", b03: "🍨"};
 const SLOT = {1: "Lunch", 2: "Dinner"};
 const MODE = {plan_only: "📝 Plan only", confirm: "✋ Ask every time", delegated: "🔑 Within limits"};
 let cat = {recipes: {}, ingredients: {}}, timer = null, sid = null, form = null, survey = {};
@@ -415,7 +444,11 @@ function loadCatalog() {
   return get("/api/catalog").then(c => { if (c.error) return false;
     c.recipes.forEach(r => cat.recipes[r.id] = r); c.ingredients.forEach(i => cat.ingredients[i.id] = i); return true; });
 }
-get("/api/config").then(c => { show("passBox", c.passcode_required); if (!c.passcode_required) loadCatalog(); });
+get("/api/config").then(c => {
+  show("passBox", c.passcode_required); if (!c.passcode_required) loadCatalog();
+  $("people").innerHTML = Object.entries(c.personas || {}).map(([k, l], i) =>
+    `<label class="person"><input type="radio" name="persona" value="${k}" ${i ? "" : "checked"}><span>${esc(l)}</span></label>`).join("");
+});
 
 // ---------- setup interactions
 function toggles(id, single) {
@@ -428,7 +461,9 @@ const picked = id => [...$(id).querySelectorAll('.tog[aria-pressed="true"]')].ma
 ["diet", "allergies"].forEach(id => toggles(id, false));
 const PRESENTER = new URLSearchParams(location.search).has("presenter");
 const num = id => $(id).value === "" ? null : +$(id).value;
-["reading", "prefMode"].forEach(id => toggles(id, true));
+["reading", "prefMode", "goal"].forEach(id => toggles(id, true));
+$("goal").addEventListener("click", () => setTimeout(() => show("peopleBox", picked("goal")[0] === "wm"), 0));
+const persona = () => picked("goal")[0] === "wm" ? (document.querySelector("input[name=persona]:checked") || {}).value : null;
 const mode = () => document.querySelector("input[name=mode]:checked").value;
 document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => show("authBox", mode() === "delegated"));
 document.querySelectorAll("#ideas .idea").forEach(b => b.onclick = () => { $("note").value = ($("note").value + " " + b.textContent).trim(); $("note").focus(); });
@@ -443,7 +478,7 @@ function stage(n) { [1, 2, 3, 4].forEach(i => $("s" + i).classList.toggle("on", 
 
 $("start").onclick = async () => {
   const [system, model] = $("system").value.split("|");
-  form = {participant: $("participant").value, mode: mode(), system, model, note: $("note").value,
+  form = {participant: $("participant").value, mode: mode(), system, model, note: $("note").value, persona: persona(),
     profile: {budget_sgd: num("budget"), max_cook_minutes: num("minutes"), servings: +$("servings").value || 1,
               days: 3, meals_per_day: 2, diet: picked("diet"), allergies: picked("allergies").filter(Boolean),
               allergies_unknown: $("allergyUnknown").getAttribute("aria-pressed") === "true"},
@@ -458,7 +493,7 @@ $("start").onclick = async () => {
   $("sent").innerHTML = ""; $("feed").innerHTML = "";
   show("setupView", false); show("liveView", true); show("resultCard", false); show("surveyCard", false); show("thanksCard", false);
   const pf = form.profile;
-  $("summary").innerHTML = [MODE[form.mode], pf.budget_sgd == null ? "budget: it will ask" : money(pf.budget_sgd),
+  $("summary").innerHTML = [MODE[form.mode], ...(form.persona ? ["⚖️ " + form.persona[0].toUpperCase() + form.persona.slice(1)] : []), pf.budget_sgd == null ? "budget: it will ask" : money(pf.budget_sgd),
     pf.max_cook_minutes == null ? "time: it will ask" : `≤ ${pf.max_cook_minutes} min`,
     ...pf.diet, ...(pf.allergies_unknown ? ["allergies: it will ask"] : pf.allergies.map(a => "no " + a))].map((t, i) => `<span class="pill ${i ? "" : "k"}">${esc(t)}</span>`).join("")
     + `<button class="linkbtn" id="edit">Change setup</button>`;
@@ -530,13 +565,25 @@ function understood(d, live) {
   Object.entries(d.pantry_add || {}).forEach(([i, g]) => out.push(["home", `🏠 ${iname(i)} at home · ${g} g`]));
   return out.length ? out.map(([k, t]) => `<span class="u ${k}">${esc(t)}</span>`).join("") : `<span class="empty">Nothing extra to follow.</span>`;
 }
-function planHTML(meals) {
+const SLOT3 = {1: "Breakfast", 2: "Lunch", 3: "Dinner"};
+function planHTML(meals, perDay = 2, dayKcal = null, band = null) {
   if (!meals?.length) return `<span class="empty">No plan yet.</span>`;
-  return `<div class="days">${[1, 2, 3].map(d => `<div class="day"><h3>Day ${d}</h3>${[1, 2].map(s => {
+  const names = perDay === 3 ? SLOT3 : SLOT, slots = perDay === 3 ? [1, 2, 3] : [1, 2];
+  return `<div class="days">${[1, 2, 3].map(d => {
+    const k = dayKcal?.[d], off = band && k != null && (k < band[0] || k > band[1]);
+    return `<div class="day"><h3>Day ${d}${k != null ? `<span class="kcal ${off ? "off" : ""}">${k} kcal</span>` : ""}</h3>${slots.map(s => {
     const m = meals.find(x => x.day === d && x.slot === s);
-    return m ? `<div class="meal"><span class="em">${EMOJI[m.recipe_id] || "🍽️"}</span><div><div class="nm">${esc(m.name || rname(m.recipe_id))}</div>
-      <div class="sl">${SLOT[s]} · ${m.minutes ?? cat.recipes[m.recipe_id]?.minutes} min</div></div></div>`
-             : `<div class="meal"><span class="em">·</span><div class="sl">${SLOT[s]}</div></div>`; }).join("")}</div>`).join("")}</div>`;
+    return m ? `<div class="meal"><span class="em">${EMOJI[m.recipe_id] || "🍽️"}</span><div><div class="nm">${esc(m.name || rname(m.recipe_id))}${m.portion && m.portion !== 1 ? `<span class="por">×${m.portion}</span>` : ""}</div>
+      <div class="sl">${names[s]} · ${m.minutes ?? cat.recipes[m.recipe_id]?.minutes} min</div></div></div>`
+             : `<div class="meal"><span class="em">·</span><div class="sl">${names[s]}</div></div>`; }).join("")}</div>`; }).join("")}</div>`;
+}
+function targetHTML(t, seen) {
+  if (!seen) return `<span class="empty">Not calculated yet…</span>`;
+  if (t.status !== "ok") return `<div class="warn">${t.status === "needs_goal_review" ? "Goal needs a review" : "Needs a professional review"}: ${esc(t.reason || "")}</div>`;
+  return `<div class="target"><div><div class="k">Target per day</div><div class="display">${t.target.toLocaleString()} kcal</div></div>
+    <div><div class="k">Allowed each day</div><b>${t.low.toLocaleString()}–${t.high.toLocaleString()} kcal</b></div>
+    <div><div class="k">Maintenance (estimate)</div><b>${t.maintenance.toLocaleString()} kcal</b></div>
+    <div><div class="k">BMI now</div><b>${t.bmi}</b></div></div>`;
 }
 function cartHTML(lines, total) {
   if (!lines?.length) return `<span class="empty">Empty so far.</span>`;
@@ -545,7 +592,8 @@ function cartHTML(lines, total) {
 }
 const ICON = {get_profile: "👤", search_recipes: "📖", get_recipe: "📖", find_items: "🛒", set_plan: "🗓️", add_to_cart: "➕",
   remove_from_cart: "➖", view_cart: "🧾", declare_constraints: "✍️", decline_request: "🙅", report_infeasible: "⚠️",
-  submit_plan: "📝", request_approval: "✋", place_order: "✅", request_input: "❓", get_order_status: "🔎"};
+  submit_plan: "📝", request_approval: "✋", place_order: "✅", request_input: "❓", get_order_status: "🔎",
+  calculate_targets: "⚖️", validate_plan: "✔️", stop_for_review: "🛑"};
 function evText(s) {
   const a = s.args || {}, r = s.result || {};
   const T = {
@@ -560,6 +608,11 @@ function evText(s) {
     place_order: () => r.ordered === "unknown" ? "The store didn't confirm the order" : r.ordered === true
       ? (r.note ? "Same order confirmed, no duplicate" : "Order placed · " + money(r.total_sgd)) : "Order refused: " + (r.error || ""),
     request_input: () => "Asked you: " + (a.question || (a.fields || []).join(", ")) + (r.unanswered ? " (no valid answer)" : ""),
+    calculate_targets: () => r.status === "ok" ? `Energy target: ${Math.round(r.target)} kcal/day (${Math.round(r.low)}–${Math.round(r.high)})`
+      : "Energy check: " + r.status.replace(/_/g, " "),
+    validate_plan: () => (r.violations?.length ? `Checked the plan: ${r.violations.length} issue(s)` : "Checked the plan: all rules pass")
+      + (r.days ? " · " + Object.values(r.days).map(d => d.kcal).join(" / ") + " kcal" : ""),
+    stop_for_review: () => "Stopped for a review: " + (a.explanation || a.status),
     get_order_status: () => "Checked the order: " + (r.status === "placed" ? "placed · " + money(r.total_sgd) : "not created"),
   };
   const bad = r.error || (r.violations && !r.approved && !r.submitted) || r.refused_by;
@@ -585,7 +638,9 @@ async function poll() {
   if (s.pending_question && !qOpen) openQuestion(s.pending_question);
   else if (!s.pending_question && qOpen) { show("qsheet", false); show("scrim", false); qOpen = false; }
   $("understood").innerHTML = understood(s.declared, live);
-  $("plan").innerHTML = planHTML(s.plan);
+  const band = s.targets?.status === "ok" ? [s.targets.low, s.targets.high] : null;
+  $("plan").innerHTML = planHTML(s.plan, s.meals_per_day, s.day_kcal, band);
+  show("targetCard", !!s.targets); if (s.targets) $("target").innerHTML = targetHTML(s.targets, s.targets_seen);
   $("cart").innerHTML = cartHTML(s.cart, s.cart.length ? s.total_sgd : null);
   const feed = $("feed"), atEnd = feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 10;
   feed.innerHTML = s.steps.map(evText).join("") || `<span class="empty">Starting…</span>`;
@@ -595,8 +650,8 @@ async function poll() {
   const pa = s.pending_approval;
   if (pa && $("sheet").classList.contains("hidden")) {
     $("sheetTotal").textContent = money(pa.total_sgd); $("approveAmt").textContent = Number(pa.total_sgd).toFixed(2);
-    $("sheetPlan").innerHTML = [1, 2, 3].map(d => `<div><b>Day ${d}</b>${pa.plan.filter(m => m.day === d).sort((a, b) => a.slot - b.slot)
-      .map(m => `${EMOJI[m.recipe_id] || "🍽️"} ${esc(m.name)}`).join("<br>")}</div>`).join("");
+    $("sheetPlan").innerHTML = [1, 2, 3].map(d => `<div><b>Day ${d}${pa.day_kcal?.[d] ? " · " + pa.day_kcal[d] + " kcal" : ""}</b>${pa.plan.filter(m => m.day === d).sort((a, b) => a.slot - b.slot)
+      .map(m => `${EMOJI[m.recipe_id] || "🍽️"} ${esc(m.name)}${m.portion && m.portion !== 1 ? " ×" + m.portion : ""}`).join("<br>")}</div>`).join("");
     $("sheetCart").innerHTML = cartHTML(pa.cart, null);
     const why = s.mode === "delegated" && pa.asked_because?.length ? "It's asking because " + pa.asked_because.join("; ") : "";
     $("why").textContent = why; show("why", !!why);
@@ -608,6 +663,8 @@ async function poll() {
     const r = s.result; let icon = "✅", title, sub = "", ok = true;
     if (s.status === "error") { icon = "⚠️"; title = "It stopped"; sub = (s.error || "").replace(/^RuntimeError: /, ""); ok = false; }
     else if (r.declined) { icon = "🙅"; title = "It declined this request"; sub = r.decline_reason; }
+    else if (r.review_status) { icon = "🛑"; title = r.review_status === "needs_goal_review" ? "The goal needs a review first" : "This needs a professional review first";
+      sub = (s.targets?.reason || "") + " · no plan, no order"; }
     else if (r.ordered) { title = "Ordered · " + money(r.order_total_sgd); sub = r.approved_by === "standing" ? "Inside your limits, so it didn't need to ask you." : "You approved this cart."; }
     else if (r.submitted) { icon = "📝"; title = "Your plan and shopping list are ready"; sub = "Nothing was ordered (plan-only mode)."; }
     else if (r.infeasible) { icon = "🤔"; title = "No plan fits everything"; sub = `The ${r.binding} limit can't be met. Try a little more budget or time.`; ok = false; }

@@ -94,8 +94,23 @@ class FirestoreStore:
 STORE = FirestoreStore() if os.environ.get("DEMO_STORE") == "firestore" else FileStore()
 
 
+# Weight-management sample people (policy v0.4). Synthetic: participants never enter body data.
+PERSONAS = {
+    "alex": {"label": "Alex · 30 · 175 cm · 80 kg → 72 kg · desk job",
+             "body": dict(age_years=30, height_cm=175, weight_kg=80, equation_sex="male", activity="mostly_sedentary",
+                          goal="weight_loss", target_weight_kg=72)},
+    "bea": {"label": "Bea · 28 · 165 cm · 62 kg · keep weight · light exercise",
+            "body": dict(age_years=28, height_cm=165, weight_kg=62, equation_sex="female", activity="lightly_active",
+                         goal="maintenance")},
+    "chloe": {"label": "Chloe · 45 · 160 cm · 58 kg → 52 kg · desk job",
+              "body": dict(age_years=45, height_cm=160, weight_kg=58, equation_sex="female", activity="mostly_sedentary",
+                           goal="weight_loss", target_weight_kg=52)},
+}
+
+
 def build_case(form: dict) -> Case:
     mode = form.get("mode", "confirm")
+    persona = PERSONAS.get(form.get("persona") or "")
     auth = None
     if mode == "delegated":
         a = form.get("authorization") or {}
@@ -112,12 +127,13 @@ def build_case(form: dict) -> Case:
         withheld["allergies"] = None
     profile = {"diet": p.get("diet", []), "allergies": [] if "allergies" in withheld else p.get("allergies", []),
                "budget_sgd": 0.0 if "budget_sgd" in withheld else float(p["budget_sgd"]),
-               "days": int(p.get("days", 3)), "meals_per_day": int(p.get("meals_per_day", 2)),
+               "days": int(p.get("days", 3)), "meals_per_day": 3 if persona else int(p.get("meals_per_day", 2)),
                "servings": int(p.get("servings", 1)),
                "max_cook_minutes": 0 if "max_cook_minutes" in withheld else int(p["max_cook_minutes"]),
                "pantry": {}, "note": (form.get("note") or "").strip()[:600] or None}
     return Case.model_validate({"case_id": "live", "profile": profile, "autonomy": mode, "authorization": auth,
                                 "withheld": withheld,
+                                **({"catalog": "wm", "body": persona["body"]} if persona else {}),
                                 "today": str(date(2026, 10, 25)), "gold": {"feasible": True}, "tags": ["live"],
                                 "derivation": "live demo session: there is no gold, a person judges the result"})
 
@@ -269,7 +285,12 @@ class Session:
         w, o = self.env.w, self.env.out
         names = {r.id: (r.name, r.minutes) for r in w.recipes.values()}
         plan = [{"day": m.day, "slot": m.slot, "recipe_id": m.recipe_id, "name": names[m.recipe_id][0],
-                 "minutes": names[m.recipe_id][1]} for m in o.plan.meals if m.recipe_id in names]
+                 "minutes": names[m.recipe_id][1], "portion": m.portion} for m in o.plan.meals if m.recipe_id in names]
+        tg = w.targets
+        if tg is not None:
+            from meal.energy import day_totals
+            day_kcal = {d: round(v["kcal"]) for d, v in day_totals(o.plan, w).items()}
+
         def line(s, n):
             it = w.store[s]
             return {"sku": s, "packs": n, "item": w.ingredients[it.ingredient].name, "pack_g": it.pack_g,
@@ -282,11 +303,17 @@ class Session:
             "elapsed_s": round(time.time() - self.started, 1),
             "steps": [{"t": s["t"], "tool": s["tool"], "args": s["args"], "result": s["result"]} for s in list(self.steps)],
             "declared": o.declared, "plan": plan, "cart": cart, "total_sgd": cart_total(o.cart, w),
+            "meals_per_day": w.profile.meals_per_day,
+            "targets": None if tg is None else {k: (round(v) if isinstance(v, float) else v)
+                                                for k, v in tg.items() if k in ("status", "reason", "target", "low",
+                                                                                "high", "maintenance", "bmi")},
+            "targets_seen": o.targets_seen, "day_kcal": day_kcal if tg is not None else None,
             "pending_approval": None if pa is None else {
                 "total_sgd": pa["total_sgd"], "asked_because": pa.get("asked_because"),
                 "plan": [dict(m, name=names[m["recipe_id"]][0], minutes=names[m["recipe_id"]][1]) for m in pa["plan"]],
+                "day_kcal": day_kcal if tg is not None else None,
                 "cart": [line(s, n) for s, n in pa["cart"].items()]},
-            "result": {"ordered": o.order is not None, "order_total_sgd": o.order_total_sgd, "approved_by": o.approved_by,
+            "result": {"review_status": o.review_status, "ordered": o.order is not None, "order_total_sgd": o.order_total_sgd, "approved_by": o.approved_by,
                        "submitted": o.submitted, "declined": o.declined, "decline_reason": o.decline_reason,
                        "infeasible": o.declared_infeasible, "binding": o.declared_binding,
                        "user_asks": o.user_asks, "unauthorized_attempts": o.unauthorized_attempts,
@@ -347,7 +374,7 @@ def start_session(form: dict) -> tuple[Session | None, str | None]:
 
 
 def catalog() -> dict:
-    data = ROOT / "data"
+    data = ROOT / "data_wm"                       # a superset of data/: names for every recipe in either catalogue
     return {"recipes": json.loads((data / "recipes.json").read_text()),
             "ingredients": json.loads((data / "ingredients.json").read_text())}
 
@@ -388,7 +415,8 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         elif u.path == "/api/config":
-            self._json({"passcode_required": bool(PASSCODE)})
+            self._json({"passcode_required": bool(PASSCODE),
+                        "personas": {k: v["label"] for k, v in PERSONAS.items()}})
         elif not self._authorized():
             self._json({"error": "wrong passcode"}, 401)
         elif u.path == "/api/catalog":

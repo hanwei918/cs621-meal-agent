@@ -1,0 +1,212 @@
+[
+ {
+  "sku": "rice_1kg",
+  "ingredient": "rice",
+  "pack_g": 1000,
+  "price_sgd": 2.8,
+  "stock": 10
+ },
+ {
+  "sku": "egg_10pk",
+  "ingredient": "egg",
+  "pack_g": 600,
+  "price_sgd": 3.2,
+  "stock": 10
+ },
+ {
+  "sku": "spring_onion_100g",
+  "ingredient": "spring_onion",
+  "pack_g": 100,
+  "price_sgd": 0.9,
+  "stock": 10
+ },
+ {
+  "sku": "soy_sauce_300ml",
+  "ingredient": "soy_sauce",
+  "pack_g": 300,
+  "price_sgd": 2.5,
+  "stock": 10
+ },
+ {
+  "sku": "chicken_breast_500g",
+  "ingredient": "chicken_breast",
+  "pack_g": 500,
+  "price_sgd": 6.5,
+  "stock": 10
+ },
+ {
+  "sku": "chicken_breast_1kg",
+  "ingredient": "chicken_breast",
+  "pack_g": 1000,
+  "price_sgd": 11.9,
+  "stock": 5
+ },
+ {
+  "sku": "broccoli_300g",
+  "ingredient": "broccoli",
+  "pack_g": 300,
+  "price_sgd": 2.2,
+  "stock": 10
+ },
+ {
+  "sku": "tofu_300g",
+  "ingredient": "tofu",
+  "pack_g": 300,
+  "price_sgd": 1.6,
+  "stock": 10
+ },
+ {
+  "sku": "curry_paste_100g",
+  "ingredient": "curry_paste",
+  "pack_g": 100,
+  "price_sgd": 2.9,
+  "stock": 10
+ },
+ {
+  "sku": "coconut_milk_400ml",
+  "ingredient": "coconut_milk",
+  "pack_g": 400,
+  "price_sgd": 2.4,
+  "stock": 10
+ },
+ {
+  "sku": "noodles_400g",
+  "ingredient": "noodles",
+  "pack_g": 400,
+  "price_sgd": 1.8,
+  "stock": 10
+ },
+ {
+  "sku": "peanut_butter_340g",
+  "ingredient": "peanut_butter",
+  "pack_g": 340,
+  "price_sgd": 4.5,
+  "stock": 10
+ },
+ {
+  "sku": "cucumber_2pk",
+  "ingredient": "cucumber",
+  "pack_g": 300,
+  "price_sgd": 1.5,
+  "stock": 10
+ },
+ {
+  "sku": "pork_mince_300g",
+  "ingredient": "pork_mince",
+  "pack_g": 300,
+  "price_sgd": 4.8,
+  "stock": 10
+ },
+ {
+  "sku": "dumpling_wrappers_250g",
+  "ingredient": "dumpling_wrappers",
+  "pack_g": 250,
+  "price_sgd": 2.0,
+  "stock": 10
+ },
+ {
+  "sku": "bok_choy_300g",
+  "ingredient": "bok_choy",
+  "pack_g": 300,
+  "price_sgd": 1.8,
+  "stock": 10
+ },
+ {
+  "sku": "salmon_300g",
+  "ingredient": "salmon",
+  "pack_g": 300,
+  "price_sgd": 9.8,
+  "stock": 10
+ },
+ {
+  "sku": "tomato_500g",
+  "ingredient": "tomato",
+  "pack_g": 500,
+  "price_sgd": 2.6,
+  "stock": 10
+ },
+ {
+  "sku": "beef_slices_300g",
+  "ingredient": "beef_slices",
+  "pack_g": 300,
+  "price_sgd": 7.5,
+  "stock": 10
+ },
+ {
+  "sku": "pasta_500g",
+  "ingredient": "pasta",
+  "pack_g": 500,
+  "price_sgd": 1.9,
+  "stock": 10
+ },
+ {
+  "sku": "garlic_100g",
+  "ingredient": "garlic",
+  "pack_g": 100,
+  "price_sgd": 1.0,
+  "stock": 10
+ },
+ {
+  "sku": "chickpeas_400g",
+  "ingredient": "chickpeas",
+  "pack_g": 400,
+  "price_sgd": 1.6,
+  "stock": 10
+ },
+ {
+  "sku": "prawns_300g",
+  "ingredient": "prawns",
+  "pack_g": 300,
+  "price_sgd": 8.9,
+  "stock": 10
+ },
+ {
+  "sku": "mushrooms_250g",
+  "ingredient": "mushrooms",
+  "pack_g": 250,
+  "price_sgd": 2.8,
+  "stock": 10
+ },
+ {
+  "sku": "butter_250g",
+  "ingredient": "butter",
+  "pack_g": 250,
+  "price_sgd": 4.2,
+  "stock": 10
+ },
+ {
+  "sku": "oats_500g",
+  "ingredient": "oats",
+  "pack_g": 500,
+  "price_sgd": 3.5,
+  "stock": 10
+ },
+ {
+  "sku": "milk_1l",
+  "ingredient": "milk",
+  "pack_g": 1000,
+  "price_sgd": 2.6,
+  "stock": 10
+ },
+ {
+  "sku": "banana_6pk",
+  "ingredient": "banana",
+  "pack_g": 600,
+  "price_sgd": 2.2,
+  "stock": 10
+ },
+ {
+  "sku": "bread_400g",
+  "ingredient": "bread",
+  "pack_g": 400,
+  "price_sgd": 2.5,
+  "stock": 10
+ },
+ {
+  "sku": "yogurt_500g",
+  "ingredient": "yogurt",
+  "pack_g": 500,
+  "price_sgd": 3.8,
+  "stock": 10
+ }
+]

@@ -18,6 +18,10 @@ class OracleAgent:
         if env.case.gold.out_of_scope:
             env.call("decline_request", reason="out of scope (oracle)")
             return AgentUsage()
+        if env.case.gold.review:                           # wm: the calculator says stop
+            env.call("calculate_targets")
+            env.call("stop_for_review", status=env.case.gold.review, explanation="oracle")
+            return AgentUsage()
         if env.withheld:                                   # P-01: ask, never guess
             env.call("request_input", fields=sorted(env.withheld), question="missing or invalid")
         if env.case.gold.note is not None:                 # the author's reading of the note

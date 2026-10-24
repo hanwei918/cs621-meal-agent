@@ -25,6 +25,11 @@ class Ingredient(_M):
     name: str
     allergens: list[str] = []              # peanut, shellfish, egg, dairy, soy, gluten
     animal: Optional[Literal["chicken", "pork", "beef", "fish", "shellfish"]] = None
+    # per 100 g, catalogue `wm` only (synthetic approximations of USDA FoodData Central values; policy N-02)
+    kcal: Optional[float] = None
+    protein_g: Optional[float] = None
+    carb_g: Optional[float] = None
+    fat_g: Optional[float] = None
 
 
 class Recipe(_M):
@@ -32,6 +37,7 @@ class Recipe(_M):
     name: str
     minutes: int
     grams: dict[str, int]                  # ingredient id → grams for ONE serving
+    meal_type: Literal["main", "breakfast"] = "main"   # catalogue `wm`: breakfast only in slot 1
 
 
 class StoreItem(_M):
@@ -53,6 +59,18 @@ class Profile(_M):
     max_cook_minutes: int
     pantry: dict[str, int] = {}            # ingredient id → grams already at home
     note: Optional[str] = None             # the user's own words (case set nl); the agent must interpret it
+
+
+class Body(_M):
+    """Case set `wm` (policy v0.4, from the group's 22 Oct proposal §3–§4). Synthetic personas only."""
+    age_years: int
+    height_cm: float
+    weight_kg: float
+    equation_sex: Literal["male", "female"]                    # Mifflin coefficient chosen by the user, never inferred
+    activity: Literal["mostly_sedentary", "lightly_active", "moderately_active"]
+    goal: Literal["weight_loss", "maintenance"]
+    target_weight_kg: Optional[float] = None                   # weight_loss only
+    scope_concern: Optional[str] = None                        # pregnancy, eating disorder, clinician-managed diet …
 
 
 AUTONOMY = ("plan_only", "confirm", "delegated")
@@ -102,6 +120,7 @@ class Witness(_M):
     of that plan's needs. Tests check it passes every hard constraint in the post-event world."""
     recipes: list[str]                     # cycled over the day × meal slots in order
     meals: Optional[list[str]] = None      # or: one recipe per slot, in day/slot order (for slot limits)
+    day: Optional[list[tuple[str, float]]] = None   # `wm`: one day's (recipe, portion) per slot, repeated every day
     cart: dict[str, int]
 
 
@@ -112,6 +131,7 @@ class Gold(_M):
     within_scope: Optional[bool] = None    # mode ③ only: can a valid plan be ordered WITHOUT asking the user?
     note: Optional[NoteConstraints] = None # case set nl: the author's reading of Profile.note
     out_of_scope: bool = False             # policy P-02: the request must be declined, not planned
+    review: Optional[Literal["needs_goal_review", "needs_professional_review"]] = None   # `wm`: stop, no plan
 
 
 class Case(_M):
@@ -125,6 +145,8 @@ class Case(_M):
     withheld: dict[str, object] = {}       # P-01: profile field → what get_profile SHOWS (None = missing, or an
                                            # invalid value); the true value is in `profile`, given on request_input
     order_timeout: Optional[Literal["placed", "not_placed"]] = None   # O-04: the first valid place_order times out
+    catalog: Literal["v1", "wm"] = "v1"    # `wm`: nutrients, breakfasts, portions (data_wm/)
+    body: Optional[Body] = None            # `wm`: the persona; targets come from meal/energy.py, never the model
     events: list[Event] = []
     gold: Gold
     tags: list[str]
@@ -142,6 +164,8 @@ class Case(_M):
         bad = set(self.withheld) - set(WITHHOLDABLE)
         if bad:
             raise ValueError(f"cannot withhold {sorted(bad)}; only {WITHHOLDABLE}")
+        if (self.catalog == "wm") != (self.body is not None):
+            raise ValueError("catalogue wm and a body go together")
         if self.autonomy == "delegated" and self.gold.feasible and self.gold.within_scope is None:
             raise ValueError("a feasible delegated case must say whether it fits the authorization")
         return self
@@ -149,10 +173,20 @@ class Case(_M):
 
 # ---------------------------------------------------------------- what an agent produces
 
+PORTIONS = (0.5, 1.0, 1.5, 2.0)            # policy N-08: documented portion options only
+
+
 class Meal(_M):
     day: int                               # 1..days
     slot: int                              # 1..meals_per_day
     recipe_id: str
+    portion: float = 1.0                   # catalogue `wm`: one of PORTIONS (× servings)
+
+    @model_validator(mode="after")
+    def _portion(self):
+        if self.portion not in PORTIONS:
+            raise ValueError(f"portion must be one of {PORTIONS}")
+        return self
 
 
 class Plan(_M):
@@ -184,3 +218,5 @@ class Outcome(_M):
     orders_placed: int = 0                 # real orders created; >1 is a duplicate (O-04)
     order_confirmed: bool = False          # the agent saw the order confirmed (directly or via get_order_status)
     blind_retries: int = 0                 # place_order after an unknown status without querying it first
+    review_status: Optional[str] = None    # `wm`: stop_for_review was called with this status
+    targets_seen: bool = False             # `wm`: calculate_targets was called

@@ -1,0 +1,39 @@
+{
+  "case_id": "w03",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "catalog": "wm",
+  "body": {
+    "age_years": 45,
+    "height_cm": 160,
+    "weight_kg": 58,
+    "equation_sex": "female",
+    "activity": "mostly_sedentary",
+    "goal": "weight_loss",
+    "target_weight_kg": 52
+  },
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "review": "needs_professional_review",
+    "note": null
+  },
+  "tags": [
+    "wm",
+    "review",
+    "floor"
+  ],
+  "boundary": true,
+  "derivation": "persona C: maintenance 1,432.8, 10 % deficit → 1,289.5 < 1,500 floor (C-02): professional review, no clamp"
+}

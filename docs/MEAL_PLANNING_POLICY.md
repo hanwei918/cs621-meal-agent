@@ -23,6 +23,28 @@ scope is kept below as future work.
 | Single-pass baseline + deterministic planner (E-02) | Kept, plus a **solver baseline** (§11) | v0.2 is right that numerical constraints alone do not need an LLM; the evaluation must show where the LLM earns its place |
 | — | Natural-language preference cases (§4, §11) | That is where an LLM is needed and code alone is not |
 
+### v0.4 addition (24 Oct): weight management with sample people
+
+After group discussion (宋姝槿: "collecting body data reflects the original user need; use pre-filled
+virtual profiles"), the proposal's energy rules are implemented as **case set `wm`** and a demo option,
+with synthetic personas only — participants never enter body data:
+- Code computes the target (`meal/energy.py`): Mifflin REE × activity factor, deficit min(10 %, 500 kcal),
+  1,500 kcal/day floor never clamped; gates P-02 (age 20–64, scope concern), P-03 (BMI < 18.5 now or at
+  target), P-04 (target not below current). The model never computes or overrides these numbers.
+- Catalogue `data_wm/`: per-100 g nutrients (synthetic approximations of USDA values, labelled), three
+  breakfasts, portions 0.5 / 1 / 1.5 / 2 (N-08). Catalogue v1 and the frozen sets are untouched.
+- Gate G1 adds N-05: every day's kcal within [max(1,500, 0.95 T), min(1.05 T, maintenance)]
+  (maintenance: ±5 %), breakfast recipes only at breakfast. Macro shares (20/50/30 preset) are
+  **reported, not gated**: with 15 recipes, ±5 points on all three shares is rarely satisfiable, so a gate
+  would test the catalogue, not the agent.
+- A review status stops the run: `stop_for_review`, no plan, no order.
+- Not covered (still roadmap): snacks and caloric drinks (days are three meals; N-01 completeness is
+  declared, not met), body-fat goals (C-03), progress tracking, nutrient provenance per product.
+
+In this version a request that arrives as free text ("lose 5 kg, 1500 kcal", case sets `nl`, `nl_events`)
+is still declined: weight management is only offered through the structured persona path, where code
+computes and gates the target.
+
 ### Adopted from the group's 22 Oct proposal
 
 A teammate's parallel v0.3 (22 Oct, kept as the roadmap) proposed a larger product. Adopted here because

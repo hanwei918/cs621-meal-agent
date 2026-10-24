@@ -2,7 +2,7 @@
 reference solver (①). One definition, so the gate, the grade and the gold cannot disagree.
 
 Every check returns a list of (check, detail); an empty list means the plan + cart are valid.
-checks: meals · diet · allergy · time · coverage · stock · budget
+checks: meals · diet · allergy · time · coverage · stock · budget · note · slot · energy (catalogue wm)
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from pathlib import Path
 from .schema import Case, Ingredient, Plan, Profile, Recipe, StoreItem
 
 DATA = Path(__file__).resolve().parent.parent / "data"
+DATA_BY_CATALOG = {"v1": DATA, "wm": DATA.parent / "data_wm"}
 FORBIDDEN_BY_DIET = {"vegetarian": {"chicken", "pork", "beef", "fish", "shellfish"},
                      "no_pork": {"pork"}, "no_beef": {"beef"}}
 
@@ -27,15 +28,21 @@ class World:
     profile: Profile
     log: list[str] = field(default_factory=list)
     note: object = None                    # NoteConstraints in force (declared by the agent, or gold when grading)
+    targets: dict | None = None            # catalogue wm: meal/energy.targets(body), computed by code
 
     @classmethod
     def for_case(cls, case: Case) -> "World":
-        ing = {i["id"]: Ingredient(**i) for i in json.loads((DATA / "ingredients.json").read_text())}
-        rec = {r["id"]: Recipe(**r) for r in json.loads((DATA / "recipes.json").read_text())}
-        sto = {s["sku"]: StoreItem(**s) for s in json.loads((DATA / "store.json").read_text())}
+        d = DATA_BY_CATALOG[case.catalog]
+        ing = {i["id"]: Ingredient(**i) for i in json.loads((d / "ingredients.json").read_text())}
+        rec = {r["id"]: Recipe(**r) for r in json.loads((d / "recipes.json").read_text())}
+        sto = {s["sku"]: StoreItem(**s) for s in json.loads((d / "store.json").read_text())}
         for sku, ov in case.store_overrides.items():
             sto[sku] = sto[sku].model_copy(update=ov)
-        return cls(ing, rec, sto, case.profile.model_copy(deep=True))
+        tg = None
+        if case.body is not None:
+            from .energy import targets
+            tg = targets(case.body)
+        return cls(ing, rec, sto, case.profile.model_copy(deep=True), targets=tg)
 
 
 def recipe_violations(r: Recipe, w: World) -> list[tuple[str, str]]:
@@ -64,7 +71,7 @@ def needs(plan: Plan, w: World) -> dict[str, int]:
     total: dict[str, int] = {}
     for m in plan.meals:
         for i, g in w.recipes[m.recipe_id].grams.items():
-            total[i] = total.get(i, 0) + g * w.profile.servings
+            total[i] = total.get(i, 0) + math.ceil(g * w.profile.servings * m.portion)
     pantry = dict(w.profile.pantry)
     if w.note is not None:
         for i, g in w.note.pantry_add.items():
@@ -88,11 +95,28 @@ def violations(plan: Plan, cart: dict[str, int], w: World) -> list[tuple[str, st
             out.append(("meals", f"unknown recipe {m.recipe_id}"))
             continue
         out += recipe_violations(w.recipes[m.recipe_id], w)
+        if w.targets is None and m.portion != 1.0:
+            out.append(("meals", f"day {m.day} meal {m.slot}: portions are only offered in catalogue wm"))
+        if w.targets is not None:
+            want_type = "breakfast" if m.slot == 1 else "main"
+            if w.recipes[m.recipe_id].meal_type != want_type:
+                out.append(("slot", f"day {m.day} meal {m.slot}: {m.recipe_id} is not a {want_type} recipe"))
         if w.note is not None:
             for lim in w.note.slot_max_minutes:
                 if (lim.day, lim.slot) == (m.day, m.slot) and w.recipes[m.recipe_id].minutes > lim.minutes:
                     out.append(("note", f"day {m.day} meal {m.slot}: {m.recipe_id} takes {w.recipes[m.recipe_id].minutes} min > {lim.minutes}"))
     known_plan = Plan(meals=[m for m in plan.meals if m.recipe_id in w.recipes])
+    if w.targets is not None:                            # N-05: every day in its own band
+        t = w.targets
+        if t["status"] != "ok":
+            out.append(("energy", f"no plan may be made: {t['status']} ({t.get('reason', '')})"))
+        else:
+            from .energy import day_totals
+            days = day_totals(known_plan, w)
+            for d in range(1, p.days + 1):
+                k = days.get(d, {"kcal": 0.0})["kcal"]
+                if not t["low"] - 1e-6 <= k <= t["high"] + 1e-6:
+                    out.append(("energy", f"day {d}: {k:.0f} kcal outside {t['low']:.0f}–{t['high']:.0f}"))
     for i, g in needs(known_plan, w).items():
         have = sum(w.store[s].pack_g * n for s, n in cart.items() if s in w.store and w.store[s].ingredient == i)
         if have < g:

@@ -1,0 +1,69 @@
+{
+  "system": "fixed",
+  "model": "none",
+  "n_cases": 11,
+  "n_runs": 1,
+  "pass_mean": 0.0,
+  "pass_sd": 0.0,
+  "per_run": [
+    0.0
+  ],
+  "failed_checks": {
+    "no_order": 6,
+    "review_status": 5
+  },
+  "failures_by_tag": {
+    "wm:no_order": 6,
+    "wm:review_status": 5,
+    "review:review_status": 5,
+    "loss:no_order": 4,
+    "maintenance:no_order": 2,
+    "diet:no_order": 1,
+    "floor:review_status": 1,
+    "bmi:review_status": 1,
+    "scope:review_status": 1,
+    "age:review_status": 1,
+    "stock_event:no_order": 1,
+    "approval_event:no_order": 1,
+    "budget:no_order": 1,
+    "note:no_order": 1,
+    "allergy:no_order": 1,
+    "target:review_status": 1
+  },
+  "flaky": [],
+  "always_fail": [
+    "w01",
+    "w02",
+    "w03",
+    "w04",
+    "w05",
+    "w06",
+    "w07",
+    "w08",
+    "w09",
+    "w10",
+    "w11"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "errors": 0,
+  "steps_per_case": 42.73,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0,
+  "meta": {
+    "case_set": "wm",
+    "eval_sha256": "f787bd4feef2200046360fa297beb434d15a3257a1aeb391d76377fb9f7ce729",
+    "code": "e2e9f55-dirty"
+  },
+  "utc": "20261024T061954Z"
+}

@@ -1,0 +1,279 @@
+[
+ {
+  "id": "rice",
+  "name": "Jasmine rice",
+  "kcal": 360,
+  "protein_g": 7.0,
+  "carb_g": 79.0,
+  "fat_g": 0.6
+ },
+ {
+  "id": "egg",
+  "name": "Eggs",
+  "allergens": [
+   "egg"
+  ],
+  "kcal": 143,
+  "protein_g": 12.6,
+  "carb_g": 0.7,
+  "fat_g": 9.5
+ },
+ {
+  "id": "spring_onion",
+  "name": "Spring onion",
+  "kcal": 32,
+  "protein_g": 1.8,
+  "carb_g": 7.3,
+  "fat_g": 0.2
+ },
+ {
+  "id": "soy_sauce",
+  "name": "Soy sauce",
+  "allergens": [
+   "soy",
+   "gluten"
+  ],
+  "kcal": 53,
+  "protein_g": 8.0,
+  "carb_g": 5.0,
+  "fat_g": 0.6
+ },
+ {
+  "id": "chicken_breast",
+  "name": "Chicken breast",
+  "animal": "chicken",
+  "kcal": 120,
+  "protein_g": 22.5,
+  "carb_g": 0.0,
+  "fat_g": 2.6
+ },
+ {
+  "id": "broccoli",
+  "name": "Broccoli",
+  "kcal": 34,
+  "protein_g": 2.8,
+  "carb_g": 6.6,
+  "fat_g": 0.4
+ },
+ {
+  "id": "tofu",
+  "name": "Firm tofu",
+  "allergens": [
+   "soy"
+  ],
+  "kcal": 144,
+  "protein_g": 15.8,
+  "carb_g": 2.8,
+  "fat_g": 8.7
+ },
+ {
+  "id": "curry_paste",
+  "name": "Curry paste",
+  "kcal": 200,
+  "protein_g": 3.0,
+  "carb_g": 15.0,
+  "fat_g": 14.0
+ },
+ {
+  "id": "coconut_milk",
+  "name": "Coconut milk",
+  "kcal": 197,
+  "protein_g": 2.0,
+  "carb_g": 2.8,
+  "fat_g": 21.0
+ },
+ {
+  "id": "noodles",
+  "name": "Egg-free wheat noodles",
+  "allergens": [
+   "gluten"
+  ],
+  "kcal": 350,
+  "protein_g": 12.0,
+  "carb_g": 72.0,
+  "fat_g": 1.5
+ },
+ {
+  "id": "peanut_butter",
+  "name": "Peanut butter",
+  "allergens": [
+   "peanut"
+  ],
+  "kcal": 590,
+  "protein_g": 25.0,
+  "carb_g": 20.0,
+  "fat_g": 50.0
+ },
+ {
+  "id": "cucumber",
+  "name": "Cucumber",
+  "kcal": 15,
+  "protein_g": 0.7,
+  "carb_g": 3.6,
+  "fat_g": 0.1
+ },
+ {
+  "id": "pork_mince",
+  "name": "Pork mince",
+  "animal": "pork",
+  "kcal": 263,
+  "protein_g": 17.0,
+  "carb_g": 0.0,
+  "fat_g": 21.0
+ },
+ {
+  "id": "dumpling_wrappers",
+  "name": "Dumpling wrappers",
+  "allergens": [
+   "gluten"
+  ],
+  "kcal": 290,
+  "protein_g": 9.0,
+  "carb_g": 58.0,
+  "fat_g": 1.5
+ },
+ {
+  "id": "bok_choy",
+  "name": "Bok choy",
+  "kcal": 13,
+  "protein_g": 1.5,
+  "carb_g": 2.2,
+  "fat_g": 0.2
+ },
+ {
+  "id": "salmon",
+  "name": "Salmon fillet",
+  "animal": "fish",
+  "kcal": 208,
+  "protein_g": 20.0,
+  "carb_g": 0.0,
+  "fat_g": 13.0
+ },
+ {
+  "id": "tomato",
+  "name": "Tomatoes",
+  "kcal": 18,
+  "protein_g": 0.9,
+  "carb_g": 3.9,
+  "fat_g": 0.2
+ },
+ {
+  "id": "beef_slices",
+  "name": "Beef slices",
+  "animal": "beef",
+  "kcal": 250,
+  "protein_g": 18.0,
+  "carb_g": 0.0,
+  "fat_g": 19.0
+ },
+ {
+  "id": "pasta",
+  "name": "Pasta",
+  "allergens": [
+   "gluten"
+  ],
+  "kcal": 371,
+  "protein_g": 13.0,
+  "carb_g": 75.0,
+  "fat_g": 1.5
+ },
+ {
+  "id": "garlic",
+  "name": "Garlic",
+  "kcal": 149,
+  "protein_g": 6.4,
+  "carb_g": 33.0,
+  "fat_g": 0.5
+ },
+ {
+  "id": "chickpeas",
+  "name": "Chickpeas",
+  "kcal": 139,
+  "protein_g": 7.0,
+  "carb_g": 22.5,
+  "fat_g": 2.6
+ },
+ {
+  "id": "prawns",
+  "name": "Prawns",
+  "allergens": [
+   "shellfish"
+  ],
+  "animal": "shellfish",
+  "kcal": 85,
+  "protein_g": 20.0,
+  "carb_g": 0.0,
+  "fat_g": 0.5
+ },
+ {
+  "id": "mushrooms",
+  "name": "Mushrooms",
+  "kcal": 22,
+  "protein_g": 3.1,
+  "carb_g": 3.3,
+  "fat_g": 0.3
+ },
+ {
+  "id": "butter",
+  "name": "Butter",
+  "allergens": [
+   "dairy"
+  ],
+  "kcal": 717,
+  "protein_g": 0.9,
+  "carb_g": 0.1,
+  "fat_g": 81.0
+ },
+ {
+  "id": "oats",
+  "name": "Rolled oats",
+  "allergens": [
+   "gluten"
+  ],
+  "kcal": 389,
+  "protein_g": 16.9,
+  "carb_g": 66.0,
+  "fat_g": 6.9
+ },
+ {
+  "id": "milk",
+  "name": "Low-fat milk",
+  "allergens": [
+   "dairy"
+  ],
+  "kcal": 50,
+  "protein_g": 3.4,
+  "carb_g": 5.0,
+  "fat_g": 2.0
+ },
+ {
+  "id": "banana",
+  "name": "Bananas",
+  "kcal": 89,
+  "protein_g": 1.1,
+  "carb_g": 23.0,
+  "fat_g": 0.3
+ },
+ {
+  "id": "bread",
+  "name": "Wholemeal bread",
+  "allergens": [
+   "gluten"
+  ],
+  "kcal": 247,
+  "protein_g": 13.0,
+  "carb_g": 41.0,
+  "fat_g": 3.4
+ },
+ {
+  "id": "yogurt",
+  "name": "Low-fat Greek yogurt",
+  "allergens": [
+   "dairy"
+  ],
+  "kcal": 73,
+  "protein_g": 10.0,
+  "carb_g": 3.9,
+  "fat_g": 2.0
+ }
+]

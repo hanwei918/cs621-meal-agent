@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements-demo.txt
 COPY meal/ meal/
 COPY eval/__init__.py eval/pricing.py eval/
 COPY data/ data/
+COPY data_wm/ data_wm/
 COPY demo/server.py demo/index.html demo/
 ARG CODE_REV=unknown
 ENV CODE_REV=$CODE_REV HOST=0.0.0.0 DEMO_STORE=firestore PYTHONUNBUFFERED=1

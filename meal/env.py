@@ -46,6 +46,13 @@ TOOL_SPECS = {
                             "at home {ingredient: grams}. Call again to replace. Declare only what the note says."),
     "decline_request": ("Decline a request this service does not handle (weight loss, calorie or macro targets, a medical "
                         "or clinician-managed diet, pregnancy, eating-disorder context). No plan and no order follow."),
+    "calculate_targets": ("Weight-management mode only: the user's daily energy target and allowed band, computed by code "
+                          "from the profile (Mifflin equation, activity factor, capped deficit, 1,500 kcal floor). Status "
+                          "is ok, needs_goal_review or needs_professional_review."),
+    "validate_plan": ("Check the current plan and cart against every rule (including each day's energy band) without "
+                      "asking anyone. Returns violations and per-day kcal and macro shares."),
+    "stop_for_review": ("Weight-management mode only: stop without a plan because calculate_targets returned a review "
+                        "status. Give that status and a short explanation for the user."),
     "report_infeasible": ("Stop without ordering: name the binding constraint (budget, diet, time or stock) and explain. "
                           "To name it, apply the constraints in this order: diet and allergies, then cooking time, then "
                           "stock, then budget; the binding one is the first after which no valid plan is left."),
@@ -180,6 +187,9 @@ class StoreEnv:
         a = self.case.authorization
         shown = self.w.profile.model_dump(exclude_none=True)
         shown.update(self.withheld)                                                 # G5: missing (None) or invalid
+        if self.case.body is not None:
+            shown["body"] = self.case.body.model_dump(exclude_none=True)
+            shown["mode"] = "weight management: call calculate_targets first"
         return dict(shown, autonomy=self.case.autonomy, today=str(self.case.today),
                     authorization=a.model_dump(mode="json") if a else None)
 
@@ -202,14 +212,46 @@ class StoreEnv:
         return out
 
     def t_search_recipes(self, max_minutes: int | None = None):
-        return [{"id": r.id, "name": r.name, "minutes": r.minutes} for r in self.w.recipes.values()
-                if max_minutes is None or r.minutes <= max_minutes]
+        wm = self.w.targets is not None
+        return [{"id": r.id, "name": r.name, "minutes": r.minutes, **({"meal_type": r.meal_type} if wm else {})}
+                for r in self.w.recipes.values() if max_minutes is None or r.minutes <= max_minutes]
 
     def t_get_recipe(self, recipe_id: str):
         r = self.w.recipes[recipe_id]
-        return {"id": r.id, "name": r.name, "minutes": r.minutes,
-                "ingredients": [{"id": i, "grams": g, "allergens": self.w.ingredients[i].allergens,
-                                 "animal": self.w.ingredients[i].animal} for i, g in r.grams.items()]}
+        out = {"id": r.id, "name": r.name, "minutes": r.minutes,
+               "ingredients": [{"id": i, "grams": g, "allergens": self.w.ingredients[i].allergens,
+                                "animal": self.w.ingredients[i].animal} for i, g in r.grams.items()]}
+        if self.w.targets is not None:                                              # catalogue wm
+            from .energy import recipe_nutrients
+            out["meal_type"] = r.meal_type
+            out["per_serving"] = {k: round(v, 1) for k, v in recipe_nutrients(r, self.w.ingredients).items()}
+        return out
+
+    def t_calculate_targets(self):
+        if self.w.targets is None:
+            raise ValueError("this user did not choose weight management; there is no energy target")
+        self.out.targets_seen = True
+        t = self.w.targets
+        return {k: (round(v, 1) if isinstance(v, float) else v) for k, v in t.items() if k != "macros_g"} | (
+            {"macro_anchors_g": {k: round(v) for k, v in t["macros_g"].items()},
+             "portions_allowed": [0.5, 1.0, 1.5, 2.0],
+             "slots": {"1": "breakfast", "2": "lunch", "3": "dinner"}} if t["status"] == "ok" else {})
+
+    def t_validate_plan(self):
+        out = {"violations": [f"{c}: {d}" for c, d in violations(self.out.plan, self.out.cart, self.w)],
+               "total_sgd": cart_total(self.out.cart, self.w)}
+        if self.w.targets is not None and self.w.targets["status"] == "ok":
+            from .energy import day_totals, macro_shares
+            out["days"] = {d: {"kcal": round(v["kcal"]), "shares": {k: round(s, 2) for k, s in macro_shares(v).items()}}
+                           for d, v in sorted(day_totals(self.out.plan, self.w).items())}
+            out["band_kcal"] = [round(self.w.targets["low"]), round(self.w.targets["high"])]
+        return out
+
+    def t_stop_for_review(self, status: str, explanation: str = ""):
+        if status not in ("needs_goal_review", "needs_professional_review"):
+            raise ValueError("status must be needs_goal_review or needs_professional_review")
+        self.out.review_status = status
+        return {"stopped": True, "status": status}
 
     def t_find_items(self, ingredient: str):
         return [s.model_dump(exclude_none=True) for s in self.w.store.values() if s.ingredient == ingredient]

@@ -1,0 +1,75 @@
+{
+  "case_id": "w10",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "catalog": "wm",
+  "body": {
+    "age_years": 28,
+    "height_cm": 165,
+    "weight_kg": 62,
+    "equation_sex": "female",
+    "activity": "lightly_active",
+    "goal": "maintenance"
+  },
+  "profile": {
+    "diet": [
+      "vegetarian"
+    ],
+    "allergies": [
+      "peanut"
+    ],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "review": null,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "b01",
+        "r01",
+        "r09"
+      ],
+      "day": [
+        [
+          "b01",
+          1.0
+        ],
+        [
+          "r01",
+          1.0
+        ],
+        [
+          "r09",
+          1.5
+        ]
+      ],
+      "cart": {
+        "banana_6pk": 1,
+        "egg_10pk": 1,
+        "garlic_100g": 1,
+        "milk_1l": 1,
+        "oats_500g": 1,
+        "pasta_500g": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "wm",
+    "maintenance",
+    "allergy"
+  ],
+  "boundary": true,
+  "derivation": "persona B vegetarian with a peanut allergy: no peanut noodles; oats 422 + fried rice 697 + 1.5 × pasta 744 = 1,863 [witness 1864 kcal/day, S$27.70]"
+}

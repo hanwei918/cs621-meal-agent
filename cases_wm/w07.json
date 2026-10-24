@@ -1,0 +1,78 @@
+{
+  "case_id": "w07",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "catalog": "wm",
+  "body": {
+    "age_years": 30,
+    "height_cm": 175,
+    "weight_kg": 80,
+    "equation_sex": "male",
+    "activity": "mostly_sedentary",
+    "goal": "weight_loss",
+    "target_weight_kg": 72
+  },
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 45,
+    "days": 3,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "out_of_stock",
+      "sku": "rice_1kg"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "review": null,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "b01",
+        "r04",
+        "r08"
+      ],
+      "day": [
+        [
+          "b01",
+          1.0
+        ],
+        [
+          "r08",
+          1.0
+        ],
+        [
+          "r04",
+          1.0
+        ]
+      ],
+      "cart": {
+        "banana_6pk": 1,
+        "beef_slices_300g": 2,
+        "bok_choy_300g": 1,
+        "cucumber_2pk": 1,
+        "milk_1l": 1,
+        "noodles_400g": 2,
+        "oats_500g": 1,
+        "peanut_butter_340g": 1
+      }
+    }
+  },
+  "tags": [
+    "wm",
+    "loss",
+    "stock_event",
+    "approval_event"
+  ],
+  "boundary": true,
+  "derivation": "rice sells out at approval: every rice main is gone; oats 422 + beef noodles 808 + peanut noodles 668 = 1,898 is back in the band [witness 1898 kcal/day, S$34.70]"
+}

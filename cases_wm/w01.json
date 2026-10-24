@@ -1,0 +1,71 @@
+{
+  "case_id": "w01",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "catalog": "wm",
+  "body": {
+    "age_years": 30,
+    "height_cm": 175,
+    "weight_kg": 80,
+    "equation_sex": "male",
+    "activity": "mostly_sedentary",
+    "goal": "weight_loss",
+    "target_weight_kg": 72
+  },
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 40,
+    "days": 3,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "review": null,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "b01",
+        "r02",
+        "r09"
+      ],
+      "day": [
+        [
+          "b01",
+          1.0
+        ],
+        [
+          "r02",
+          1.0
+        ],
+        [
+          "r09",
+          1.5
+        ]
+      ],
+      "cart": {
+        "banana_6pk": 1,
+        "broccoli_300g": 1,
+        "chicken_breast_500g": 1,
+        "garlic_100g": 1,
+        "milk_1l": 1,
+        "oats_500g": 1,
+        "pasta_500g": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "wm",
+    "loss"
+  ],
+  "boundary": false,
+  "derivation": "persona A (proposal fixture), band 1,794–1,983: oats 422 + chicken stir-fry 762 + 1.5 × pasta 744 = 1,928 [witness 1928 kcal/day, S$32.30]"
+}

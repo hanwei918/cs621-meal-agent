@@ -30,8 +30,43 @@ def _plan(ids: tuple[str, ...], w: World) -> Plan:
     return Plan(meals=meals)
 
 
+def day_plan(day: list[tuple[str, float]], w: World) -> Plan:
+    """Catalogue wm: one day's (recipe, portion) per slot, repeated for every day."""
+    return Plan(meals=[Meal(day=d, slot=s + 1, recipe_id=r, portion=p)
+                       for d in range(1, w.profile.days + 1) for s, (r, p) in enumerate(day)])
+
+
+def solve_wm(w: World):
+    """Catalogue wm: search one day template (breakfast + two mains, each at a documented portion) repeated
+    every day. A stated simplification, like ≤3 recipes in v1: it proves feasibility, not optimal variety."""
+    from itertools import combinations_with_replacement, product
+    from .energy import recipe_nutrients
+    from .schema import PORTIONS
+    t = w.targets
+    if t is None or t["status"] != "ok":
+        return None
+    ok = allowed_recipes(w)
+    kcal = {r: recipe_nutrients(w.recipes[r], w.ingredients)["kcal"] * w.profile.servings for r in ok}
+    bks = [(r, p) for r in ok if w.recipes[r].meal_type == "breakfast" for p in PORTIONS]
+    mains = [(r, p) for r in ok if w.recipes[r].meal_type == "main" for p in PORTIONS]
+    best = None
+    for b, (m1, m2) in product(bks, combinations_with_replacement(mains, 2)):
+        e = kcal[b[0]] * b[1] + kcal[m1[0]] * m1[1] + kcal[m2[0]] * m2[1]
+        if not t["low"] - 1e-6 <= e <= t["high"] + 1e-6:
+            continue
+        plan = day_plan([b, m1, m2], w)
+        cart = cheapest_cart(needs(plan, w), w)
+        if cart is None or violations(plan, cart, w):
+            continue
+        if best is None or cart_total(cart, w) < cart_total(best[1], w):
+            best = (plan, cart)
+    return best
+
+
 def solve(w: World) -> tuple[Plan, dict[str, int]] | None:
     """Cheapest valid (plan, cart) found, or None."""
+    if w.targets is not None:
+        return solve_wm(w)
     ok = allowed_recipes(w)
     best = None
     for k in (1, 2, 3):

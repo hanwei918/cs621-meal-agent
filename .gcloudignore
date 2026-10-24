@@ -10,6 +10,8 @@
 !eval/pricing.py
 !data/
 !data/*.json
+!data_wm/
+!data_wm/*.json
 !demo/
 !demo/server.py
 !demo/index.html

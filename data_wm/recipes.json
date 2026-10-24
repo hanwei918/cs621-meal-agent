@@ -1,0 +1,160 @@
+[
+ {
+  "id": "r01",
+  "name": "Egg fried rice",
+  "minutes": 15,
+  "grams": {
+   "rice": 150,
+   "egg": 100,
+   "spring_onion": 20,
+   "soy_sauce": 15
+  }
+ },
+ {
+  "id": "r02",
+  "name": "Chicken and broccoli stir-fry",
+  "minutes": 20,
+  "grams": {
+   "chicken_breast": 150,
+   "broccoli": 100,
+   "soy_sauce": 15,
+   "rice": 150
+  }
+ },
+ {
+  "id": "r03",
+  "name": "Tofu curry",
+  "minutes": 30,
+  "grams": {
+   "tofu": 200,
+   "curry_paste": 40,
+   "coconut_milk": 100,
+   "rice": 150
+  }
+ },
+ {
+  "id": "r04",
+  "name": "Peanut noodles",
+  "minutes": 15,
+  "grams": {
+   "noodles": 120,
+   "peanut_butter": 40,
+   "cucumber": 80
+  }
+ },
+ {
+  "id": "r05",
+  "name": "Pork dumpling soup",
+  "minutes": 35,
+  "grams": {
+   "pork_mince": 120,
+   "dumpling_wrappers": 80,
+   "bok_choy": 100
+  }
+ },
+ {
+  "id": "r06",
+  "name": "Salmon rice bowl",
+  "minutes": 20,
+  "grams": {
+   "salmon": 150,
+   "rice": 150,
+   "cucumber": 80,
+   "soy_sauce": 15
+  }
+ },
+ {
+  "id": "r07",
+  "name": "Tomato omelette",
+  "minutes": 10,
+  "grams": {
+   "egg": 150,
+   "tomato": 100,
+   "spring_onion": 20
+  }
+ },
+ {
+  "id": "r08",
+  "name": "Beef noodle stir-fry",
+  "minutes": 25,
+  "grams": {
+   "beef_slices": 150,
+   "noodles": 120,
+   "bok_choy": 100
+  }
+ },
+ {
+  "id": "r09",
+  "name": "Tomato garlic pasta",
+  "minutes": 20,
+  "grams": {
+   "pasta": 120,
+   "tomato": 200,
+   "garlic": 10
+  }
+ },
+ {
+  "id": "r10",
+  "name": "Chickpea salad",
+  "minutes": 10,
+  "grams": {
+   "chickpeas": 150,
+   "cucumber": 80,
+   "tomato": 100
+  }
+ },
+ {
+  "id": "r11",
+  "name": "Prawn fried rice",
+  "minutes": 20,
+  "grams": {
+   "prawns": 120,
+   "rice": 150,
+   "egg": 50,
+   "spring_onion": 20
+  }
+ },
+ {
+  "id": "r12",
+  "name": "Mushroom risotto",
+  "minutes": 40,
+  "grams": {
+   "rice": 150,
+   "mushrooms": 150,
+   "butter": 20,
+   "garlic": 10
+  }
+ },
+ {
+  "id": "b01",
+  "name": "Oats with milk and banana",
+  "minutes": 5,
+  "meal_type": "breakfast",
+  "grams": {
+   "oats": 60,
+   "milk": 200,
+   "banana": 100
+  }
+ },
+ {
+  "id": "b02",
+  "name": "Wholemeal toast with eggs",
+  "minutes": 10,
+  "meal_type": "breakfast",
+  "grams": {
+   "bread": 80,
+   "egg": 100
+  }
+ },
+ {
+  "id": "b03",
+  "name": "Yogurt with banana and oats",
+  "minutes": 3,
+  "meal_type": "breakfast",
+  "grams": {
+   "yogurt": 200,
+   "banana": 100,
+   "oats": 30
+  }
+ }
+]

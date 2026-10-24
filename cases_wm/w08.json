@@ -1,0 +1,72 @@
+{
+  "case_id": "w08",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "catalog": "wm",
+  "body": {
+    "age_years": 35,
+    "height_cm": 168,
+    "weight_kg": 78,
+    "equation_sex": "female",
+    "activity": "moderately_active",
+    "goal": "weight_loss",
+    "target_weight_kg": 68
+  },
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 31,
+    "days": 3,
+    "meals_per_day": 3,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "store_overrides": {},
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "review": null,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "b01",
+        "r01",
+        "r09"
+      ],
+      "day": [
+        [
+          "b01",
+          1.0
+        ],
+        [
+          "r09",
+          2.0
+        ],
+        [
+          "r01",
+          1.0
+        ]
+      ],
+      "cart": {
+        "banana_6pk": 1,
+        "egg_10pk": 1,
+        "garlic_100g": 1,
+        "milk_1l": 1,
+        "oats_500g": 1,
+        "pasta_500g": 2,
+        "rice_1kg": 1,
+        "soy_sauce_300ml": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 3
+      }
+    }
+  },
+  "tags": [
+    "wm",
+    "loss",
+    "budget"
+  ],
+  "boundary": true,
+  "derivation": "persona E, band 1,980–2,188 and only S$31: oats 422 + 2 × pasta 992 + egg fried rice 697 = 2,111 [witness 2112 kcal/day, S$30.30]"
+}
