@@ -15,3 +15,10 @@
   "calculate_targets first, then stop_for_review". The gold (needs_professional_review, policy v0.4) is unchanged;
   the agent and single-call prompts now say that in weight-management mode the calculator decides scope and
   decline_request is not used. Debug runs to be repeated on the fixed prompt before freezing.
+
+- 2026-10-24 — Repeat debug runs on the fixed prompt (code `2d2017c`, 1 run each, not for reporting): Haiku agent
+  `20261024T064859Z_agent_claude-haiku-5-5_wm` 10/11 — w01 ended after 36 tool calls with no plan and no cart (an
+  agent failure; the same persona passed w07/w09 and w01 in the first debug run); all five review statuses right.
+  Haiku single call `20261024T064942Z_single_call_claude-haiku-5-5_wm` 10/11 — fails only w07 (rice sells out at
+  approval; it cannot re-plan). The first single-call run (`064256Z`, code `be97bdc`) declined 9/11 as "out of scope"
+  under the old contradictory prompt; not reported. **FROZEN (wm v1)**, fingerprint `f787bd4feef2200046360fa297beb434d15a3257a1aeb391d76377fb9f7ce729`.

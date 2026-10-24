@@ -13,6 +13,7 @@ W = {c.case_id: c for c in load_cases(case_set="wm")}
 def test_earlier_sets_keep_their_catalogue_and_fingerprints():
     assert all(c.catalog == "v1" for s in ("v1", "autonomy", "nl", "nl_events", "ops") for c in load_cases(case_set=s))
     assert eval_fingerprint("v1").startswith("cb1a1bdc") and eval_fingerprint("ops").startswith("99c5fc39")
+    assert eval_fingerprint("wm").startswith("f787bd4f")
     assert "oats" not in World.for_case(load_cases(case_set="v1")[0]).ingredients
 
 

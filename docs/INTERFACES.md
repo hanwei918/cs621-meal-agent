@@ -38,7 +38,7 @@ infeasibility reported with the gold binding constraint.
 
 | | Contract | Status |
 |---|---|---|
-| ① | `Body`, `Case.catalog = "wm"`, `Case.body`, `Gold.review`, `Witness.day`; `Meal.portion` ∈ {0.5, 1, 1.5, 2}; `Recipe.meal_type`; nutrient fields on `Ingredient`; `scripts/build_wm_data.py` → `data_wm/`; `scripts/build_wm_cases.py` → `cases_wm/w01..w11` | ✅ 11 cases, 5 boundary · ⬜ freeze after the debug run |
+| ① | `Body`, `Case.catalog = "wm"`, `Case.body`, `Gold.review`, `Witness.day`; `Meal.portion` ∈ {0.5, 1, 1.5, 2}; `Recipe.meal_type`; nutrient fields on `Ingredient`; `scripts/build_wm_data.py` → `data_wm/`; `scripts/build_wm_cases.py` → `cases_wm/w01..w11` | ✅ 11 cases, 5 boundary · frozen 2026-10-24 |
 | ④ | `meal/energy.py` (`targets`, `day_totals`, `macro_shares`); tools `calculate_targets`, `validate_plan`, `stop_for_review`; G1 energy band + slot rule | ✅ |
 | ② | Checks `energy`, `slot`, `review_status`, `wrong_review`, `acted_under_review` | ✅ |
 | ①③⑤ | `solve_wm` (one day template repeated); agent prompt; single call gets the same code-computed targets and per-serving numbers | ✅ · ⬜ LLM run on `--set wm` |
