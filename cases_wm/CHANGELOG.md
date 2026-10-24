@@ -22,3 +22,6 @@
   Haiku single call `20261024T064942Z_single_call_claude-haiku-5-5_wm` 10/11 — fails only w07 (rice sells out at
   approval; it cannot re-plan). The first single-call run (`064256Z`, code `be97bdc`) declined 9/11 as "out of scope"
   under the old contradictory prompt; not reported. **FROZEN (wm v1)**, fingerprint `f787bd4feef2200046360fa297beb434d15a3257a1aeb391d76377fb9f7ce729`.
+
+- 2026-10-24 — Formal runs (code `7a29f58`, 3 runs): fixed 0.000 ± 0, single call 0.879 ± 0.052 (w07 ×3, w05 ×1),
+  agent 1.000 ± 0. Results in policy E-04.

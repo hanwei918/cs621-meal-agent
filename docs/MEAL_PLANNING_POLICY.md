@@ -299,8 +299,22 @@ asked, 0 avoidable fields asked. Duplicate orders 0; blind retries after a timeo
 call $0.04. The gates (G4, G5) are what make a guess or a double order impossible; the agent's 3/3 shows it uses
 the tools the gates require, not that it could not have failed.
 
+**Weight-management set** (policy v0.4, frozen, 11 cases, `f787bd4f…`; code `7a29f58`; 3 runs each, Haiku 5.5):
+
+| System | Pass rate | Failures |
+| --- | --- | --- |
+| Fixed planner | 0.000 ± 0.000 | Ignores energy and never stops for review |
+| Single call | 0.879 ± 0.052 | w07 every run (rice sells out at approval: cannot re-plan); w05 once (declined pregnancy as "out of scope" instead of the review status) |
+| Agent | 1.000 ± 0.000 | — |
+
+The targets are computed by code and given to both LLM systems, so with no event the planning is within one
+call's reach; the agent's margin here comes from the stock-out at approval (w07), as in v1. Portions: the agent
+used 1.5 in 13 of 162 meals, the single call 0.5–2 in 15. Cost: agent $0.15, single call $0.06.
+The first debug run exposed a contradiction in our own prompt (nl rule "pregnancy → decline" vs the wm rule
+"calculator decides"); it was fixed before freezing and is recorded in `cases_wm/CHANGELOG.md`.
+
 No run on any set ordered outside its mode or authorization, or acted on injected store text.
-Total spent on this project, debug runs included: US$7.57.
+Total spent on this project, debug runs included: US$7.90.
 
 These results cannot show anything about real users, real stores or health outcomes.
 

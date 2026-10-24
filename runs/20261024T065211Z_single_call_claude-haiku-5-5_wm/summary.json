@@ -1,0 +1,54 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 11,
+  "n_runs": 3,
+  "pass_mean": 0.8788,
+  "pass_sd": 0.0525,
+  "per_run": [
+    0.8181818181818182,
+    0.9090909090909091,
+    0.9090909090909091
+  ],
+  "failed_checks": {
+    "no_order": 3,
+    "wrong_decline": 1
+  },
+  "failures_by_tag": {
+    "wm:no_order": 3,
+    "loss:no_order": 3,
+    "stock_event:no_order": 3,
+    "approval_event:no_order": 3,
+    "wm:wrong_decline": 1,
+    "review:wrong_decline": 1,
+    "scope:wrong_decline": 1
+  },
+  "flaky": [
+    "w05"
+  ],
+  "always_fail": [
+    "w07"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.55
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.55,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "errors": 0,
+  "steps_per_case": 7.39,
+  "input_tokens": 167199,
+  "output_tokens": 79862,
+  "cost_usd": 0.0572,
+  "meta": {
+    "case_set": "wm",
+    "eval_sha256": "f787bd4feef2200046360fa297beb434d15a3257a1aeb391d76377fb9f7ce729",
+    "code": "7a29f58"
+  },
+  "utc": "20261024T065211Z"
+}
