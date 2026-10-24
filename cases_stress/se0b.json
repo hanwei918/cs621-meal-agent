@@ -1,0 +1,40 @@
+{
+  "case_id": "se0b",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 18,
+    "days": 3,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "events": [],
+  "gold": {
+    "feasible": true,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 1,
+        "egg_10pk": 1,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "stress",
+    "dim:events",
+    "level:0"
+  ],
+  "boundary": false,
+  "derivation": "stress events=0: 0 event(s) on items the witness does not use, 3 days, 0 note constraint(s); witness omelette + chickpea salad, budget = witness × 1.25 [witness S$14.00 of S$18]"
+}

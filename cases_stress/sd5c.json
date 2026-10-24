@@ -1,0 +1,47 @@
+{
+  "case_id": "sd5c",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 24,
+    "days": 5,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {}
+  },
+  "events": [
+    {
+      "on": "step",
+      "after_step": 3,
+      "kind": "out_of_stock",
+      "sku": "garlic_100g"
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "note": null,
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 2,
+        "cucumber_2pk": 2,
+        "egg_10pk": 2,
+        "spring_onion_100g": 1,
+        "tomato_500g": 2
+      }
+    }
+  },
+  "tags": [
+    "stress",
+    "dim:days",
+    "level:5"
+  ],
+  "boundary": false,
+  "derivation": "stress days=5: 1 event(s) on items the witness does not use, 5 days, 0 note constraint(s); witness omelette + chickpea salad, budget = witness × 1.25 [witness S$18.70 of S$24]"
+}

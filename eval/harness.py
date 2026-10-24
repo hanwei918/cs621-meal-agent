@@ -25,7 +25,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CASES = ROOT / "cases"                     # case set v1 (frozen): mode ② only
 CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[0-9]*.json"),
              "nl": ("cases_nl", "n[0-9]*.json"), "nl_events": ("cases_nl_events", "e[0-9]*.json"),
-             "ops": ("cases_ops", "o[0-9]*.json"), "wm": ("cases_wm", "w[0-9]*.json")}
+             "ops": ("cases_ops", "o[0-9]*.json"), "wm": ("cases_wm", "w[0-9]*.json"),
+             "stress": ("cases_stress", "s[denx]*.json")}
 RUNS = ROOT / "runs"
 
 
@@ -43,7 +44,8 @@ def eval_fingerprint(case_set: str = "v1") -> str:
     """v1 keeps its original definition (cases/ + data/), so the frozen v1 fingerprint is unchanged."""
     h = hashlib.sha256()
     first = (CASES, "c[0-9]*.json") if case_set == "v1" else (ROOT / CASE_SETS[case_set][0], CASE_SETS[case_set][1])
-    for folder, pat in (first, (ROOT / "data", "*.json")):
+    extra = [(ROOT / "data_wm", "*.json")] if case_set == "wm" else []      # wm's own catalogue (added 24 Oct)
+    for folder, pat in [first, (ROOT / "data", "*.json")] + extra:
         for f in _canonical(folder, pat):
             h.update(f.name.encode()); h.update(f.read_bytes())
     return h.hexdigest()

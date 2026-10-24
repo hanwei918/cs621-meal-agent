@@ -1,0 +1,71 @@
+{
+  "case_id": "sxc",
+  "synthetic": true,
+  "autonomy": "confirm",
+  "profile": {
+    "diet": [],
+    "allergies": [],
+    "budget_sgd": 30,
+    "days": 7,
+    "meals_per_day": 2,
+    "servings": 1,
+    "max_cook_minutes": 30,
+    "pantry": {},
+    "note": "Cannot take spicy one lah. No prawns, they don't agree with me. I don't eat pork."
+  },
+  "events": [
+    {
+      "on": "step",
+      "after_step": 3,
+      "kind": "out_of_stock",
+      "sku": "coconut_milk_400ml"
+    },
+    {
+      "on": "step",
+      "after_step": 6,
+      "kind": "price_change",
+      "sku": "garlic_100g",
+      "price_sgd": 2.5
+    },
+    {
+      "on": "approval",
+      "after_step": 0,
+      "kind": "price_change",
+      "sku": "peanut_butter_340g",
+      "price_sgd": 11.25
+    }
+  ],
+  "gold": {
+    "feasible": true,
+    "note": {
+      "exclude_ingredients": [
+        "curry_paste",
+        "prawns",
+        "pork_mince"
+      ],
+      "exclude_recipes": [],
+      "slot_max_minutes": [],
+      "pantry_add": {}
+    },
+    "witness": {
+      "recipes": [
+        "r07",
+        "r10"
+      ],
+      "cart": {
+        "chickpeas_400g": 3,
+        "cucumber_2pk": 2,
+        "egg_10pk": 2,
+        "spring_onion_100g": 2,
+        "tomato_500g": 3
+      }
+    }
+  },
+  "tags": [
+    "stress",
+    "dim:mixed",
+    "level:k3d7n3"
+  ],
+  "boundary": false,
+  "derivation": "stress mixed=k3d7n3: 3 event(s) on items the witness does not use, 7 days, 3 note constraint(s); witness omelette + chickpea salad, budget = witness × 1.25 [witness S$23.80 of S$30]"
+}

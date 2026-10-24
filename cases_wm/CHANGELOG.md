@@ -25,3 +25,8 @@
 
 - 2026-10-24 — Formal runs (code `7a29f58`, 3 runs): fixed 0.000 ± 0, single call 0.879 ± 0.052 (w07 ×3, w05 ×1),
   agent 1.000 ± 0. Results in policy E-04.
+
+- 2026-10-24 — **Fingerprint definition fixed, cases and catalogue unchanged.** `eval_fingerprint("wm")` hashed
+  `cases_wm/` + `data/` but not `data_wm/`, the catalogue this set actually uses — a change to the nutrients would
+  not have shown. It now includes `data_wm/`: fingerprint `ebfd8e2c…` (the formal runs recorded `f787bd4f…` under
+  the old definition; same case and catalogue bytes). Found while adding the stress set.
