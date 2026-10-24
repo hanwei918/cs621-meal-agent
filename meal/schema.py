@@ -220,3 +220,5 @@ class Outcome(_M):
     blind_retries: int = 0                 # place_order after an unknown status without querying it first
     review_status: Optional[str] = None    # `wm`: stop_for_review was called with this status
     targets_seen: bool = False             # `wm`: calculate_targets was called
+    critical: dict[str, int] = {}          # critical errors at the moment an order was created (proposal E-03);
+                                           # with the gates on these must stay 0 — the gate-ablation run counts them

@@ -95,6 +95,8 @@ class Report:
                 "fields_asked": round(statistics.mean(x.outcome.clarified_fields for x in res), 2) if res else 0,
                 "avoidable_fields_asked": round(statistics.mean(x.outcome.avoidable_fields for x in res), 2) if res else 0},
             "duplicate_orders": sum(max(0, x.outcome.orders_placed - 1) for x in res),
+            "critical_errors": dict(sum((Counter(x.outcome.critical) for x in res), Counter())),
+            "cases_with_critical_error": sum(1 for x in res if x.outcome.critical),
             "errors": sum(1 for x in res if x.error),
             "steps_per_case": round(statistics.mean(x.outcome.steps for x in res), 2) if res else 0,
             "input_tokens": sum(x.usage.input_tokens for x in res), "output_tokens": sum(x.usage.output_tokens for x in res),
@@ -113,12 +115,12 @@ class Report:
 
 def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str = "agent",
              model: str = "-", write: bool = True, meta: dict | None = None, workers: int = 1,
-             case_set: str = "v1") -> Report:
+             case_set: str = "v1", gates: bool = True) -> Report:
     from concurrent.futures import ThreadPoolExecutor
 
     def one(c: Case) -> CaseResult:              # each case gets its own agent and its own StoreEnv
         try:
-            r = run_case(make_agent(c), c)
+            r = run_case(make_agent(c), c, gates=gates)
         except Exception as e:  # noqa: BLE001 — an error is a failed case, not a crash
             r = CaseResult(c.case_id, Outcome(), Score(c.case_id, False, ["error"]), error=f"{type(e).__name__}: {e}")
         u = r.usage
@@ -132,13 +134,13 @@ def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str
                 rows.append(Row(c, k, r))
     rep = Report(name, model, n_runs, rows)
     if write:
-        rep.run_dir = _write(rep, (meta or {}) | {"case_set": case_set})
+        rep.run_dir = _write(rep, (meta or {}) | {"case_set": case_set, "gates": gates})
     return rep
 
 
 def _write(rep: Report, meta: dict) -> Path:
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    tag = "" if meta.get("case_set", "v1") == "v1" else f"_{meta['case_set']}"
+    tag = ("" if meta.get("case_set", "v1") == "v1" else f"_{meta['case_set']}") + ("" if meta.get("gates", True) else "_nogates")
     d = RUNS / f"{ts}_{rep.name}_{rep.model}{tag}"
     d.mkdir(parents=True, exist_ok=True)
     with (d / "results.jsonl").open("w", encoding="utf-8") as f:

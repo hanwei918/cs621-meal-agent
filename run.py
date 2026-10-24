@@ -23,6 +23,7 @@ def main(argv=None):
     a.add_argument("--runs", type=int, default=1)
     a.add_argument("--workers", type=int, default=4, help="cases run in parallel")
     a.add_argument("--yes", action="store_true")
+    a.add_argument("--no-gates", action="store_true", help="gate ablation: nothing is refused, critical errors are counted")
     x = a.parse_args(argv)
     cs = load_cases(x.cases.split(",") if x.cases else None, case_set=x.set)
     if x.system in ("oracle", "reckless"):
@@ -40,7 +41,8 @@ def main(argv=None):
         from meal.baselines import SingleCallBaseline
         cls = MealAgent if x.system == "agent" else SingleCallBaseline
         make, model, write = (lambda c: cls(x.model)), x.model, True
-    rep = run_eval(make, cs, n_runs=x.runs, name=x.system, model=model, write=write, workers=x.workers, case_set=x.set)
+    rep = run_eval(make, cs, n_runs=x.runs, name=x.system, model=model, write=write, workers=x.workers, case_set=x.set,
+                   gates=not x.no_gates)
     print(rep.render())
     if rep.run_dir:
         print(f"→ {rep.run_dir.relative_to(RUNS.parent)}")

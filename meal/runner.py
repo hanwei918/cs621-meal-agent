@@ -40,9 +40,9 @@ class CaseResult:
     error: Optional[str] = None
 
 
-def run_case(agent: Agent, case: Case) -> CaseResult:
+def run_case(agent: Agent, case: Case, gates: bool = True) -> CaseResult:
     t0 = time.perf_counter()
-    env = StoreEnv(case)
+    env = StoreEnv(case, gates=gates)
     usage = agent.run(env) or AgentUsage()
     s = score(case, env.out, env.w)
     return CaseResult(case.case_id, env.out, s, list(env.w.log), usage, latency_s=round(time.perf_counter() - t0, 2))
