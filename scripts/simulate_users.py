@@ -140,7 +140,9 @@ def build(p: dict, note: str) -> Case:
         "case_id": f"sim_{p['id']}", "profile": prof, "autonomy": p["mode"], "authorization": p.get("auth"),
         "withheld": held, **({"catalog": "wm", "body": p["body"]} if p.get("body") else {}),
         "gold": {"feasible": True, "note": NoteConstraints(**p["truth"]).model_dump() if p["truth"] else None,
-                 "out_of_scope": bool(p.get("out_of_scope"))},
+                 "out_of_scope": bool(p.get("out_of_scope")),
+                 # delegated persona: budget = per-order limit, so every valid plan is inside the authorization
+                 **({"within_scope": True} if p["mode"] == "delegated" else {})},
         "tags": ["simulated"], "derivation": "simulated pilot: persona truth written by the team before any run"})
 
 
