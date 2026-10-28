@@ -15,6 +15,7 @@
 !demo/
 !demo/server.py
 !demo/index.html
+!demo/shell.html
 **/__pycache__/
 eval/harness.py
 deploy/hosting/

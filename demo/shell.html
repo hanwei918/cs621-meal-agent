@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meal Agent Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  // a phone or a narrow window gets the app itself, full screen; only wide screens get the frame
+  if (window.innerWidth < 900) location.replace("/app" + location.search);
+</script>
+<style>
+:root {
+  --bg: #e9e5da; --paper: #fffdf8; --ink: #22201b; --muted: #77716a; --faint: #a39d94; --line: #e2dccd;
+  --green: #2e6b4a; --green-soft: #e3efe7; --tomato: #c8502f; --tomato-soft: #fbe9e2;
+  --amber: #a8640f; --amber-soft: #fbf0dc; --device: #1c1b19;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121210; --paper: #1d1c19; --ink: #f0ece4; --muted: #aaa398; --faint: #7d776e; --line: #33302a;
+    --green: #74c39a; --green-soft: #1f3529; --tomato: #ee8a6c; --tomato-soft: #3b231b;
+    --amber: #e8b062; --amber-soft: #382a15; --device: #050505;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121210; --paper: #1d1c19; --ink: #f0ece4; --muted: #aaa398; --faint: #7d776e; --line: #33302a;
+  --green: #74c39a; --green-soft: #1f3529; --tomato: #ee8a6c; --tomato-soft: #3b231b; --amber: #e8b062; --amber-soft: #382a15;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 15px/1.5 Inter, -apple-system, BlinkMacSystemFont, sans-serif; }
+.stage { display: grid; grid-template-columns: auto minmax(360px, 560px); gap: 56px; justify-content: center; align-items: center; min-height: 100vh; padding: 32px 40px; }
+.phone-wrap { width: 414px; height: 868px; transform-origin: top center; }
+.phone { position: relative; width: 414px; height: 868px; border-radius: 64px; background: var(--device); padding: 12px;
+  box-shadow: 0 0 0 2px #3a3833, 0 30px 80px rgba(20,16,10,.28); }
+.phone::before { content: ""; position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px; border-radius: 20px; background: var(--device); z-index: 2; }
+.screen { width: 390px; height: 844px; border-radius: 52px; overflow: hidden; background: #f5f1e8; }
+.screen iframe { width: 390px; height: 844px; border: 0; display: block; }
+.side { display: flex; flex-direction: column; gap: 18px; max-height: calc(100vh - 64px); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand .logo { width: 34px; height: 34px; border-radius: 10px; background: var(--green); color: #fff; display: grid; place-items: center; }
+.brand h1 { font-family: Fraunces, Georgia, serif; font-size: 22px; margin: 0; }
+.brand .tag { color: var(--muted); font-size: 13px; }
+.lead { color: var(--muted); font-size: 14.5px; margin: 0; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; }
+.gates { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.gate { border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 6px; text-align: center; transition: background .3s, border-color .3s; }
+.gate b { display: block; font-size: 15px; }
+.gate span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.25; }
+.gate.hit { border-color: var(--tomato); background: var(--tomato-soft); }
+.gate.hit b { color: var(--tomato); }
+.gate.ok { border-color: var(--green); background: var(--green-soft); }
+.feedcard { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.feed { overflow: auto; min-height: 120px; }
+.ev { display: flex; gap: 10px; padding: 7px 0; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+.ev:last-child { border-bottom: 0; }
+.ev .i { width: 22px; text-align: center; flex: none; }
+.ev .t { margin-left: auto; color: var(--faint); font-size: 12px; flex: none; }
+.ev.bad .x { color: var(--tomato); }
+.ev .note { display: block; margin-top: 3px; font-size: 12.5px; background: var(--amber-soft); color: var(--amber); border-radius: 6px; padding: 3px 7px; }
+.empty { color: var(--faint); font-size: 14px; }
+.pill { font-size: 12px; padding: 2px 10px; border-radius: 99px; background: var(--bg); color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
+.pill:empty { display: none; }
+.pbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pbtns button { border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 10px; padding: 9px 10px; cursor: pointer; font: inherit; font-size: 13.5px; text-align: left; }
+.pbtns button:hover { border-color: var(--amber); }
+.plog { margin-top: 8px; font-size: 12.5px; color: var(--amber); }
+.presenter { border: 1.5px dashed var(--amber); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone-wrap" id="wrap">
+    <div class="phone"><div class="screen"><iframe id="app" title="Meal Agent app"></iframe></div></div>
+  </div>
+  <div class="side">
+    <div class="brand"><div class="logo" aria-hidden="true">🥬</div><div><h1>Meal Agent</h1><div class="tag">CS621 · the app on the left, the agent on the right</div></div></div>
+    <p class="lead">The phone is what a user sees. This panel shows what the agent does underneath, and where the code gates step in — the model cannot override them.</p>
+    <div class="card">
+      <p class="eyebrow"><span>Code gates</span><span class="pill" id="status">waiting</span></p>
+      <div class="gates">
+        <div class="gate" id="g1"><b>G1</b><span>rules + total</span></div>
+        <div class="gate" id="g2"><b>G2</b><span>change voids approval</span></div>
+        <div class="gate" id="g3"><b>G3</b><span>current token only</span></div>
+        <div class="gate" id="g4"><b>G4</b><span>one order</span></div>
+        <div class="gate" id="g5"><b>G5</b><span>ask, never guess</span></div>
+      </div>
+    </div>
+    <div class="card presenter hidden" id="presenter">
+      <p class="eyebrow"><span>Presenter controls</span></p>
+      <div class="pbtns">
+        <button data-w="sell_out">🚫 Sell out an item in the cart</button>
+        <button data-w="price_up">📈 Raise the biggest price 50%</button>
+        <button data-w="plan_only">📝 Switch to plan only</button>
+        <button data-w="timeout">⏳ Next order times out</button>
+      </div>
+      <div class="plog" id="plog"></div>
+    </div>
+    <div class="card feedcard">
+      <p class="eyebrow"><span>What the agent is doing</span><span class="pill" id="count"></span></p>
+      <div class="feed" id="feed"><span class="empty">Start a plan on the phone.</span></div>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+const PRESENTER = q.has("presenter");
+$("app").src = "/app?frame=1";
+$("presenter").classList.toggle("hidden", !PRESENTER);
+function fit() {                                   // shrink the phone to the window height, never wider than life
+  const s = Math.min(1, (window.innerHeight - 64) / 868);
+  $("wrap").style.transform = `scale(${s})`;
+  $("wrap").style.height = `${868 * s}px`; $("wrap").style.width = `${414 * s}px`;
+}
+fit(); addEventListener("resize", fit);
+const app = () => { try { return $("app").contentWindow.__demo; } catch (e) { return null; } };
+const hdrs = () => ({"Content-Type": "application/json", "X-Passcode": app()?.pass || ""});
+
+// which gate acted, read from the tool results the agent got back
+function gatesOf(steps) {
+  const g = {g1: 0, g2: 0, g3: 0, g4: 0, g5: 0}, ok = {g1: 0, g3: 0, g4: 0, g5: 0};
+  for (const s of steps) {
+    const r = s.result || {};
+    if ((s.tool === "request_approval" || s.tool === "submit_plan") && r.violations && !r.approved && !r.submitted) g.g1++;
+    if (s.tool === "request_approval" && r.approved) ok.g1++;
+    if (r.refused_by === "needs_input") g.g5++;
+    if (s.tool === "request_input") ok.g5++;                    // asked instead of guessing: the rule, followed
+    if (s.tool === "get_order_status") ok.g4++;
+    if ((r.notices || []).some(n => n.startsWith("Approval revoked"))) g.g2++;
+    if (s.tool === "place_order" && /no valid approval/.test(r.error || "")) g.g3++;
+    if (s.tool === "place_order" && r.ordered === true) ok.g3++;
+    if (s.tool === "place_order" && (/already used/.test(r.error || "") || r.note)) g.g4++;
+  }
+  return {g, ok};
+}
+let last = -1;
+async function poll() {
+  const a = app();
+  if (!a || !a.sid) return;
+  const s = await fetch("/api/state?sid=" + encodeURIComponent(a.sid), {headers: hdrs()}).then(r => r.json()).catch(() => null);
+  if (!s || s.status === "idle") return;
+  $("status").textContent = {running: "working", awaiting_approval: "waiting for the user", awaiting_input: "asking the user", done: "done", error: "stopped"}[s.status] || s.status;
+  const {g, ok} = gatesOf(s.steps);
+  for (const k of ["g1", "g2", "g3", "g4", "g5"]) {
+    const el = $(k);
+    el.classList.toggle("hit", g[k] > 0);
+    el.classList.toggle("ok", !g[k] && (ok[k] || 0) > 0);
+    el.title = g[k] ? `stepped in ${g[k]}×` : "";
+  }
+  $("count").textContent = `${s.steps.length} tool calls`;
+  if (s.steps.length !== last) {
+    last = s.steps.length;
+    const feed = $("feed");
+    feed.innerHTML = s.steps.map(x => a.step(x)).join("") || '<span class="empty">Starting…</span>';
+    feed.scrollTop = feed.scrollHeight;
+  }
+}
+setInterval(poll, 700);
+document.querySelectorAll("#presenter button").forEach(b => b.onclick = async () => {
+  const a = app(); if (!a?.sid) { $("plog").textContent = "Start a plan on the phone first."; return; }
+  const r = await fetch("/api/inject", {method: "POST", headers: hdrs(), body: JSON.stringify({sid: a.sid, what: b.dataset.w})}).then(r => r.json());
+  $("plog").insertAdjacentHTML("afterbegin", `<div>▸ ${(r.detail || r.error || "?").replace(/[<>&]/g, "")}</div>`);
+});
+</script>
+</body>
+</html>

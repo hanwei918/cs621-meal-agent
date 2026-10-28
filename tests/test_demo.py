@@ -201,3 +201,17 @@ def test_fixed_rules_with_a_blank_field_stop_with_a_plain_reason(live):
     sid = call("/api/start", dict(FORM, profile=dict(FORM["profile"], budget_sgd=None)))["sid"]
     s = wait(call, sid, "error")
     assert "cannot ask" in s["error"] and "budget_sgd" in s["error"] and not s["result"]["ordered"]
+
+
+
+def test_root_is_the_phone_frame_and_app_is_the_app():
+    srv = server.serve(0)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        root = urllib.request.urlopen(base + "/", timeout=5).read().decode()
+        app = urllib.request.urlopen(base + "/app?frame=1", timeout=5).read().decode()
+    finally:
+        srv.shutdown()
+    assert 'id="app"' in root and 'location.replace("/app"' in root          # wide screens: frame; phones: the app
+    assert 'id="setupView"' in app and "window.__demo" in app

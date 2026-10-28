@@ -6,9 +6,9 @@ Hosting serves only `deploy/hosting/robots.txt` and forwards everything else to 
 
 ## What goes out (check before every deploy)
 
-`gcloud meta list-files-for-upload .` must list exactly the 23 files the server needs (Dockerfile,
+`gcloud meta list-files-for-upload .` must list exactly the 24 files the server needs (Dockerfile,
 `meal/*.py` (incl. `energy.py`), `eval/__init__.py`, `eval/pricing.py`, `data/*.json`, `data_wm/*.json`, `demo/server.py`,
-`demo/index.html`, `deploy/requirements-demo.txt`). No cases, runs, user-study data, docs or `.git`. The Dockerfile copies
+`demo/index.html`, `demo/shell.html`, `deploy/requirements-demo.txt`). No cases, runs, user-study data, docs or `.git`. The Dockerfile copies
 the same list explicitly.
 
 ## Account and project — personal only
@@ -17,8 +17,8 @@ The demo lives in project `cs621-meal-demo`, owned by zhouhanwei421@gmail.com. T
 machine may point at a former employer's account and project; never rely on them. Every command below names
 the account and project explicitly.
 
-Before every deploy: `gcloud meta list-files-for-upload . | wc -l` must print **23** (19 until 24 Oct, then
-`data_wm/*.json` and `meal/energy.py` for weight management). Any other number:
+Before every deploy: `gcloud meta list-files-for-upload . | wc -l` must print **24** (19 until 24 Oct, then
+`data_wm/*.json` and `meal/energy.py` for weight management; 24 from 28 Oct with `demo/shell.html`). Any other number:
 stop and find out why.
 
 ## Protections

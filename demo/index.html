@@ -188,6 +188,10 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .kcal.off { color: var(--tomato); }
 .por { font-size: 11.5px; font-weight: 600; background: var(--amber-soft); color: var(--amber); border-radius: 6px; padding: 1px 6px; margin-left: 4px; }
 
+/* inside the phone frame (/?frame): the side panel shows the steps and the presenter controls */
+body.framed #feedCard, body.framed #presenterCard { display: none !important; }
+body.framed .top { padding-top: 58px; }                  /* clear the phone's camera island */
+
 /* survey */
 .likert { margin: 14px 0; }
 .likert .q { font-size: 14.5px; margin-bottom: 7px; }
@@ -384,7 +388,7 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
           <p class="eyebrow">Cart</p>
           <div id="cart"></div>
         </div>
-        <div class="card">
+        <div class="card" id="feedCard">
           <p class="eyebrow">What it's doing</p>
           <div class="feed" id="feed"></div>
           <div class="thinking" id="thinking"><span class="b"><i></i><i></i><i></i></span><span>working…</span></div>
@@ -460,6 +464,9 @@ function toggles(id, single) {
 const picked = id => [...$(id).querySelectorAll('.tog[aria-pressed="true"]')].map(b => b.dataset.v);
 ["diet", "allergies"].forEach(id => toggles(id, false));
 const PRESENTER = new URLSearchParams(location.search).has("presenter");
+const FRAMED = new URLSearchParams(location.search).has("frame");
+if (FRAMED) document.body.classList.add("framed");
+window.__demo = {get sid() { return sid; }, get pass() { return $("passcode").value; }, step: s => evText(s), cat};
 const num = id => $(id).value === "" ? null : +$(id).value;
 ["reading", "prefMode", "goal"].forEach(id => toggles(id, true));
 $("goal").addEventListener("click", () => setTimeout(() => show("peopleBox", picked("goal")[0] === "wm"), 0));
@@ -615,8 +622,9 @@ function evText(s) {
     stop_for_review: () => "Stopped for a review: " + (a.explanation || a.status),
     get_order_status: () => "Checked the order: " + (r.status === "placed" ? "placed · " + money(r.total_sgd) : "not created"),
   };
-  const bad = r.error || (r.violations && !r.approved && !r.submitted) || r.refused_by;
-  const notes = [...(r.violations && !r.approved ? [r.violations.join("; ")] : []), ...(r.error ? [r.error] : []), ...(r.notices || [])];
+  const viol = r.violations?.length && !r.approved && !r.submitted;     // [] is truthy in JS: "no violations" is not a failure
+  const bad = r.error || viol || r.refused_by;
+  const notes = [...(viol ? [r.violations.join("; ")] : []), ...(r.error ? [r.error] : []), ...(r.notices || [])];
   const icon = s.tool === "place_order" && r.ordered !== true ? "⏳" : (ICON[s.tool] || "•");
   return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${icon}</span><span class="x">${esc((T[s.tool] || (() => s.tool))())}
     ${notes.map(n => `<span class="note">${esc(n)}</span>`).join("")}</span><span class="t">${Math.round(s.t)}s</span></div>`;

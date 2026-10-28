@@ -407,8 +407,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
-        if u.path in ("/", "/index.html"):
-            body = (Path(__file__).parent / "index.html").read_bytes()
+        if u.path in ("/", "/shell.html", "/app", "/index.html"):
+            page = "shell.html" if u.path in ("/", "/shell.html") else "index.html"   # / = phone frame + side panel
+            body = (Path(__file__).parent / page).read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
