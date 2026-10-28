@@ -188,6 +188,22 @@ details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .kcal.off { color: var(--tomato); }
 .por { font-size: 11.5px; font-weight: 600; background: var(--amber-soft); color: var(--amber); border-radius: 6px; padding: 1px 6px; margin-left: 4px; }
 
+/* live line, agent bubbles, what changed */
+.nowline { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; }
+.nowline .b { display: inline-flex; gap: 3px; }
+.nowline .b i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); animation: pulse 1s infinite; }
+.nowline .b i:nth-child(2) { animation-delay: .2s; } .nowline .b i:nth-child(3) { animation-delay: .4s; }
+.nowline.wait { color: var(--amber); border-color: var(--amber); background: var(--amber-soft); }
+.says { display: flex; flex-direction: column; gap: 8px; }
+.agentmsg { align-self: flex-start; max-width: 92%; background: var(--bg); border-radius: 14px 14px 14px 4px; padding: 8px 12px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+.diff { margin-top: 12px; background: var(--bg); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.diff .h { font-weight: 600; margin-bottom: 6px; }
+.diff .chips { gap: 6px; }
+.chg { font-size: 13px; padding: 3px 9px; border-radius: 99px; }
+.chg.out { background: var(--tomato-soft); color: var(--tomato); text-decoration: line-through; }
+.chg.in { background: var(--green-soft); color: var(--green); }
+.diff .because { margin-top: 8px; color: var(--muted); font-size: 13px; }
+
 /* inside the phone frame (/?frame): the side panel shows the steps and the presenter controls */
 body.framed #feedCard, body.framed #presenterCard { display: none !important; }
 body.framed .top { padding-top: 58px; }                  /* clear the phone's camera island */
@@ -325,12 +341,17 @@ body.framed .top { padding-top: 58px; }                  /* clear the phone's ca
   <!-- ======================= live ======================= -->
   <section id="liveView" class="hidden">
     <div class="summary" id="summary"></div>
+    <div class="nowline hidden" id="nowLine"><span class="b" id="nowDots"><i></i><i></i><i></i></span><span id="nowText"></span></div>
     <div class="board">
       <div>
         <div class="card hidden" id="resultCard"></div>
         <div class="card hidden" id="targetCard">
           <p class="eyebrow">Energy target (computed by code)</p>
           <div id="target"></div>
+        </div>
+        <div class="card hidden" id="saysCard">
+          <p class="eyebrow">From the agent</p>
+          <div class="says" id="says"></div>
         </div>
         <div class="card" id="understoodCard">
           <p class="eyebrow">What it understood from your words</p>
@@ -404,6 +425,7 @@ body.framed .top { padding-top: 58px; }                  /* clear the phone's ca
   <div class="grab"></div>
   <h2 id="sheetTitle">Approve this order?</h2>
   <div class="why hidden" id="why"></div>
+  <div class="diff hidden" id="diff"></div>
   <div class="tot"><span class="empty">Total</span><span class="display" id="sheetTotal"></span></div>
   <div class="mini" id="sheetPlan"></div>
   <div class="receipt" id="sheetCart"></div>
@@ -435,11 +457,14 @@ const LIKERT = [
 const EMOJI = {r01: "🍳", r02: "🥦", r03: "🍛", r04: "🥜", r05: "🥟", r06: "🐟", r07: "🍅", r08: "🍜", r09: "🍝", r10: "🥗", r11: "🍤", r12: "🍄", b01: "🥣", b02: "🍞", b03: "🍨"};
 const SLOT = {1: "Lunch", 2: "Dinner"};
 const MODE = {plan_only: "📝 Plan only", confirm: "✋ Ask every time", delegated: "🔑 Within limits"};
-let cat = {recipes: {}, ingredients: {}}, timer = null, sid = null, form = null, survey = {};
+let cat = {recipes: {}, ingredients: {}}, timer = null, sid = null, form = null, survey = {}, prevCart = null;
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const money = x => "S$" + Number(x || 0).toFixed(2);
 const rname = id => cat.recipes[id]?.name || id;
 const iname = id => cat.ingredients[id]?.name || id;
+// "chicken_breast_500g" → "Chicken breast": the ingredient id is the sku's prefix
+const skuName = sku => { const id = Object.keys(cat.ingredients).sort((a, b) => b.length - a.length).find(i => sku.startsWith(i + "_")); return id ? iname(id) : sku; };
+const plainSkus = t => String(t).replace(/\b[a-z]+(?:_[a-z]+)*_\d+[a-z]*\b/g, skuName);
 const show = (id, on) => $(id).classList.toggle("hidden", !on);
 const hdrs = () => ({"Content-Type": "application/json", "X-Passcode": $("passcode").value});
 const get = url => fetch(url, {headers: hdrs()}).then(r => r.json());
@@ -494,7 +519,7 @@ $("start").onclick = async () => {
   if (!Object.keys(cat.recipes).length && !(await loadCatalog())) { alert("That passcode doesn't work."); return; }
   const r = await post("/api/start", form);
   if (r.error) { alert(r.error); return; }
-  sid = r.sid; survey = {}; $("plog").innerHTML = ""; show("presenterCard", PRESENTER);
+  sid = r.sid; survey = {}; prevCart = null; $("plog").innerHTML = ""; show("presenterCard", PRESENTER);
   document.querySelectorAll('.scale button, #reading .tog, #prefMode .tog').forEach(b => b.setAttribute("aria-pressed", "false"));
   ["missed", "wouldDelegate", "minutesNow", "msg"].forEach(id => $(id).value = "");
   $("sent").innerHTML = ""; $("feed").innerHTML = "";
@@ -601,12 +626,12 @@ const ICON = {get_profile: "👤", search_recipes: "📖", get_recipe: "📖", f
   remove_from_cart: "➖", view_cart: "🧾", declare_constraints: "✍️", decline_request: "🙅", report_infeasible: "⚠️",
   submit_plan: "📝", request_approval: "✋", place_order: "✅", request_input: "❓", get_order_status: "🔎",
   calculate_targets: "⚖️", validate_plan: "✔️", stop_for_review: "🛑"};
-function evText(s) {
+function stepLabel(s) {
   const a = s.args || {}, r = s.result || {};
   const T = {
     get_profile: () => "Read your setup", search_recipes: () => "Looked through the recipes",
     get_recipe: () => "Checked " + rname(a.recipe_id), find_items: () => "Priced " + iname(a.ingredient).toLowerCase(),
-    set_plan: () => "Made a plan", add_to_cart: () => `Added ${a.packs} × ${a.sku}`, remove_from_cart: () => `Removed ${a.packs} × ${a.sku}`,
+    set_plan: () => "Made a plan", add_to_cart: () => `Added ${a.packs} × ${skuName(a.sku)}`, remove_from_cart: () => `Removed ${a.packs} × ${skuName(a.sku)}`,
     view_cart: () => "Checked the cart", declare_constraints: () => "Wrote down what your words mean",
     decline_request: () => "Declined: " + (a.reason || ""), report_infeasible: () => `No plan fits (${a.binding})`,
     submit_plan: () => r.submitted ? "Submitted the plan" : "Plan stopped by the checks",
@@ -622,12 +647,33 @@ function evText(s) {
     stop_for_review: () => "Stopped for a review: " + (a.explanation || a.status),
     get_order_status: () => "Checked the order: " + (r.status === "placed" ? "placed · " + money(r.total_sgd) : "not created"),
   };
+  return (T[s.tool] || (() => s.tool))();
+}
+function evText(s) {
+  const r = s.result || {};
   const viol = r.violations?.length && !r.approved && !r.submitted;     // [] is truthy in JS: "no violations" is not a failure
   const bad = r.error || viol || r.refused_by;
   const notes = [...(viol ? [r.violations.join("; ")] : []), ...(r.error ? [r.error] : []), ...(r.notices || [])];
   const icon = s.tool === "place_order" && r.ordered !== true ? "⏳" : (ICON[s.tool] || "•");
-  return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${icon}</span><span class="x">${esc((T[s.tool] || (() => s.tool))())}
-    ${notes.map(n => `<span class="note">${esc(n)}</span>`).join("")}</span><span class="t">${Math.round(s.t)}s</span></div>`;
+  return `<div class="ev ${bad ? "bad" : ""}"><span class="i">${icon}</span><span class="x">${esc(stepLabel(s))}
+    ${notes.map(n => `<span class="note">${esc(plainSkus(n))}</span>`).join("")}</span><span class="t">${Math.round(s.t)}s</span></div>`;
+}
+// what changed between the last cart the user saw and this one, and the event that caused it
+function diffHTML(prev, pa, steps) {
+  const now = new Set(pa.plan.map(m => m.name)), was = prev.names;
+  const out = [...was].filter(n => !now.has(n)), inn = [...now].filter(n => !was.has(n));
+  const d = Math.round((pa.total_sgd - prev.total) * 100) / 100;
+  const causes = [];
+  for (const s of steps.slice(prev.at)) {
+    const r = s.result || {};
+    (r.notices || []).filter(n => !n.startsWith("Approval revoked")).forEach(n => causes.push(plainSkus(n.replace(/^Store update: |^User update: /, ""))));
+    if (s.tool === "request_approval" && r.refused_by === "user") causes.push("you said: " + (r.comment || "not this one"));
+    if (s.tool === "request_approval" && r.violations?.length && !r.approved) causes.push("the checks found: " + r.violations[0]);
+  }
+  if (!out.length && !inn.length && !d && !causes.length) return "";
+  const chips = [...out.map(n => `<span class="chg out">${esc(n)}</span>`), ...inn.map(n => `<span class="chg in">+ ${esc(n)}</span>`)].join("");
+  return `<div class="h">Changed since the last cart</div><div class="chips">${chips || '<span class="empty">same dishes</span>'}</div>
+    <div class="because">${money(prev.total)} → ${money(pa.total_sgd)} (${d > 0 ? "+" : d < 0 ? "−" : "±"}${money(Math.abs(d))})${causes.length ? " · because " + esc(causes.at(-1)) : ""}</div>`;
 }
 function setStatus(st) {
   $("status").className = "status " + st;
@@ -653,7 +699,16 @@ async function poll() {
   const feed = $("feed"), atEnd = feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 10;
   feed.innerHTML = s.steps.map(evText).join("") || `<span class="empty">Starting…</span>`;
   if (atEnd) feed.scrollTop = feed.scrollHeight;
-  show("thinking", s.status === "running"); show("msgCard", live); show("presenterCard", PRESENTER && live);
+  show("thinking", s.status === "running"); show("msgCard", live);
+  const lastStep = s.steps.at(-1);
+  show("nowLine", live);
+  $("nowLine").classList.toggle("wait", s.status !== "running");
+  show("nowDots", s.status === "running");
+  $("nowText").textContent = s.status === "awaiting_approval" ? "Waiting for your approval"
+    : s.status === "awaiting_input" ? "Waiting for your answer" : (lastStep ? stepLabel(lastStep) + "…" : "Starting…");
+  const said = [...new Set(s.agent_text || [])];
+  show("saysCard", said.length > 0);
+  $("says").innerHTML = said.map(t => `<div class="agentmsg">${esc(t)}</div>`).join(""); show("presenterCard", PRESENTER && live);
 
   const pa = s.pending_approval;
   if (pa && $("sheet").classList.contains("hidden")) {
@@ -663,6 +718,9 @@ async function poll() {
     $("sheetCart").innerHTML = cartHTML(pa.cart, null);
     const why = s.mode === "delegated" && pa.asked_because?.length ? "It's asking because " + pa.asked_because.join("; ") : "";
     $("why").textContent = why; show("why", !!why);
+    const dh = prevCart ? diffHTML(prevCart, pa, s.steps) : "";
+    $("diff").innerHTML = dh; show("diff", !!dh);
+    prevCart = {names: new Set(pa.plan.map(m => m.name)), total: pa.total_sgd, at: s.steps.length};
     show("sheet", true); show("scrim", true);
   } else if (!pa && !qOpen) hideSheet();
 
@@ -682,7 +740,7 @@ async function poll() {
     sub += ` · ${r.user_asks} approval${r.user_asks === 1 ? "" : "s"}` + (b.questions ? ` · ${b.questions} question${b.questions === 1 ? "" : "s"}` : "")
          + ` · ${Math.round(s.elapsed_s)} s`;
     const v = r.violations_against_profile_and_declared || [];
-    const said = s.agent_text.length ? `<div class="say">${esc(s.agent_text[s.agent_text.length - 1])}</div>` : "";
+    const said = "";                                           // the agent's words are in the "From the agent" card
     $("resultCard").innerHTML = `<div class="result ${ok ? "" : "bad"}"><span class="big">${icon}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div></div>
       ${v.length ? `<div class="warn">⚠ ${esc(v.join("; "))}</div>` : ""}${said}`;
     show("resultCard", true);
