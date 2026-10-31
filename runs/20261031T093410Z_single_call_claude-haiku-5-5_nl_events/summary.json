@@ -1,0 +1,76 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 8,
+  "n_runs": 3,
+  "pass_mean": 0.2083,
+  "pass_sd": 0.0722,
+  "per_run": [
+    0.25,
+    0.125,
+    0.25
+  ],
+  "failed_checks": {
+    "no_order": 15,
+    "not_declined": 3,
+    "acted_out_of_scope": 3,
+    "note": 1
+  },
+  "failures_by_tag": {
+    "message:no_order": 15,
+    "approval_event:no_order": 12,
+    "exclude_ingredient:no_order": 9,
+    "pantry:no_order": 3,
+    "budget:no_order": 3,
+    "control:no_order": 3,
+    "message:not_declined": 3,
+    "out_of_scope:not_declined": 3,
+    "weight_loss:not_declined": 3,
+    "message:acted_out_of_scope": 3,
+    "out_of_scope:acted_out_of_scope": 3,
+    "weight_loss:acted_out_of_scope": 3,
+    "accumulate:no_order": 3,
+    "message:note": 1,
+    "slot_limit:note": 1
+  },
+  "flaky": [
+    "e03"
+  ],
+  "always_fail": [
+    "e01",
+    "e02",
+    "e04",
+    "e05",
+    "e07",
+    "e08"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.88
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.88,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "critical_errors": {
+    "order_breaks_constraints": 1
+  },
+  "cases_with_critical_error": 1,
+  "nudges": 0,
+  "errors": 0,
+  "steps_per_case": 12.67,
+  "input_tokens": 80805,
+  "output_tokens": 75509,
+  "cost_usd": 0.0463,
+  "meta": {
+    "case_set": "nl_events",
+    "gates": true,
+    "eval_sha256": "cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6",
+    "code": "6c8a7f9",
+    "code_sha256": "939667c9d51462a24f4ad3f6b63d4f871290f845606ed450dbeb9761ccafe5b7"
+  },
+  "utc": "20261031T093410Z"
+}

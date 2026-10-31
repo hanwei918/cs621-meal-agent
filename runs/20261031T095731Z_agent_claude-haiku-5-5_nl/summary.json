@@ -1,0 +1,54 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 16,
+  "n_runs": 3,
+  "pass_mean": 0.9792,
+  "pass_sd": 0.0361,
+  "per_run": [
+    0.9375,
+    1.0,
+    1.0
+  ],
+  "failed_checks": {
+    "note": 1
+  },
+  "failures_by_tag": {
+    "note:note": 1,
+    "singlish:note": 1,
+    "exclude_ingredient:note": 1
+  },
+  "flaky": [
+    "n09"
+  ],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.88
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.88,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "critical_errors": {
+    "order_breaks_constraints": 1
+  },
+  "cases_with_critical_error": 1,
+  "nudges": 0,
+  "errors": 0,
+  "steps_per_case": 35.23,
+  "input_tokens": 852,
+  "output_tokens": 208514,
+  "cost_usd": 0.185,
+  "meta": {
+    "case_set": "nl",
+    "gates": true,
+    "eval_sha256": "27dc68c16e3330ca819a4a7033ca6fb563f5624dd4bd9e56915a406bc12071dd",
+    "code": "6c8a7f9",
+    "code_sha256": "939667c9d51462a24f4ad3f6b63d4f871290f845606ed450dbeb9761ccafe5b7"
+  },
+  "utc": "20261031T095731Z"
+}

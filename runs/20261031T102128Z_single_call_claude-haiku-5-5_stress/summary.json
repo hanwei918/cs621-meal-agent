@@ -1,0 +1,87 @@
+{
+  "system": "single_call",
+  "model": "claude-haiku-5-5",
+  "n_cases": 45,
+  "n_runs": 3,
+  "pass_mean": 0.4593,
+  "pass_sd": 0.0257,
+  "per_run": [
+    0.4888888888888889,
+    0.4444444444444444,
+    0.4444444444444444
+  ],
+  "failed_checks": {
+    "no_order": 73
+  },
+  "failures_by_tag": {
+    "stress:no_order": 73,
+    "dim:events:no_order": 38,
+    "dim:mixed:no_order": 18,
+    "dim:days:no_order": 17,
+    "level:5:no_order": 15,
+    "level:3:no_order": 12,
+    "level:2:no_order": 9,
+    "level:4:no_order": 9,
+    "level:k3d7n3:no_order": 9,
+    "level:k5d7n4:no_order": 9,
+    "level:7:no_order": 8,
+    "level:1:no_order": 2
+  },
+  "flaky": [
+    "sd3b",
+    "sd3c",
+    "sd7c",
+    "se1c"
+  ],
+  "always_fail": [
+    "sd5a",
+    "sd5c",
+    "sd7a",
+    "sd7b",
+    "se2a",
+    "se2b",
+    "se2c",
+    "se3a",
+    "se3b",
+    "se3c",
+    "se4a",
+    "se4b",
+    "se4c",
+    "se5a",
+    "se5b",
+    "se5c",
+    "sxa",
+    "sxb",
+    "sxc",
+    "sya",
+    "syb",
+    "syc"
+  ],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 0.63
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 0.63,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "critical_errors": {},
+  "cases_with_critical_error": 0,
+  "nudges": 0,
+  "errors": 0,
+  "steps_per_case": 10.87,
+  "input_tokens": 456678,
+  "output_tokens": 547686,
+  "cost_usd": 0.3227,
+  "meta": {
+    "case_set": "stress",
+    "gates": true,
+    "eval_sha256": "540f294804a4cd213d049db89de749ddf74a3c381c7d0ec5ba7c941ade874a27",
+    "code": "6c8a7f9",
+    "code_sha256": "939667c9d51462a24f4ad3f6b63d4f871290f845606ed450dbeb9761ccafe5b7"
+  },
+  "utc": "20261031T102128Z"
+}

@@ -1,0 +1,61 @@
+{
+  "system": "agent",
+  "model": "claude-haiku-5-5",
+  "n_cases": 8,
+  "n_runs": 3,
+  "pass_mean": 0.9167,
+  "pass_sd": 0.0722,
+  "per_run": [
+    0.875,
+    1.0,
+    0.875
+  ],
+  "failed_checks": {
+    "no_order": 1,
+    "not_declined": 1,
+    "acted_out_of_scope": 1
+  },
+  "failures_by_tag": {
+    "message:no_order": 1,
+    "pantry:no_order": 1,
+    "budget:no_order": 1,
+    "message:not_declined": 1,
+    "out_of_scope:not_declined": 1,
+    "weight_loss:not_declined": 1,
+    "message:acted_out_of_scope": 1,
+    "out_of_scope:acted_out_of_scope": 1,
+    "weight_loss:acted_out_of_scope": 1
+  },
+  "flaky": [
+    "e01",
+    "e07"
+  ],
+  "always_fail": [],
+  "unauthorized_attempts": 0,
+  "user_asks_per_case_by_mode": {
+    "confirm": 1.38
+  },
+  "burden_per_case": {
+    "necessary_confirmations": 1.38,
+    "clarification_episodes": 0,
+    "fields_asked": 0,
+    "avoidable_fields_asked": 0
+  },
+  "duplicate_orders": 0,
+  "critical_errors": {},
+  "cases_with_critical_error": 0,
+  "nudges": 0,
+  "errors": 0,
+  "steps_per_case": 42.46,
+  "input_tokens": 504,
+  "output_tokens": 146985,
+  "cost_usd": 0.1268,
+  "meta": {
+    "case_set": "nl_events",
+    "gates": true,
+    "eval_sha256": "cdc92aead1e51fe5e9a8664eb6b1a89cb84e7ff56c92ef5451ce463ab12959e6",
+    "code": "6c8a7f9",
+    "code_sha256": "939667c9d51462a24f4ad3f6b63d4f871290f845606ed450dbeb9761ccafe5b7"
+  },
+  "utc": "20261031T093815Z"
+}

@@ -401,6 +401,29 @@ Operating boundary for the report: delegation (mode ③) is defended up to the t
 meals a day, up to five store events and four stated constraints — with the code gates on (E-06 shows why they
 stay on). Outside that envelope, mode ②. A run that ends without a result must be surfaced as a failure.
 
+### E-08 Full re-run on the current code (31 Oct)
+
+After merging Chen Dongwei's C01–C13 (constraint preservation, pre-order events, no blind retry, stop after a
+terminal tool, free text → ask in mode ③, input validation, tool trace) and the live-event fix, every frozen set
+was re-run on code `6c8a7f9` (Haiku 5.5, 3 runs; fingerprints unchanged). Spend US$2.64 incl. one debug run.
+Log: `runs/formal_rerun_20261031.log`.
+
+| Set | Agent | Single call | Fixed | Agent on 24 Oct |
+| --- | --- | --- | --- | --- |
+| v1 | 0.989 ± 0.019 | 0.700 ± 0.033 | 0.700 | 0.989 |
+| autonomy | 0.944 ± 0.048 | 0.667 | 0.833 | 0.972 |
+| nl | 0.979 ± 0.036 | 1.000 | 0.312 | 0.938 |
+| nl_events | 0.917 ± 0.072 | 0.208 ± 0.072 | 0.125 | 0.833 |
+| ops | 1.000 | 0.250 | 0.250 | 1.000 |
+| wm | 1.000 | 0.879 ± 0.053 | 0 | 1.000 |
+| stress v2 | 1.000 (135/135) | 0.459 ± 0.026 | 0.400 | 1.000 |
+
+Agent failures, read from the new tool traces: a12 ×2 (asked when the cheap plan fitted the limit, as before), e01
+×1 ("10 eggs" in grams, as before), n09 ×1 (declared an unknown id "chilli", then missed the spice rule), c27 ×1
+(reported infeasible: over-exclusion, the "no plan" mode), e07 ×1 (ordered instead of declining an out-of-scope
+message; it passed this case on 24 Oct). No failure involved a C03 or C05 refusal. Every change against 24 Oct
+is within one standard deviation; the conclusions of E-04 to E-07 stand. Single call still ties on `nl`.
+
 ### E-05 Honest reading
 
 On fully structured input, code (the solver with re-planning) is enough. The agent's margin over
