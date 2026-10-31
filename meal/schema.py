@@ -166,7 +166,10 @@ class Case(_M):
             raise ValueError(f"cannot withhold {sorted(bad)}; only {WITHHOLDABLE}")
         if (self.catalog == "wm") != (self.body is not None):
             raise ValueError("catalogue wm and a body go together")
-        if self.autonomy == "delegated" and self.gold.feasible and self.gold.within_scope is None:
+        # Live demo cases have no authored gold; formal evaluation cases still require it.
+        is_live_demo = self.case_id == "live" and "live" in self.tags
+        if (self.autonomy == "delegated" and self.gold.feasible
+                and self.gold.within_scope is None and not is_live_demo):
             raise ValueError("a feasible delegated case must say whether it fits the authorization")
         return self
 

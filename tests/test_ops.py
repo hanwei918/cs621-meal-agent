@@ -74,11 +74,11 @@ def test_timeout_not_placed_query_then_retry_same_intent_orders_once():
 def test_timeout_placed_retry_cannot_duplicate_and_blind_retry_fails():
     env, tok = approved(O["o06"])
     env.call("place_order", token=tok, intent_id="a")
-    assert env.call("place_order", token=tok, intent_id="b")["ordered"] is False     # token already used (G4)
-    assert env.call("place_order", token=tok, intent_id="a")["ordered"] is True      # idempotent, no new order
+    assert env.call("place_order", token=tok, intent_id="b")["ordered"] is False     # C05: status is unresolved
+    assert env.call("place_order", token=tok, intent_id="a")["ordered"] is False     # C05: even idempotent replay must await status
     assert env.out.orders_placed == 1
     s = score(O["o06"], env.out, env.w)
-    assert not s.passed and s.failed == ["retry_without_status"]
+    assert not s.passed and s.failed == ["retry_without_status", "status_unresolved"]
 
 
 def test_timeout_placed_query_first_passes():

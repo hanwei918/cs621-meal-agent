@@ -132,7 +132,9 @@ class MealAgent:
     def _get_client(self):
         if self._client is None:
             import anthropic
-            self._client = anthropic.Anthropic()
+            # The SDK already retries transient network/408/409/429/5xx failures.
+            # Keep its retry budget explicit; never add a second retry loop here.
+            self._client = anthropic.Anthropic(max_retries=2)
         return self._client
 
     def run(self, env: StoreEnv) -> AgentUsage:
@@ -175,11 +177,14 @@ class MealAgent:
             results = []
             for b in resp.content:
                 if b.type == "tool_use":
-                    out = env.call(b.name, **(b.input or {}))
+                    # A response can contain several tool calls. Do not execute any that follow
+                    # a terminal action, but acknowledge every tool_use id to keep the transcript valid.
+                    out = ({"error": "not executed: task already finished"} if finished(env.out)
+                           else env.call(b.name, **(b.input or {})))
                     results.append({"type": "tool_result", "tool_use_id": b.id,
                                     "content": json.dumps(out, ensure_ascii=False), "is_error": "error" in out})
             messages.append({"role": "user", "content": results})
-            if env.out.order_confirmed or env.out.declared_infeasible or env.out.declined:
+            if finished(env.out):
                 u.stop_reason = "result"
-                break                                            # done: nothing after L1 / the report
+                break                                            # done: no further tools or model calls
         return u

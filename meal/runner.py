@@ -7,6 +7,7 @@ the agent. Return token usage for the cost ledger (zeros for code-only agents).
 """
 from __future__ import annotations
 
+import copy
 import time
 from dataclasses import dataclass, field
 from typing import Optional, Protocol
@@ -41,11 +42,31 @@ class CaseResult:
     cost_usd: float = 0.0
     latency_s: float = 0.0
     error: Optional[str] = None
+    tool_trace: list[dict] = field(default_factory=list)  # C09: chronological tool calls with arguments and results
 
 
-def run_case(agent: Agent, case: Case, gates: bool = True) -> CaseResult:
+def run_case(agent: Agent, case: Case, gates: bool = True,
+             trace_sink: list[dict] | None = None) -> CaseResult:
     t0 = time.perf_counter()
     env = StoreEnv(case, gates=gates)
+    trace = trace_sink if trace_sink is not None else []
+    original_call = env.call
+
+    def traced_call(name: str, **kwargs):
+        # C09: observe every agent/baseline tool call without changing StoreEnv or tool behaviour.
+        entry = {"tool": name, "arguments": copy.deepcopy(kwargs)}
+        try:
+            result = original_call(name, **kwargs)
+        except Exception as e:
+            entry["exception"] = f"{type(e).__name__}: {e}"
+            trace.append(entry)
+            raise
+        entry["result"] = copy.deepcopy(result)
+        trace.append(entry)
+        return result
+
+    env.call = traced_call
     usage = agent.run(env) or AgentUsage()
     s = score(case, env.out, env.w)
-    return CaseResult(case.case_id, env.out, s, list(env.w.log), usage, latency_s=round(time.perf_counter() - t0, 2))
+    return CaseResult(case.case_id, env.out, s, list(env.w.log), usage,
+                      latency_s=round(time.perf_counter() - t0, 2), tool_trace=trace)
