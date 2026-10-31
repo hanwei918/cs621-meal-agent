@@ -10,6 +10,7 @@ import csv
 import hashlib
 import json
 import statistics
+import time
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -28,6 +29,41 @@ CASE_SETS = {"v1": ("cases", "c[0-9]*.json"), "autonomy": ("cases_autonomy", "a[
              "ops": ("cases_ops", "o[0-9]*.json"), "wm": ("cases_wm", "w[0-9]*.json"),
              "stress": ("cases_stress", "s[denxy]*.json")}
 RUNS = ROOT / "runs"
+
+
+def _source_code_sha256() -> str:
+    """Fingerprint the Python code used by evaluations, even without .git."""
+    h = hashlib.sha256()
+    files = [ROOT / "run.py"] if (ROOT / "run.py").is_file() else []
+    for package in ("meal", "eval"):
+        folder = ROOT / package
+        if folder.exists():
+            files.extend(folder.rglob("*.py"))
+    for f in sorted(files, key=lambda x: x.relative_to(ROOT).as_posix()):
+        h.update(f.relative_to(ROOT).as_posix().encode("utf-8"))
+        h.update(b"\0")
+        h.update(f.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
+def _code_revision(source_sha256: str) -> str:
+    """Keep Git revision when available; otherwise use the source fingerprint."""
+    import subprocess
+    fallback = f"sha256:{source_sha256[:12]}"
+    try:
+        git = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
+                             capture_output=True, text=True)
+        if git.returncode != 0 or not git.stdout.strip():
+            return fallback
+        rev = git.stdout.strip()
+        dirty = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--",
+                                "meal", "eval", "run.py"], capture_output=True, text=True)
+        if dirty.returncode != 0:
+            return fallback
+        return rev + ("-dirty" if dirty.stdout.strip() else "")
+    except OSError:
+        return fallback
 
 
 def _canonical(folder: Path, pattern: str):
@@ -122,10 +158,13 @@ def run_eval(make_agent: Callable, cases: list[Case], n_runs: int = 3, name: str
     from concurrent.futures import ThreadPoolExecutor
 
     def one(c: Case) -> CaseResult:              # each case gets its own agent and its own StoreEnv
+        t0, trace = time.perf_counter(), []
         try:
-            r = run_case(make_agent(c), c, gates=gates)
+            r = run_case(make_agent(c), c, gates=gates, trace_sink=trace)
         except Exception as e:  # noqa: BLE001 — an error is a failed case, not a crash
-            r = CaseResult(c.case_id, Outcome(), Score(c.case_id, False, ["error"]), error=f"{type(e).__name__}: {e}")
+            r = CaseResult(c.case_id, Outcome(), Score(c.case_id, False, ["error"]),
+                           error=f"{type(e).__name__}: {e}",
+                           latency_s=round(time.perf_counter() - t0, 2), tool_trace=trace)
         u = r.usage
         r.cost_usd = cost_usd(model, u.input_tokens, u.output_tokens, u.cache_write_tokens, u.cache_read_tokens)
         return r
@@ -151,16 +190,12 @@ def _write(rep: Report, meta: dict) -> Path:
             x = r.result
             f.write(json.dumps({"case": r.case.case_id, "run": r.run, "score": x.score.as_dict(),
                                 "outcome": x.outcome.model_dump(), "events": x.log, "usage": asdict(x.usage),
-                                "cost_usd": x.cost_usd, "error": x.error}, ensure_ascii=False) + "\n")
-    import subprocess
-    try:
-        rev = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
-        dirty = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--", "meal", "eval", "run.py"],
-                               capture_output=True, text=True).stdout.strip()
-        rev += "-dirty" if dirty else ""
-    except OSError:
-        rev = "unknown"
-    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint(meta.get("case_set", "v1")), "code": rev}, "utc": ts}
+                                "cost_usd": x.cost_usd, "error": x.error,
+                                "latency_s": x.latency_s, "tool_trace": x.tool_trace}, ensure_ascii=False) + "\n")
+    code_sha256 = _source_code_sha256()
+    rev = _code_revision(code_sha256)
+    s = rep.summary() | {"meta": meta | {"eval_sha256": eval_fingerprint(meta.get("case_set", "v1")),
+                                        "code": rev, "code_sha256": code_sha256}, "utc": ts}
     (d / "summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False), encoding="utf-8")
     ledger, prev = RUNS / "ledger.csv", 0.0
     if ledger.exists():

@@ -25,7 +25,7 @@ import sys
 import threading
 import time
 import traceback
-from datetime import date, datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -134,7 +134,9 @@ def build_case(form: dict) -> Case:
     return Case.model_validate({"case_id": "live", "profile": profile, "autonomy": mode, "authorization": auth,
                                 "withheld": withheld,
                                 **({"catalog": "wm", "body": persona["body"]} if persona else {}),
-                                "today": str(date(2026, 10, 25)), "gold": {"feasible": True}, "tags": ["live"],
+                                # Live authorizations expire on the Singapore calendar date, not a frozen eval date.
+                                "today": datetime.now(timezone(timedelta(hours=8))).date().isoformat(),
+                                "gold": {"feasible": True}, "tags": ["live"],
                                 "derivation": "live demo session: there is no gold, a person judges the result"})
 
 
