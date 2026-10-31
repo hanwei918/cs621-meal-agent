@@ -70,3 +70,16 @@ def test_approval_refused_when_the_reported_total_is_wrong():
     env = StoreEnv(C["c01"]); ready(env)
     r = env.call("request_approval", reported_total_sgd=12.80)
     assert r["approved"] is False and any(v.startswith("total") for v in r["violations"])
+
+
+def test_live_event_before_order_voids_the_approval():
+    """Regression (review 31 Oct): an injected event or user message that arrives after approval and before
+    place_order must be applied before the order runs, not after it."""
+    for push in (lambda env: env.inject("out_of_stock", sku="rice_1kg"),
+                 lambda env: env.say("actually no rice please")):
+        env = StoreEnv(C["c01"]); ready(env)
+        tok = env.call("request_approval", reported_total_sgd=16.10)["token"]
+        push(env)
+        r = env.call("place_order", token=tok)
+        assert r["ordered"] is False and any("Approval revoked" in n for n in r["notices"])
+        assert env.out.order_confirmed is False
